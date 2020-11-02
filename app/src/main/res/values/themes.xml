@@ -15,7 +15,6 @@
     </style>
 
     <style name="appButtonStyle">
-        <item name="android:layout_marginBottom">48dp</item>
         <item name="android:textSize">18sp</item>
     </style>
 </resources>

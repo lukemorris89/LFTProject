@@ -5,6 +5,5 @@
     <string name="start_camera">Start Camera</string>
     <string name="return_home">Return Home</string>
     <string name="take_photo">Take Photo</string>
-    <string name="app_title"><![CDATA[Android Camera R&D]]></string>
     <string name="retake_photo">Retake Photo</string>
 </resources>
