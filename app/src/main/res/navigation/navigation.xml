@@ -7,7 +7,7 @@
 
     <fragment
         android:id="@+id/startFragment"
-        android:name="com.example.androidcamerard.StartFragment"
+        android:name="com.example.androidcamerard.views.StartFragment"
         android:label="fragment_start"
         tools:layout="@layout/fragment_start" >
         <action
@@ -18,7 +18,7 @@
     </fragment>
     <fragment
         android:id="@+id/cameraFragment"
-        android:name="com.example.androidcamerard.CameraFragment"
+        android:name="com.example.androidcamerard.views.CameraFragment"
         android:label="fragment_camera"
         tools:layout="@layout/fragment_camera" >
         <action
@@ -30,7 +30,7 @@
     </fragment>
     <fragment
         android:id="@+id/cameraOutputFragment"
-        android:name="com.example.androidcamerard.CameraOutputFragment"
+        android:name="com.example.androidcamerard.views.CameraOutputFragment"
         android:label="fragment_camera_output"
         tools:layout="@layout/fragment_camera_output" >
         <action

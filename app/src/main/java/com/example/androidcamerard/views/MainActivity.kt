@@ -1,8 +1,9 @@
-package com.example.androidcamerard
+package com.example.androidcamerard.views
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.navigation.fragment.NavHostFragment
+import com.example.androidcamerard.R
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

@@ -1,4 +1,4 @@
-package com.example.androidcamerard
+package com.example.androidcamerard.views
 
 import android.Manifest
 import android.content.pm.PackageManager
@@ -14,7 +14,10 @@ import android.widget.Toast
 import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
+import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
+import com.example.androidcamerard.R
+import com.example.androidcamerard.viewmodel.PhotoViewModel
 import kotlinx.android.synthetic.main.fragment_camera.*
 import kotlinx.android.synthetic.main.fragment_camera.view.*
 import java.io.File
@@ -37,6 +40,9 @@ class CameraFragment : Fragment() {
     private var outputDirectory: File? = null
     private lateinit var cameraExecutor: ExecutorService
 
+    private val viewModel: PhotoViewModel by activityViewModels()
+
+    private var luminosity: Double? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -63,6 +69,7 @@ class CameraFragment : Fragment() {
         return view
     }
 
+
     private fun startCamera() {
         val cameraProviderFuture = ProcessCameraProvider.getInstance(requireContext())
 
@@ -81,7 +88,7 @@ class CameraFragment : Fragment() {
                 .build()
                 .also {
                     it.setAnalyzer(cameraExecutor, LuminosityAnalyzer { luma ->
-                        Log.d(TAG, "Average luminosity: $luma")
+                        luminosity = luma
                     })
                 }
 
@@ -163,6 +170,9 @@ class CameraFragment : Fragment() {
 
                 override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
                     val savedUri = Uri.fromFile(photoFile)
+                    viewModel.photoFilename.value = savedUri
+                    viewModel.photoLuminosity.value = luminosity
+
                     findNavController().navigate(R.id.action_cameraFragment_to_cameraOutputFragment)
                 }
             }

@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".CameraFragment">
+    tools:context=".views.CameraFragment">
 
     <androidx.camera.view.PreviewView
         android:layout_width="match_parent"
@@ -14,7 +14,7 @@
     <com.google.android.material.button.MaterialButton
         android:id="@+id/camera_capture_button"
         style="@style/appButtonStyle"
-        android:layout_marginBottom="48dp"
+        android:layout_marginBottom="32dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/take_photo"
