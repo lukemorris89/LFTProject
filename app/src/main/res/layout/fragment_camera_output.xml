@@ -26,7 +26,8 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            tools:src="@tools:sample/backgrounds/scenic" />
+            tools:src="@tools:sample/backgrounds/scenic"
+            android:contentDescription="@string/image_preview"/>
 
         <TextView
             android:layout_width="match_parent"
@@ -38,7 +39,6 @@
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
             android:text="@{@string/luminosity(luminosity)}"
-            tools:text="Test"
             android:textColor="@android:color/white"/>
 
         <com.google.android.material.button.MaterialButton

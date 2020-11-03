@@ -13,29 +13,46 @@ import android.view.ViewTreeObserver
 import android.widget.Toast
 import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
+import androidx.camera.view.PreviewView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
+import com.example.androidcamerard.GraphicOverlay
 import com.example.androidcamerard.R
+import com.example.androidcamerard.VisionImageProcessor
+import com.example.androidcamerard.labeldetector.LabelDetectorProcessor
 import com.example.androidcamerard.viewmodel.PhotoViewModel
+import com.google.mlkit.common.MlKitException
+import com.google.mlkit.common.model.LocalModel
+import com.google.mlkit.vision.common.InputImage
+import com.google.mlkit.vision.label.ImageLabeling
+import com.google.mlkit.vision.label.automl.AutoMLImageLabelerLocalModel
+import com.google.mlkit.vision.label.automl.AutoMLImageLabelerOptions
+import com.google.mlkit.vision.label.custom.CustomImageLabelerOptions
+import com.google.mlkit.vision.label.defaults.ImageLabelerOptions
 import kotlinx.android.synthetic.main.fragment_camera.*
-import kotlinx.android.synthetic.main.fragment_camera.view.*
 import java.io.File
 import java.lang.Exception
-import java.nio.ByteBuffer
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
-typealias LumaListener = (luma: Double) -> Unit
 
 class CameraFragment : Fragment() {
 
-    private var preview: Preview? = null
-    private var imageCapture: ImageCapture? = null
+    private var previewView: PreviewView? = null
+    private lateinit var graphicOverlay: GraphicOverlay
+    private var imageProcessor: VisionImageProcessor? = null
+    private var needUpdateGraphicOverlayImageSourceInfo = false
+
     private var camera: Camera? = null
+
+    //Use cases
+    private var previewUseCase: Preview? = null
+    private var imageCaptureUseCase: ImageCapture? = null
+    private var analysisUseCase: ImageAnalysis? = null
 
     private var outputDirectory: File? = null
     private lateinit var cameraExecutor: ExecutorService
@@ -60,11 +77,13 @@ class CameraFragment : Fragment() {
         }
 
         // Set up the listener for take photo button
-        view.camera_capture_button.setOnClickListener { takePhoto() }
+//        view.camera_capture_button.setOnClickListener { takePhoto() }
 
         outputDirectory = getOutputDirectory()
-
         cameraExecutor = Executors.newSingleThreadExecutor()
+
+        previewView = view.findViewById(R.id.cameraPreview)
+        graphicOverlay = view.findViewById(R.id.graphic_overlay)
 
         return view
     }
@@ -75,22 +94,85 @@ class CameraFragment : Fragment() {
 
         cameraProviderFuture.addListener(Runnable {
             // Used to bind the lifecycle of cameras to the lifecycle owner
-            val cameraProvider: ProcessCameraProvider = cameraProviderFuture.get()
+            var cameraProvider: ProcessCameraProvider? = cameraProviderFuture.get()
 
             // Preview
-            preview = Preview.Builder()
+            previewUseCase = Preview.Builder()
                 .build()
 
-            imageCapture = ImageCapture.Builder()
+//            imageCaptureUseCase = ImageCapture.Builder()
+//                .build()
+
+            imageProcessor = LabelDetectorProcessor(requireContext(), ImageLabelerOptions.DEFAULT_OPTIONS)
+
+//            Replace LabelDetectorProcessor (above) with below when using custom models
+//            IMAGE_LABELING_CUSTOM -> {
+//            Log.i(
+//                TAG,
+//                "Using Custom Image Label (Bird) Detector Processor"
+//            )
+//            val localClassifier = LocalModel.Builder()
+//                .setAssetFilePath("custom_models/bird_classifier.tflite")
+//                .build()
+//            val customImageLabelerOptions =
+//                CustomImageLabelerOptions.Builder(localClassifier).build()
+//            LabelDetectorProcessor(
+//                this, customImageLabelerOptions
+//            )
+//        }
+//            AUTOML_LABELING -> {
+//            Log.i(
+//                TAG,
+//                "Using AutoML Image Label Detector Processor"
+//            )
+//            val autoMLLocalModel = AutoMLImageLabelerLocalModel.Builder()
+//                .setAssetFilePath("automl/manifest.json")
+//                .build()
+//            val autoMLOptions = AutoMLImageLabelerOptions
+//                .Builder(autoMLLocalModel)
+//                .setConfidenceThreshold(0f)
+//                .build()
+//            LabelDetectorProcessor(
+//                this, autoMLOptions
+//            )
+//        }
+
+            analysisUseCase = ImageAnalysis.Builder()
+                .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
                 .build()
 
-            val imageAnalyzer = ImageAnalysis.Builder()
-                .build()
-                .also {
-                    it.setAnalyzer(cameraExecutor, LuminosityAnalyzer { luma ->
-                        luminosity = luma
-                    })
+            needUpdateGraphicOverlayImageSourceInfo = true
+
+            analysisUseCase!!.setAnalyzer(
+                // imageProcessor.processImageProxy will use another thread to run the detection underneath,
+                // thus we can just runs the analyzer itself on main thread.
+                ContextCompat.getMainExecutor(requireContext()), { imageProxy: ImageProxy ->
+                    if (needUpdateGraphicOverlayImageSourceInfo) {
+                        val isImageFlipped = false
+//                            lensFacing == CameraSelector.LENS_FACING_FRONT
+                        val rotationDegrees =
+                            imageProxy.imageInfo.rotationDegrees
+                        if (rotationDegrees == 0 || rotationDegrees == 180) {
+                            graphicOverlay.setImageSourceInfo(
+                                imageProxy.width, imageProxy.height, isImageFlipped
+                            )
+                        } else {
+                            graphicOverlay.setImageSourceInfo(
+                                imageProxy.height, imageProxy.width, isImageFlipped
+                            )
+                        }
+                        needUpdateGraphicOverlayImageSourceInfo = false
+                    }
+                    try {
+                        imageProcessor!!.processImageProxy(imageProxy, graphicOverlay)
+                    } catch (e: MlKitException) {
+                        Log.e(
+                            TAG,
+                            "Failed to process image. Error: " + e.localizedMessage
+                        )
+                    }
                 }
+            )
 
             // Select back camera as a default
             val cameraSelector =
@@ -99,12 +181,12 @@ class CameraFragment : Fragment() {
 
             try {
                 // Unbind use cases before rebinding
-                cameraProvider.unbindAll()
+                cameraProvider?.unbindAll()
 
+                previewUseCase?.setSurfaceProvider(cameraPreview.surfaceProvider)
                 // Bind use cases to camera
-                camera = cameraProvider.bindToLifecycle(
-                    this, cameraSelector, preview, imageCapture, imageAnalyzer)
-                preview?.setSurfaceProvider(cameraPreview.surfaceProvider)
+                camera = cameraProvider?.bindToLifecycle(
+                    this, cameraSelector, previewUseCase, analysisUseCase)
 
             } catch(exc: Exception) {
                 Log.e(TAG, "Use case binding failed", exc)
@@ -151,7 +233,7 @@ class CameraFragment : Fragment() {
 
     private fun takePhoto() {
         // Get a stable reference of the modifiable image capture use case
-        val imageCapture = imageCapture ?: return
+        val imageCapture = imageCaptureUseCase ?: return
 
         // Create a time-stamped output file to hold the image
         val photoFile = File(outputDirectory,
@@ -224,24 +306,39 @@ class CameraFragment : Fragment() {
         private val REQUIRED_PERMISSIONS = arrayOf(Manifest.permission.CAMERA)
     }
 
-    private class LuminosityAnalyzer(private val listener: LumaListener) : ImageAnalysis.Analyzer {
+    private class ImageAnalyzer : ImageAnalysis.Analyzer {
 
-        private fun ByteBuffer.toByteArray() : ByteArray {
-            rewind() // Rewind the buffer to zero
-            val data = ByteArray(remaining())
-            get(data) // Copy the buffer into a byte array
-            return data //Return the byte array
-        }
+        @androidx.camera.core.ExperimentalGetImage
+        override fun analyze(imageProxy: ImageProxy) {
+            val mediaImage = imageProxy.image
+            if (mediaImage != null) {
+                val image = InputImage.fromMediaImage(mediaImage, imageProxy.imageInfo.rotationDegrees)
+                // Pass image to an ML Kit Vision API
 
-        override fun analyze(image: ImageProxy) {
-            val buffer = image.planes[0].buffer
-            val data = buffer.toByteArray()
-            val pixels = data.map { it.toInt() and 0xFF }
-            val luma = pixels.average()
+                // To use default options:
+                val labeler = ImageLabeling.getClient(ImageLabelerOptions.DEFAULT_OPTIONS)
 
-            listener(luma)
+                // Or, to set the minimum confidence required:
+                // val options = ImageLabelerOptions.Builder()
+                //     .setConfidenceThreshold(0.7f)
+                //     .build()
+                // val labeler = ImageLabeling.getClient(options)
 
-            image.close()
+                labeler.process(image)
+                    .addOnSuccessListener { labels ->
+                        // Task completed successfully
+                        for (label in labels) {
+                            val text = label.text
+                            val confidence = label.confidence
+                            val index = label.index
+                            Log.i(TAG, "Text: $text, Confidence: $confidence")
+                        }
+                    }
+                    .addOnFailureListener { e ->
+                        // Task failed with an exception
+                        Log.e(TAG, "Failed to process image. Error: ${e.localizedMessage}")
+                    }
+            }
         }
     }
 }

@@ -43,15 +43,15 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     implementation 'androidx.core:core-ktx:1.3.2'
     implementation 'androidx.appcompat:appcompat:1.2.0'
+
     implementation 'com.google.android.material:material:1.2.1'
     implementation 'androidx.constraintlayout:constraintlayout:2.0.3'
+
     implementation "androidx.navigation:navigation-fragment-ktx:$nav_version"
     implementation "androidx.navigation:navigation-ui-ktx:$nav_version"
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
 
-    testImplementation 'junit:junit:4.13.1'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.2'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
+
 
     // CameraX core library using the camera2 implementation
     def camerax_version = "1.0.0-beta11"
@@ -64,4 +64,46 @@ dependencies {
     // Glide image loading
     implementation "com.github.bumptech.glide:glide:$glide_version"
     kapt "com.github.bumptech.glide:compiler:$glide_version"
+
+
+
+    // Image labeling with automl model support
+    implementation 'com.google.mlkit:image-labeling-automl:16.2.1'
+
+    // Image labeling
+    // Use this dependency to use dynamically downloaded model in Google Play Service
+    implementation 'com.google.android.gms:play-services-mlkit-image-labeling:16.0.0'
+
+    // Use this dependency to bundle the model with your app
+    implementation 'com.google.mlkit:image-labeling:17.0.0'
+
+    // Image labeling custom
+    implementation 'com.google.mlkit:image-labeling-custom:16.2.1'
+
+    // -------------------------------------------------------
+
+    implementation 'com.google.guava:guava:24.1-jre'
+
+    // Core library
+    androidTestImplementation 'androidx.test:core:1.3.0'
+
+    // AndroidJUnitRunner and JUnit Rules
+    androidTestImplementation 'androidx.test:runner:1.3.0'
+    androidTestImplementation 'androidx.test:rules:1.3.0'
+
+    // Assertions
+    androidTestImplementation 'androidx.test.ext:junit:1.1.2'
+
+    // ViewModel and LiveData
+    implementation "androidx.lifecycle:lifecycle-livedata-ktx:2.2.0"
+    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:2.2.0"
+
+    implementation 'androidx.appcompat:appcompat:1.2.0'
+    implementation 'androidx.annotation:annotation:1.1.0'
+}
+
+configurations {
+    // Resolves dependency conflict caused by some dependencies use
+    // com.google.guava:guava and com.google.guava:listenablefuture together.
+    all*.exclude group: 'com.google.guava', module: 'listenablefuture'
 }

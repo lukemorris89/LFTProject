@@ -11,15 +11,25 @@
         android:layout_height="match_parent"
         android:id="@+id/cameraPreview"/>
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/camera_capture_button"
-        style="@style/appButtonStyle"
-        android:layout_marginBottom="32dp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/take_photo"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+    <com.example.androidcamerard.GraphicOverlay
+        android:id="@+id/graphic_overlay"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"/>
+
+
+<!--    <com.google.android.material.button.MaterialButton-->
+<!--        android:id="@+id/camera_capture_button"-->
+<!--        style="@style/appButtonStyle"-->
+<!--        android:layout_marginBottom="32dp"-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:text="@string/take_photo"-->
+<!--        app:layout_constraintBottom_toBottomOf="parent"-->
+<!--        app:layout_constraintEnd_toEndOf="parent"-->
+<!--        app:layout_constraintStart_toStartOf="parent" />-->
 
 </androidx.constraintlayout.widget.ConstraintLayout>
