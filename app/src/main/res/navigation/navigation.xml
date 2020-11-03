@@ -15,6 +15,9 @@
             app:destination="@id/cameraFragment"
             app:launchSingleTop="true"
             app:popUpTo="@id/startFragment" />
+        <action
+            android:id="@+id/action_startFragment_to_staticImageAnalysisFragment"
+            app:destination="@id/staticImageAnalysisFragment" />
     </fragment>
     <fragment
         android:id="@+id/cameraFragment"
@@ -43,5 +46,15 @@
             app:destination="@id/cameraFragment"
             app:launchSingleTop="true"
             app:popUpTo="@id/cameraFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/staticImageAnalysisFragment"
+        android:name="com.example.androidcamerard.views.StaticImageAnalysisFragment"
+        android:label="fragment_static_image_analysis"
+        tools:layout="@layout/fragment_static_image_analysis" >
+        <action
+            android:id="@+id/action_staticImageAnalysisFragment_to_startFragment"
+            app:destination="@id/startFragment"
+            app:popUpTo="@id/startFragment" />
     </fragment>
 </navigation>

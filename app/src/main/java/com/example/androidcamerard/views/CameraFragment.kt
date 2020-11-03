@@ -31,6 +31,7 @@ import com.google.mlkit.vision.label.automl.AutoMLImageLabelerOptions
 import com.google.mlkit.vision.label.custom.CustomImageLabelerOptions
 import com.google.mlkit.vision.label.defaults.ImageLabelerOptions
 import kotlinx.android.synthetic.main.fragment_camera.*
+import kotlinx.android.synthetic.main.fragment_camera.view.*
 import java.io.File
 import java.lang.Exception
 import java.text.SimpleDateFormat
@@ -59,8 +60,6 @@ class CameraFragment : Fragment() {
 
     private val viewModel: PhotoViewModel by activityViewModels()
 
-    private var luminosity: Double? = null
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -77,7 +76,7 @@ class CameraFragment : Fragment() {
         }
 
         // Set up the listener for take photo button
-//        view.camera_capture_button.setOnClickListener { takePhoto() }
+        view.camera_capture_button.setOnClickListener { takePhoto() }
 
         outputDirectory = getOutputDirectory()
         cameraExecutor = Executors.newSingleThreadExecutor()
@@ -100,8 +99,8 @@ class CameraFragment : Fragment() {
             previewUseCase = Preview.Builder()
                 .build()
 
-//            imageCaptureUseCase = ImageCapture.Builder()
-//                .build()
+            imageCaptureUseCase = ImageCapture.Builder()
+                .build()
 
             val options = ImageLabelerOptions.Builder()
                 .setConfidenceThreshold(0.7f)
@@ -189,7 +188,7 @@ class CameraFragment : Fragment() {
                 previewUseCase?.setSurfaceProvider(cameraPreview.surfaceProvider)
                 // Bind use cases to camera
                 camera = cameraProvider?.bindToLifecycle(
-                    this, cameraSelector, previewUseCase, analysisUseCase)
+                    this, cameraSelector, previewUseCase, analysisUseCase, imageCaptureUseCase)
 
             } catch(exc: Exception) {
                 Log.e(TAG, "Use case binding failed", exc)
@@ -256,7 +255,6 @@ class CameraFragment : Fragment() {
                 override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
                     val savedUri = Uri.fromFile(photoFile)
                     viewModel.photoFilename.value = savedUri
-                    viewModel.photoLuminosity.value = luminosity
 
                     findNavController().navigate(R.id.action_cameraFragment_to_cameraOutputFragment)
                 }

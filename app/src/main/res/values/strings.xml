@@ -7,4 +7,8 @@
     <string name="retake_photo">Retake</string>
     <string name="luminosity">Luminosity: %1$s</string>
     <string name="image_preview">Image Preview</string>
+    <string name="mode_odt_static_title">Object Detection: Static Image</string>
+    <string name="mode_odt_static_subtitle">One or more objects can be detected from a provided image.</string>
+    <string name="custom_model_live_title">Object Detection: Live Camera with Custom Classification (Lateral Flow Test)</string>
+    <string name="custom_model_live_subtitle">A device\'s live camera can be used to detect lateral flow tests.</string>
 </resources>

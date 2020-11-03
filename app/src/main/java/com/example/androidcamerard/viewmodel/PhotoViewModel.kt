@@ -22,11 +22,6 @@ class PhotoViewModel(
             placeholderImageUri
         )
 
-    val photoLuminosity =
-        MutableLiveData<Double>(
-            placeholderPhotoLuminosity
-        )
-
     init {
         Log.i(TAG,"Photo ViewModel created.")
     }

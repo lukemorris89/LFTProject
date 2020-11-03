@@ -1,15 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <data>
-        <variable
-            name="luminosity"
-            type="String" />
-    </data>
-
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:context=".views.CameraOutputFragment"
@@ -17,51 +10,46 @@
 
         <ImageView
             android:id="@+id/imageView"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:layout_marginStart="32dp"
             android:layout_marginEnd="32dp"
-            android:layout_marginBottom="160dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
             tools:src="@tools:sample/backgrounds/scenic"
             android:contentDescription="@string/image_preview"/>
 
-        <TextView
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center_horizontal"
-            android:textSize="18sp"
-            app:layout_constraintTop_toBottomOf="@id/imageView"
-            app:layout_constraintBottom_toTopOf="@id/retake_photo_button"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent"
-            android:text="@{@string/luminosity(luminosity)}"
-            android:textColor="@android:color/white"/>
+            android:orientation="horizontal"
+            android:layout_alignParentBottom="true"
+            android:background="@color/black">
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/retake_photo_button"
-            style="@style/appButtonStyle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="32dp"
-            android:text="@string/retake_photo"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/return_home_button"
-            app:layout_constraintStart_toStartOf="parent" />
+            <TextView
+                android:id="@+id/retake_photo_button"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:paddingTop="16dp"
+                android:paddingBottom="32dp"
+                android:layout_weight="1"
+                android:fontFamily="google-sans-medium"
+                android:textSize="18sp"
+                android:textColor="@color/white"
+                android:text="@string/retake_photo"
+                android:gravity="center"/>
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/return_home_button"
-            style="@style/appButtonStyle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="32dp"
-            android:text="@string/return_home"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@id/retake_photo_button" />
+            <TextView
+                android:id="@+id/return_home_button"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:paddingTop="16dp"
+                android:paddingBottom="32dp"
+                android:fontFamily="google-sans-medium"
+                android:textSize="18sp"
+                android:textColor="@color/white"
+                android:text="@string/return_home"
+                android:gravity="center"/>
+        </LinearLayout>
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+    </RelativeLayout>
 </layout>
