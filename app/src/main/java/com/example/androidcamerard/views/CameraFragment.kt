@@ -103,7 +103,10 @@ class CameraFragment : Fragment() {
 //            imageCaptureUseCase = ImageCapture.Builder()
 //                .build()
 
-            imageProcessor = LabelDetectorProcessor(requireContext(), ImageLabelerOptions.DEFAULT_OPTIONS)
+            val options = ImageLabelerOptions.Builder()
+                .setConfidenceThreshold(0.7f)
+                .build()
+            imageProcessor = LabelDetectorProcessor(requireContext(), options)
 
 //            Replace LabelDetectorProcessor (above) with below when using custom models
 //            IMAGE_LABELING_CUSTOM -> {
@@ -304,41 +307,5 @@ class CameraFragment : Fragment() {
         private const val FILENAME_FORMAT = "yyyy-MM-dd-HH-mm-ss-SSS"
         private const val REQUEST_CODE_PERMISSIONS = 10
         private val REQUIRED_PERMISSIONS = arrayOf(Manifest.permission.CAMERA)
-    }
-
-    private class ImageAnalyzer : ImageAnalysis.Analyzer {
-
-        @androidx.camera.core.ExperimentalGetImage
-        override fun analyze(imageProxy: ImageProxy) {
-            val mediaImage = imageProxy.image
-            if (mediaImage != null) {
-                val image = InputImage.fromMediaImage(mediaImage, imageProxy.imageInfo.rotationDegrees)
-                // Pass image to an ML Kit Vision API
-
-                // To use default options:
-                val labeler = ImageLabeling.getClient(ImageLabelerOptions.DEFAULT_OPTIONS)
-
-                // Or, to set the minimum confidence required:
-                // val options = ImageLabelerOptions.Builder()
-                //     .setConfidenceThreshold(0.7f)
-                //     .build()
-                // val labeler = ImageLabeling.getClient(options)
-
-                labeler.process(image)
-                    .addOnSuccessListener { labels ->
-                        // Task completed successfully
-                        for (label in labels) {
-                            val text = label.text
-                            val confidence = label.confidence
-                            val index = label.index
-                            Log.i(TAG, "Text: $text, Confidence: $confidence")
-                        }
-                    }
-                    .addOnFailureListener { e ->
-                        // Task failed with an exception
-                        Log.e(TAG, "Failed to process image. Error: ${e.localizedMessage}")
-                    }
-            }
-        }
     }
 }
