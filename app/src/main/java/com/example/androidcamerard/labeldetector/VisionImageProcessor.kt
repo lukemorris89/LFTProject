@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package com.example.androidcamerard
+package com.example.androidcamerard.labeldetector
 
-import android.graphics.Bitmap
 import android.os.Build.VERSION_CODES
 import androidx.annotation.RequiresApi
 import androidx.camera.core.ImageProxy
+import com.example.androidcamerard.labeldetector.GraphicOverlay
 import com.google.mlkit.common.MlKitException
 
 

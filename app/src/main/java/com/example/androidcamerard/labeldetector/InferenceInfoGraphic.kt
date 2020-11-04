@@ -14,7 +14,7 @@
 * limitations under the License.
 */
 
-package com.example.androidcamerard
+package com.example.androidcamerard.labeldetector
 
 import android.graphics.Canvas
 import android.graphics.Color

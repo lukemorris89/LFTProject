@@ -4,8 +4,6 @@ import android.content.Context
 import android.util.Log
 import com.google.android.gms.tasks.Task
 import com.google.mlkit.vision.common.InputImage
-import com.example.androidcamerard.GraphicOverlay
-import com.example.androidcamerard.VisionProcessorBase
 import com.google.mlkit.vision.label.ImageLabel
 import com.google.mlkit.vision.label.ImageLabeler
 import com.google.mlkit.vision.label.ImageLabelerOptionsBase

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.example.androidcamerard
+package com.example.androidcamerard.labeldetector
 
 /** Describing a frame info.  */
 class FrameMetadata private constructor(val width: Int, val height: Int, val rotation: Int) {

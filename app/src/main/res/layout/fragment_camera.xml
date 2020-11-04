@@ -10,7 +10,7 @@
         android:layout_height="match_parent"
         android:id="@+id/cameraPreview"/>
 
-    <com.example.androidcamerard.GraphicOverlay
+    <com.example.androidcamerard.labeldetector.GraphicOverlay
         android:id="@+id/graphic_overlay"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />

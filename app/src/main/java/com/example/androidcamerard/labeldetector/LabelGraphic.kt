@@ -19,8 +19,7 @@ package com.example.androidcamerard.labeldetector
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
-import com.example.androidcamerard.GraphicOverlay
-import com.example.androidcamerard.GraphicOverlay.Graphic
+import com.example.androidcamerard.labeldetector.GraphicOverlay.Graphic
 import com.google.mlkit.vision.label.ImageLabel
 import java.util.Locale
 
