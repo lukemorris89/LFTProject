@@ -19,7 +19,7 @@ package com.example.androidcamerard.labeldetector
 import android.os.Build.VERSION_CODES
 import androidx.annotation.RequiresApi
 import androidx.camera.core.ImageProxy
-import com.example.androidcamerard.labeldetector.GraphicOverlay
+import com.example.androidcamerard.camera.LabelDetectionGraphicOverlay
 import com.google.mlkit.common.MlKitException
 
 
@@ -31,7 +31,7 @@ interface VisionImageProcessor {
     /** Processes ImageProxy image data, e.g. used for CameraX live preview case.  */
     @RequiresApi(VERSION_CODES.KITKAT)
     @Throws(MlKitException::class)
-    fun processImageProxy(image: ImageProxy, graphicOverlay: GraphicOverlay)
+    fun processImageProxy(image: ImageProxy, graphicOverlay: LabelDetectionGraphicOverlay)
 
     /** Stops the underlying machine learning model and release resources.  */
     fun stop()

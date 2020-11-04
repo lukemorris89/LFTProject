@@ -2,6 +2,7 @@ package com.example.androidcamerard.labeldetector
 
 import android.content.Context
 import android.util.Log
+import com.example.androidcamerard.camera.LabelDetectionGraphicOverlay
 import com.google.android.gms.tasks.Task
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.label.ImageLabel
@@ -32,7 +33,7 @@ class LabelDetectorProcessor(context: Context, options: ImageLabelerOptionsBase)
         return imageLabeler.process(image)
     }
 
-    override fun onSuccess(labels: List<ImageLabel>, graphicOverlay: GraphicOverlay) {
+    override fun onSuccess(labels: List<ImageLabel>, graphicOverlay: LabelDetectionGraphicOverlay) {
         graphicOverlay.add(LabelGraphic(graphicOverlay, labels))
         logExtrasForTesting(labels)
     }

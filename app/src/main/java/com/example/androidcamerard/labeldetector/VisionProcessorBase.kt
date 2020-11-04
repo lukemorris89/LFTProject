@@ -27,6 +27,9 @@ import android.util.Log
 import android.widget.Toast
 import androidx.camera.core.ExperimentalGetImage
 import androidx.camera.core.ImageProxy
+import com.example.androidcamerard.LabelDetectionScopedExecutor
+import com.example.androidcamerard.camera.LabelDetectionFrameMetadata
+import com.example.androidcamerard.camera.LabelDetectionGraphicOverlay
 import com.example.androidcamerard.utils.BitmapUtils
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.tasks.TaskExecutors
@@ -52,7 +55,7 @@ abstract class VisionProcessorBase<T>(context: Context) : VisionImageProcessor {
     private var activityManager: ActivityManager =
         context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
     private val fpsTimer = Timer()
-    private val executor = ScopedExecutor(TaskExecutors.MAIN_THREAD)
+    private val executor = LabelDetectionScopedExecutor(TaskExecutors.MAIN_THREAD)
 
     // Whether this processor is already shut down
     private var isShutdown = false
@@ -71,12 +74,12 @@ abstract class VisionProcessorBase<T>(context: Context) : VisionImageProcessor {
     @GuardedBy("this")
     private var latestImage: ByteBuffer? = null
     @GuardedBy("this")
-    private var latestImageMetaData: FrameMetadata? = null
+    private var latestImageMetaData: LabelDetectionFrameMetadata? = null
     // To keep the images and metadata in process.
     @GuardedBy("this")
     private var processingImage: ByteBuffer? = null
     @GuardedBy("this")
-    private var processingMetaData: FrameMetadata? = null
+    private var processingMetaData: LabelDetectionFrameMetadata? = null
 
     init {
         fpsTimer.scheduleAtFixedRate(
@@ -139,7 +142,7 @@ abstract class VisionProcessorBase<T>(context: Context) : VisionImageProcessor {
     // -----------------Code for processing live preview frame from CameraX API-----------------------
     @RequiresApi(VERSION_CODES.KITKAT)
     @ExperimentalGetImage
-    override fun processImageProxy(image: ImageProxy, graphicOverlay: GraphicOverlay) {
+    override fun processImageProxy(image: ImageProxy, graphicOverlay: LabelDetectionGraphicOverlay) {
         if (isShutdown) {
             return
         }
@@ -161,7 +164,7 @@ abstract class VisionProcessorBase<T>(context: Context) : VisionImageProcessor {
     // -----------------Common processing logic-------------------------------------------------------
     private fun requestDetectInImage(
         image: InputImage,
-        graphicOverlay: GraphicOverlay,
+        graphicOverlay: LabelDetectionGraphicOverlay,
         originalCameraImage: Bitmap?,
         shouldShowFps: Boolean
     ): Task<T> {
@@ -236,7 +239,7 @@ abstract class VisionProcessorBase<T>(context: Context) : VisionImageProcessor {
 
     protected abstract fun detectInImage(image: InputImage): Task<T>
 
-    protected abstract fun onSuccess(results: T, graphicOverlay: GraphicOverlay)
+    protected abstract fun onSuccess(results: T, graphicOverlay: LabelDetectionGraphicOverlay)
 
     protected abstract fun onFailure(e: Exception)
 }

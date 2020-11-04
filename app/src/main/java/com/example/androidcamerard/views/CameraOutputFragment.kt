@@ -32,7 +32,7 @@ class CameraOutputFragment : Fragment() {
         )
 
         binding.retakePhotoButton.setOnClickListener {
-            findNavController().navigate(R.id.action_cameraOutputFragment_to_cameraFragment)
+            findNavController().navigate(R.id.action_cameraOutputFragment_to_labelDetectionLiveFragment)
         }
 
         binding.returnHomeButton.setOnClickListener {

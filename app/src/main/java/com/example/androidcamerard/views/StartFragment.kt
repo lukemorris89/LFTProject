@@ -19,6 +19,7 @@ class StartFragment : Fragment() {
 
     private enum class DetectionMode(val titleResId: Int, val subtitleResId: Int) {
         CUSTOM_MODEL_LIVE(R.string.custom_model_live_title, R.string.custom_model_live_subtitle),
+        ODT_LIVE(R.string.mode_odt_live_title, R.string.mode_odt_live__subtitle),
         ODT_STATIC(R.string.mode_odt_static_title, R.string.mode_odt_static_subtitle)
     }
 
@@ -69,9 +70,11 @@ class StartFragment : Fragment() {
                 itemView.setOnClickListener {
                     val activity = activity as Activity
                     when (detectionMode) {
-                        DetectionMode.ODT_STATIC -> Utils.openImagePicker(activity)
                         DetectionMode.CUSTOM_MODEL_LIVE ->
-                            findNavController().navigate(R.id.action_startFragment_to_cameraFragment)
+                            findNavController().navigate(R.id.action_startFragment_to_labelDetectionLiveFragment)
+                        DetectionMode.ODT_STATIC -> Utils.openImagePicker(activity)
+                        DetectionMode.ODT_LIVE ->
+                            findNavController().navigate(R.id.action_startFragment_to_objectDetectionLiveFragment)
                     }
                 }
             }

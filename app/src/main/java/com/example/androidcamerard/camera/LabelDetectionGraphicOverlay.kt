@@ -15,14 +15,14 @@
 
  */
 
-package com.example.androidcamerard.labeldetector
+package com.example.androidcamerard.camera
 
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Matrix
 import android.util.AttributeSet
 import android.view.View
-import com.example.androidcamerard.labeldetector.GraphicOverlay.Graphic
+import com.example.androidcamerard.camera.LabelDetectionGraphicOverlay.Graphic
 import com.google.common.base.Preconditions
 import java.util.*
 
@@ -48,7 +48,7 @@ import java.util.*
  * coordinate from the image's coordinate system to the view coordinate system.
  *
  */
-class GraphicOverlay(context: Context?, attrs: AttributeSet?) :
+class LabelDetectionGraphicOverlay(context: Context?, attrs: AttributeSet?) :
     View(context, attrs) {
     private val lock = Any()
     private val graphics: MutableList<Graphic> =
@@ -78,9 +78,9 @@ class GraphicOverlay(context: Context?, attrs: AttributeSet?) :
     /**
      * Base class for a custom graphics object to be rendered within the graphic overlay. Subclass
      * this and implement the [Graphic.draw] method to define the graphics element. Add
-     * instances to the overlay using [GraphicOverlay.add].
+     * instances to the overlay using [LabelDetectionGraphicOverlay.add].
      */
-    abstract class Graphic(private val overlay: GraphicOverlay) {
+    abstract class Graphic(private val overlay: LabelDetectionGraphicOverlay) {
         /**
          * Draw the graphic on the supplied canvas. Drawing should use the following methods to convert
          * to view coordinates for the graphics that are drawn:

@@ -51,6 +51,8 @@ dependencies {
     implementation "androidx.navigation:navigation-ui-ktx:$nav_version"
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
 
+    implementation 'com.android.volley:volley:1.1.1'
+
 
 
     // CameraX core library using the camera2 implementation
@@ -79,6 +81,11 @@ dependencies {
 
     // Image labeling custom
     implementation 'com.google.mlkit:image-labeling-custom:16.2.1'
+
+    // Object feature and model
+    implementation 'com.google.mlkit:object-detection:16.2.1'
+    // Custom model
+    implementation 'com.google.mlkit:object-detection-custom:16.2.1'
 
     // -------------------------------------------------------
 

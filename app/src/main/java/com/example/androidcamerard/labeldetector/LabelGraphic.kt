@@ -19,13 +19,14 @@ package com.example.androidcamerard.labeldetector
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
-import com.example.androidcamerard.labeldetector.GraphicOverlay.Graphic
+import com.example.androidcamerard.camera.LabelDetectionGraphicOverlay
+import com.example.androidcamerard.camera.LabelDetectionGraphicOverlay.Graphic
 import com.google.mlkit.vision.label.ImageLabel
 import java.util.Locale
 
 /** Graphic instance for rendering a label within an associated graphic overlay view.  */
 class LabelGraphic(
-    private val overlay: GraphicOverlay,
+    private val overlay: LabelDetectionGraphicOverlay,
     private val labels: List<ImageLabel>
 ) : Graphic(overlay) {
     private val textPaint: Paint = Paint()

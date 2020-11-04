@@ -17,15 +17,15 @@ import androidx.camera.view.PreviewView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
-import com.example.androidcamerard.labeldetector.GraphicOverlay
+import com.example.androidcamerard.camera.LabelDetectionGraphicOverlay
 import com.example.androidcamerard.R
 import com.example.androidcamerard.labeldetector.VisionImageProcessor
 import com.example.androidcamerard.labeldetector.LabelDetectorProcessor
 import com.example.androidcamerard.viewmodel.PhotoViewModel
 import com.google.mlkit.common.MlKitException
 import com.google.mlkit.vision.label.defaults.ImageLabelerOptions
-import kotlinx.android.synthetic.main.fragment_camera.*
-import kotlinx.android.synthetic.main.fragment_camera.view.*
+import kotlinx.android.synthetic.main.fragment_label_detection_live.*
+import kotlinx.android.synthetic.main.fragment_label_detection_live.view.*
 import java.io.File
 import java.lang.Exception
 import java.text.SimpleDateFormat
@@ -35,10 +35,10 @@ import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
 
-class CameraFragment : Fragment() {
+class LabelDetectionLiveFragment : Fragment() {
 
     private var previewView: PreviewView? = null
-    private lateinit var graphicOverlay: GraphicOverlay
+    private lateinit var graphicOverlay: LabelDetectionGraphicOverlay
     private var imageProcessor: VisionImageProcessor? = null
     private var needUpdateGraphicOverlayImageSourceInfo = false
 
@@ -60,7 +60,7 @@ class CameraFragment : Fragment() {
     ): View? {
 
         // Inflate the layout for this fragment
-        val view = inflater.inflate(R.layout.fragment_camera, container, false)
+        val view = inflater.inflate(R.layout.fragment_label_detection_live, container, false)
 
         // Request camera permissions
         if (allPermissionsGranted()) {
@@ -234,7 +234,7 @@ class CameraFragment : Fragment() {
         // Create a time-stamped output file to hold the image
         val photoFile = File(outputDirectory,
             SimpleDateFormat(FILENAME_FORMAT, Locale.ENGLISH)
-            .format(System.currentTimeMillis()) + ".jpg")
+                .format(System.currentTimeMillis()) + ".jpg")
 
         // Create output options object which contains file + metadata
         val outputOptions = ImageCapture.OutputFileOptions.Builder(photoFile).build()
@@ -250,18 +250,18 @@ class CameraFragment : Fragment() {
                     val savedUri = Uri.fromFile(photoFile)
                     viewModel.photoFilename.value = savedUri
 
-                    findNavController().navigate(R.id.action_cameraFragment_to_cameraOutputFragment)
+                    findNavController().navigate(R.id.action_labelDetectionLiveFragment_to_cameraOutputFragment)
                 }
             }
         )
     }
 
     private fun allPermissionsGranted() = REQUIRED_PERMISSIONS.all {
-            activity?.baseContext?.let { it1 ->
-                ContextCompat.checkSelfPermission(
-                    it1, it
-                )
-            } == PackageManager.PERMISSION_GRANTED
+        activity?.baseContext?.let { it1 ->
+            ContextCompat.checkSelfPermission(
+                it1, it
+            )
+        } == PackageManager.PERMISSION_GRANTED
     }
 
     private fun getOutputDirectory(): File? {

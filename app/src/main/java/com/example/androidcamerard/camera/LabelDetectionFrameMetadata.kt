@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package com.example.androidcamerard.labeldetector
+package com.example.androidcamerard.camera
 
 /** Describing a frame info.  */
-class FrameMetadata private constructor(val width: Int, val height: Int, val rotation: Int) {
+class LabelDetectionFrameMetadata private constructor(val width: Int, val height: Int, val rotation: Int) {
 
-    /** Builder of [FrameMetadata].  */
+    /** Builder of [LabelDetectionFrameMetadata].  */
     class Builder {
         private var width = 0
         private var height = 0
@@ -39,8 +39,8 @@ class FrameMetadata private constructor(val width: Int, val height: Int, val rot
             return this
         }
 
-        fun build(): FrameMetadata {
-            return FrameMetadata(width, height, rotation)
+        fun build(): LabelDetectionFrameMetadata {
+            return LabelDetectionFrameMetadata(width, height, rotation)
         }
     }
 }
