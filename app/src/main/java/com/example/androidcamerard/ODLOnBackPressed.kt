@@ -1,5 +1,5 @@
 package com.example.androidcamerard
 
-interface ODLOnBackPressed {
+interface ODOnBackPressed {
     fun onBackPressed()
 }

@@ -42,3 +42,9 @@ class CameraInputInfo(
         }
     }
 }
+
+class BitmapInputInfo(private val bitmap: Bitmap) : InputInfo {
+    override fun getBitmap(): Bitmap {
+        return bitmap
+    }
+}

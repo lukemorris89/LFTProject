@@ -18,7 +18,7 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.androidcamerard.ODLOnBackPressed
+import com.example.androidcamerard.ODOnBackPressed
 import com.example.androidcamerard.R
 import com.example.androidcamerard.camera.CameraSource
 import com.example.androidcamerard.camera.CameraSourcePreview
@@ -38,7 +38,7 @@ import com.google.common.base.Objects
 import com.google.common.collect.ImmutableList
 import java.io.IOException
 
-class ObjectDetectionLiveFragment : Fragment(), View.OnClickListener, ODLOnBackPressed {
+class ObjectDetectionLiveFragment : Fragment(), View.OnClickListener, ODOnBackPressed {
 
     private var cameraSource: CameraSource? = null
     private var preview: CameraSourcePreview? = null
@@ -66,6 +66,8 @@ class ObjectDetectionLiveFragment : Fragment(), View.OnClickListener, ODLOnBackP
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+        searchEngine = SearchEngine(requireContext())
+
         val view = inflater.inflate(R.layout.fragment_object_detection_live, container, false)
 
         searchEngine = SearchEngine(requireContext())
@@ -91,9 +93,6 @@ class ObjectDetectionLiveFragment : Fragment(), View.OnClickListener, ODLOnBackP
         setUpBottomSheet(view)
         view.findViewById<View>(R.id.close_button).setOnClickListener(this)
         flashButton = view.findViewById<View>(R.id.flash_button).apply {
-            setOnClickListener(this@ObjectDetectionLiveFragment)
-        }
-        settingsButton = view.findViewById<View>(R.id.settings_button).apply {
             setOnClickListener(this@ObjectDetectionLiveFragment)
         }
         setUpWorkflowModel()
@@ -375,6 +374,6 @@ class ObjectDetectionLiveFragment : Fragment(), View.OnClickListener, ODLOnBackP
     }
 
     companion object {
-        private const val TAG = "LiveObjectActivity"
+        private const val TAG = "ObjectDetectionLiveFrag"
     }
 }
