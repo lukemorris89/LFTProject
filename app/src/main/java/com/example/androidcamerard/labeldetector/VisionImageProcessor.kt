@@ -22,7 +22,6 @@ import androidx.camera.core.ImageProxy
 import com.example.androidcamerard.camera.GraphicOverlay
 import com.google.mlkit.common.MlKitException
 
-
 /** An interface to process the images with different vision detectors and custom image models.  */
 interface VisionImageProcessor {
 //    /** Processes a bitmap image.  */

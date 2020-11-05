@@ -41,6 +41,7 @@ import com.example.androidcamerard.objectdetector.ObjectDetectorProcessor
 import com.example.androidcamerard.utils.PreferenceUtils
 import com.example.androidcamerard.viewmodel.CameraViewModel
 import com.google.android.gms.common.annotation.KeepName
+import com.google.android.material.chip.Chip
 import com.google.mlkit.common.MlKitException
 import java.util.ArrayList
 
@@ -49,8 +50,9 @@ import java.util.ArrayList
 @RequiresApi(VERSION_CODES.LOLLIPOP)
 class ObjectDetectionLiveFragment : Fragment() {
 
-    private var previewView: PreviewView? = null
+    private lateinit var previewView: PreviewView
     private lateinit var graphicOverlay: GraphicOverlay
+    private lateinit var searchChip: Chip
     private var cameraProvider: ProcessCameraProvider? = null
     private var previewUseCase: Preview? = null
     private var analysisUseCase: ImageAnalysis? = null
@@ -66,18 +68,12 @@ class ObjectDetectionLiveFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+        cameraSelector = CameraSelector.Builder().requireLensFacing(lensFacing).build()
         // Inflate the layout for this fragment
         val view = inflater.inflate(R.layout.fragment_object_detection_live, container, false)
-
-        cameraSelector = CameraSelector.Builder().requireLensFacing(lensFacing).build()
+        searchChip = view.findViewById(R.id.overlay_search_chip)
         previewView = view.findViewById(R.id.preview_view)
-        if (previewView == null) {
-            Log.d(TAG, "previewView is null")
-        }
         graphicOverlay = view.findViewById(R.id.graphic_overlay)
-        if (graphicOverlay == null) {
-            Log.d(TAG, "graphicOverlay is null")
-        }
         viewModel.processCameraProvider
             .observe(
                 viewLifecycleOwner,
@@ -101,8 +97,6 @@ class ObjectDetectionLiveFragment : Fragment() {
         bundle.putInt(STATE_LENS_FACING, lensFacing)
     }
 
-
-
     override fun onResume() {
         super.onResume()
         bindAllCameraUseCases()
@@ -116,7 +110,7 @@ class ObjectDetectionLiveFragment : Fragment() {
         }
     }
 
-    public override fun onDestroy() {
+    override fun onDestroy() {
         super.onDestroy()
         imageProcessor?.run {
             this.stop()
@@ -149,8 +143,8 @@ class ObjectDetectionLiveFragment : Fragment() {
             builder.setTargetResolution(targetResolution)
         }
         previewUseCase = builder.build()
-        previewUseCase!!.setSurfaceProvider(previewView!!.getSurfaceProvider())
-        cameraProvider!!.bindToLifecycle(/* lifecycleOwner= */this, cameraSelector!!, previewUseCase)
+        previewUseCase!!.setSurfaceProvider(previewView.surfaceProvider)
+        cameraProvider!!.bindToLifecycle(this, cameraSelector!!, previewUseCase)
     }
 
     private fun bindAnalysisUseCase() {
@@ -167,7 +161,7 @@ class ObjectDetectionLiveFragment : Fragment() {
                     Log.i(TAG, "Using Object Detector Processor")
                     val objectDetectorOptions =
                         PreferenceUtils.getObjectDetectorOptionsForLivePreview(requireContext())
-                    ObjectDetectorProcessor(requireContext(), objectDetectorOptions!!)
+                    ObjectDetectorProcessor(requireContext(), objectDetectorOptions!!, searchChip)
         } catch (e: Exception) {
             Log.e(
                 TAG,
@@ -190,18 +184,18 @@ class ObjectDetectionLiveFragment : Fragment() {
             // imageProcessor.processImageProxy will use another thread to run the detection underneath,
             // thus we can just runs the analyzer itself on main thread.
             ContextCompat.getMainExecutor(requireContext()),
-            ImageAnalysis.Analyzer { imageProxy: ImageProxy ->
+            { imageProxy: ImageProxy ->
                 if (needUpdateGraphicOverlayImageSourceInfo) {
                     val isImageFlipped =
                         lensFacing == CameraSelector.LENS_FACING_FRONT
                     val rotationDegrees =
                         imageProxy.imageInfo.rotationDegrees
                     if (rotationDegrees == 0 || rotationDegrees == 180) {
-                        graphicOverlay!!.setImageSourceInfo(
+                        graphicOverlay.setImageSourceInfo(
                             imageProxy.width, imageProxy.height, isImageFlipped
                         )
                     } else {
-                        graphicOverlay!!.setImageSourceInfo(
+                        graphicOverlay.setImageSourceInfo(
                             imageProxy.height, imageProxy.width, isImageFlipped
                         )
                     }
@@ -217,7 +211,7 @@ class ObjectDetectionLiveFragment : Fragment() {
                 }
             }
         )
-        cameraProvider!!.bindToLifecycle( /* lifecycleOwner= */this, cameraSelector!!, analysisUseCase)
+        cameraProvider!!.bindToLifecycle(this, cameraSelector!!, analysisUseCase)
     }
 
     private val requiredPermissions: Array<String?>

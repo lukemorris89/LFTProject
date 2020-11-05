@@ -26,8 +26,8 @@ import com.google.android.gms.common.images.Size
  * then there is no picture size with the same aspect ratio as the preview size.
  */
 class CameraSizePair {
-    val preview: Size
-    val picture: Size?
+    private val preview: Size
+    private val picture: Size?
 
     constructor(previewSize: Camera.Size, pictureSize: Camera.Size?) {
         preview = Size(previewSize.width, previewSize.height)

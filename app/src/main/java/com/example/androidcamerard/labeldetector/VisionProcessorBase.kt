@@ -48,7 +48,6 @@ import java.util.TimerTask
 abstract class VisionProcessorBase<T>(context: Context) : VisionImageProcessor {
 
     companion object {
-        const val MANUAL_TESTING_LOG = "LogTagForTest"
         private const val TAG = "VisionProcessorBase"
     }
 
@@ -147,14 +146,13 @@ abstract class VisionProcessorBase<T>(context: Context) : VisionImageProcessor {
             return
         }
 
-        var bitmap = BitmapUtils.getBitmap(image)
+        val bitmap = BitmapUtils.getBitmap(image)
 
         if (graphicOverlay != null) {
             requestDetectInImage(
-                InputImage.fromMediaImage(image?.image!!, image.imageInfo.rotationDegrees),
+                InputImage.fromMediaImage(image.image!!, image.imageInfo.rotationDegrees),
                 graphicOverlay, /* originalCameraImage= */
-                bitmap, /* shouldShowFps= */
-                true
+                bitmap
             )
                 // When the image is from CameraX analysis use case, must call image.close() on received
                 // images when finished using them. Otherwise, new images may not be received or the camera
@@ -168,7 +166,6 @@ abstract class VisionProcessorBase<T>(context: Context) : VisionImageProcessor {
         image: InputImage,
         graphicOverlay: GraphicOverlay,
         originalCameraImage: Bitmap?,
-        shouldShowFps: Boolean
     ): Task<T> {
         val startMs = SystemClock.elapsedRealtime()
         return detectInImage(image).addOnSuccessListener(executor) { results: T ->
@@ -204,13 +201,6 @@ abstract class VisionProcessorBase<T>(context: Context) : VisionImageProcessor {
                     )
                 )
             }
-            graphicOverlay.add(
-                InferenceInfoGraphic(
-                    graphicOverlay,
-                    currentLatencyMs.toDouble(),
-                    if (shouldShowFps) framesPerSecond else null
-                )
-            )
             this@VisionProcessorBase.onSuccess(results, graphicOverlay)
             graphicOverlay.postInvalidate()
         }

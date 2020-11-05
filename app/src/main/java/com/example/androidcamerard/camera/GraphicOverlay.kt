@@ -20,12 +20,13 @@ package com.example.androidcamerard.camera
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Matrix
+import android.graphics.Rect
+import android.graphics.RectF
 import android.util.AttributeSet
 import android.view.View
 import com.example.androidcamerard.camera.GraphicOverlay.Graphic
 import com.google.common.base.Preconditions
 import java.util.*
-
 
 /**
  * A view which renders a series of custom graphics to be overlayed on top of an associated preview
@@ -72,6 +73,10 @@ class GraphicOverlay(context: Context?, attrs: AttributeSet?) :
     // The number of vertical pixels needed to be cropped on each side to fit the image with the
     // area of overlay View after scaling.
     private var postScaleHeightOffset = 0f
+
+    private var widthScaleFactor = 1.0f
+    private var heightScaleFactor = 1.0f
+
     private var isImageFlipped = false
     private var needUpdateTransformation = true
 
@@ -80,7 +85,8 @@ class GraphicOverlay(context: Context?, attrs: AttributeSet?) :
      * this and implement the [Graphic.draw] method to define the graphics element. Add
      * instances to the overlay using [GraphicOverlay.add].
      */
-    abstract class Graphic(private val overlay: GraphicOverlay) {
+    abstract class Graphic(val overlay: GraphicOverlay) {
+        protected val context: Context = overlay.context
         /**
          * Draw the graphic on the supplied canvas. Drawing should use the following methods to convert
          * to view coordinates for the graphics that are drawn:
@@ -125,11 +131,21 @@ class GraphicOverlay(context: Context?, attrs: AttributeSet?) :
         fun getTransformationMatrix(): Matrix {
             return overlay.transformationMatrix
         }
-
-        fun postInvalidate() {
-            overlay.postInvalidate()
-        }
     }
+
+    private fun translateX(x: Float): Float = x * widthScaleFactor
+    private fun translateY(y: Float): Float = y * heightScaleFactor
+
+    /**
+     * Adjusts the `rect`'s coordinate from the preview's coordinate system to the view
+     * coordinate system.
+     */
+    fun translateRect(rect: Rect) = RectF(
+        translateX(rect.left.toFloat()),
+        translateY(rect.top.toFloat()),
+        translateX(rect.right.toFloat()),
+        translateY(rect.bottom.toFloat())
+    )
 
     /** Removes all graphics from the overlay.  */
     fun clear() {

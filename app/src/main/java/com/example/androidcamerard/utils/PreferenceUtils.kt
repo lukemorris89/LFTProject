@@ -18,36 +18,11 @@ package com.example.androidcamerard.utils
 
 import android.content.Context
 import android.preference.PreferenceManager
-import androidx.annotation.StringRes
 import com.example.androidcamerard.R
-import com.example.androidcamerard.camera.CameraSizePair
-import com.google.android.gms.common.images.Size
-import com.google.mlkit.vision.objects.ObjectDetectorOptionsBase.DetectorMode
 import com.google.mlkit.vision.objects.defaults.ObjectDetectorOptions
 
 /** Utility class to retrieve shared preferences.  */
 object PreferenceUtils {
-
-    fun saveStringPreference(context: Context, @StringRes prefKeyId: Int, value: String?) {
-        PreferenceManager.getDefaultSharedPreferences(context)
-            .edit()
-            .putString(context.getString(prefKeyId), value)
-            .apply()
-    }
-
-    fun getUserSpecifiedPreviewSize(context: Context): CameraSizePair? {
-        return try {
-            val previewSizePrefKey = context.getString(R.string.pref_key_rear_camera_preview_size)
-            val pictureSizePrefKey = context.getString(R.string.pref_key_rear_camera_picture_size)
-            val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
-            CameraSizePair(
-                Size.parseSize(sharedPreferences.getString(previewSizePrefKey, null)),
-                Size.parseSize(sharedPreferences.getString(pictureSizePrefKey, null))
-            )
-        } catch (e: Exception) {
-            null
-        }
-    }
 
     fun isCameraLiveViewportEnabled(context: Context): Boolean {
         val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
@@ -66,29 +41,20 @@ object PreferenceUtils {
     }
 
     fun getObjectDetectorOptionsForLivePreview(context: Context?): ObjectDetectorOptions? {
-        return getObjectDetectorOptions(
+        return R.string.pref_key_live_preview_object_detector_enable_classification.getObjectDetectorOptions(
             context!!,
-            R.string.pref_key_live_preview_object_detector_enable_multiple_objects,
-            R.string.pref_key_live_preview_object_detector_enable_classification,
             ObjectDetectorOptions.STREAM_MODE
         )
     }
 
-    private fun getObjectDetectorOptions(
+    private fun Int.getObjectDetectorOptions(
         context: Context,
-        @StringRes prefKeyForMultipleObjects: Int,
-        @StringRes prefKeyForClassification: Int,
-        @DetectorMode mode: Int
+        mode: Int
     ): ObjectDetectorOptions? {
         val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
-        val enableMultipleObjects =
-            sharedPreferences.getBoolean(context.getString(prefKeyForMultipleObjects), false)
         val enableClassification =
-            sharedPreferences.getBoolean(context.getString(prefKeyForClassification), true)
+            sharedPreferences.getBoolean(context.getString(this), true)
         val builder = ObjectDetectorOptions.Builder().setDetectorMode(mode)
-        if (enableMultipleObjects) {
-            builder.enableMultipleObjects()
-        }
         if (enableClassification) {
             builder.enableClassification()
         }

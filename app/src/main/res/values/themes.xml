@@ -3,10 +3,4 @@
     <style name="AppTheme" parent="Theme.MaterialComponents.NoActionBar">
     </style>
 
-    <style name="appButtonStyle">
-        <item name="android:textSize">18sp</item>
-        <item name="backgroundTint">#444</item>
-        <item name="android:textColor">@android:color/white</item>
-        <item name="android:padding">16dp</item>
-    </style>
 </resources>

@@ -21,5 +21,23 @@
         app:layout_constraintTop_toTopOf="@id/preview_view"
         app:layout_constraintBottom_toBottomOf="@id/preview_view"/>
 
+    <com.google.android.material.chip.Chip
+        android:id="@+id/overlay_search_chip"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/white"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        android:layout_marginBottom="@dimen/bottom_prompt_chip_margin_bottom"
+        android:textSize="18sp"
+        android:layout_marginStart="64dp"
+        android:layout_marginEnd="64dp"
+        android:paddingStart="32dp"
+        android:paddingEnd="32dp"
+        app:chipCornerRadius="@dimen/bottom_prompt_chip_corner_radius"
+        android:background="@color/white"
+        android:text="@string/searching"/>
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>
