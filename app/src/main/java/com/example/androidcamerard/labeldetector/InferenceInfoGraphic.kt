@@ -19,14 +19,14 @@ package com.example.androidcamerard.labeldetector
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
-import com.example.androidcamerard.camera.LabelDetectionGraphicOverlay
+import com.example.androidcamerard.camera.GraphicOverlay
 
 /** Graphic instance for rendering inference info (latency, FPS, resolution) in an overlay view.  */
 class InferenceInfoGraphic(
-    private val overlay: LabelDetectionGraphicOverlay,
+    private val overlay: GraphicOverlay,
     private val latency: Double, // Only valid when a stream of input images is being processed. Null for single image mode.
     private val framesPerSecond: Int?
-) : LabelDetectionGraphicOverlay.Graphic(overlay) {
+) : GraphicOverlay.Graphic(overlay) {
     private val textPaint: Paint
     @Synchronized
     override fun draw(canvas: Canvas?) {

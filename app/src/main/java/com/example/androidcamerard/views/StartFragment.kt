@@ -12,18 +12,17 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.androidcamerard.R
-import com.example.androidcamerard.utils.Utils
-import com.example.androidcamerard.viewmodel.PhotoViewModel
+import com.example.androidcamerard.viewmodel.CameraViewModel
 
 class StartFragment : Fragment() {
 
-    private enum class DetectionMode(val titleResId: Int, val subtitleResId: Int) {
-        CUSTOM_MODEL_LIVE(R.string.custom_model_live_title, R.string.custom_model_live_subtitle),
+    enum class DetectionMode(val titleResId: Int, val subtitleResId: Int) {
+//        CUSTOM_MODEL_LIVE(R.string.custom_model_live_title, R.string.custom_model_live_subtitle),
         ODT_LIVE(R.string.mode_odt_live_title, R.string.mode_odt_live__subtitle),
-        ODT_STATIC(R.string.mode_odt_static_title, R.string.mode_odt_static_subtitle)
+//        ODT_STATIC(R.string.mode_odt_static_title, R.string.mode_odt_static_subtitle)
     }
 
-    private val viewModel: PhotoViewModel by activityViewModels()
+    private val viewModel: CameraViewModel by activityViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -70,9 +69,9 @@ class StartFragment : Fragment() {
                 itemView.setOnClickListener {
                     val activity = activity as Activity
                     when (detectionMode) {
-                        DetectionMode.CUSTOM_MODEL_LIVE ->
-                            findNavController().navigate(R.id.action_startFragment_to_labelDetectionLiveFragment)
-                        DetectionMode.ODT_STATIC -> Utils.openImagePicker(activity)
+//                        DetectionMode.CUSTOM_MODEL_LIVE ->
+//                            findNavController().navigate(R.id.action_startFragment_to_labelDetectionLiveFragment)
+//                        DetectionMode.ODT_STATIC -> Utils.openImagePicker(activity)
                         DetectionMode.ODT_LIVE ->
                             findNavController().navigate(R.id.action_startFragment_to_objectDetectionLiveFragment)
                     }

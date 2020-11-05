@@ -28,7 +28,7 @@ import androidx.annotation.RequiresApi
 import androidx.camera.core.ExperimentalGetImage
 import androidx.camera.core.ImageProxy
 import androidx.exifinterface.media.ExifInterface
-import com.example.androidcamerard.camera.LabelDetectionFrameMetadata
+import com.example.androidcamerard.camera.FrameMetadata
 import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.nio.ByteBuffer
@@ -38,7 +38,7 @@ object BitmapUtils {
     private const val TAG = "BitmapUtils"
 
     /** Converts NV21 format byte buffer to bitmap.  */
-    fun getBitmap(data: ByteBuffer, metadata: LabelDetectionFrameMetadata): Bitmap? {
+    private fun getBitmap(data: ByteBuffer, metadata: FrameMetadata): Bitmap? {
         data.rewind()
         val imageInBuffer = ByteArray(data.limit())
         data[imageInBuffer, 0, imageInBuffer.size]
@@ -61,7 +61,7 @@ object BitmapUtils {
     @RequiresApi(VERSION_CODES.KITKAT)
     @ExperimentalGetImage
     fun getBitmap(image: ImageProxy): Bitmap? {
-        val frameMetadata: LabelDetectionFrameMetadata = LabelDetectionFrameMetadata.Builder()
+        val frameMetadata: FrameMetadata = FrameMetadata.Builder()
             .setWidth(image.width)
             .setHeight(image.height)
             .setRotation(image.imageInfo.rotationDegrees)

@@ -18,11 +18,11 @@ package com.example.androidcamerard.labeldetector
 
 import android.graphics.Bitmap
 import android.graphics.Canvas
-import com.example.androidcamerard.camera.LabelDetectionGraphicOverlay
-import com.example.androidcamerard.camera.LabelDetectionGraphicOverlay.Graphic
+import com.example.androidcamerard.camera.GraphicOverlay
+import com.example.androidcamerard.camera.GraphicOverlay.Graphic
 
 /** Draw camera image to background.  */
-class CameraImageGraphic(overlay: LabelDetectionGraphicOverlay, private val bitmap: Bitmap) : Graphic(overlay) {
+class CameraImageGraphic(overlay: GraphicOverlay, private val bitmap: Bitmap) : Graphic(overlay) {
     override fun draw(canvas: Canvas?) {
         canvas?.drawBitmap(bitmap, getTransformationMatrix(), null)
     }

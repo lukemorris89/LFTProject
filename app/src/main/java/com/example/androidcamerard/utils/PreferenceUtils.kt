@@ -22,36 +22,17 @@ import androidx.annotation.StringRes
 import com.example.androidcamerard.R
 import com.example.androidcamerard.camera.CameraSizePair
 import com.google.android.gms.common.images.Size
+import com.google.mlkit.vision.objects.ObjectDetectorOptionsBase.DetectorMode
+import com.google.mlkit.vision.objects.defaults.ObjectDetectorOptions
 
 /** Utility class to retrieve shared preferences.  */
 object PreferenceUtils {
-
-    fun isAutoSearchEnabled(context: Context): Boolean =
-        getBooleanPref(context, R.string.pref_key_enable_auto_search, true)
-
-    fun isMultipleObjectsMode(context: Context): Boolean =
-        getBooleanPref(context, R.string.pref_key_object_detector_enable_multiple_objects, false)
-
-    fun isClassificationEnabled(context: Context): Boolean =
-        getBooleanPref(context, R.string.pref_key_object_detector_enable_classification, false)
 
     fun saveStringPreference(context: Context, @StringRes prefKeyId: Int, value: String?) {
         PreferenceManager.getDefaultSharedPreferences(context)
             .edit()
             .putString(context.getString(prefKeyId), value)
             .apply()
-    }
-
-    fun getConfirmationTimeMs(context: Context): Int = when {
-        isMultipleObjectsMode(context) -> 300
-        isAutoSearchEnabled(context) -> getIntPref(context, R.string.pref_key_confirmation_time_in_auto_search, 1500)
-        else -> getIntPref(context, R.string.pref_key_confirmation_time_in_manual_search, 500)
-    }
-
-    private fun getIntPref(context: Context, @StringRes prefKeyId: Int, defaultValue: Int): Int {
-        val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
-        val prefKey = context.getString(prefKeyId)
-        return sharedPreferences.getInt(prefKey, defaultValue)
     }
 
     fun getUserSpecifiedPreviewSize(context: Context): CameraSizePair? {
@@ -68,7 +49,50 @@ object PreferenceUtils {
         }
     }
 
-    private fun getBooleanPref(context: Context, @StringRes prefKeyId: Int, defaultValue: Boolean): Boolean =
-        PreferenceManager.getDefaultSharedPreferences(context).getBoolean(context.getString(prefKeyId), defaultValue)
+    fun isCameraLiveViewportEnabled(context: Context): Boolean {
+        val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
+        val prefKey = context.getString(R.string.pref_key_camera_live_viewport)
+        return sharedPreferences.getBoolean(prefKey, false)
+    }
+
+    fun getCameraXTargetResolution(context: Context): android.util.Size? {
+        val prefKey = context.getString(R.string.pref_key_camerax_target_resolution)
+        val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
+        return try {
+            android.util.Size.parseSize(sharedPreferences.getString(prefKey, null))
+        } catch (e: java.lang.Exception) {
+            null
+        }
+    }
+
+    fun getObjectDetectorOptionsForLivePreview(context: Context?): ObjectDetectorOptions? {
+        return getObjectDetectorOptions(
+            context!!,
+            R.string.pref_key_live_preview_object_detector_enable_multiple_objects,
+            R.string.pref_key_live_preview_object_detector_enable_classification,
+            ObjectDetectorOptions.STREAM_MODE
+        )
+    }
+
+    private fun getObjectDetectorOptions(
+        context: Context,
+        @StringRes prefKeyForMultipleObjects: Int,
+        @StringRes prefKeyForClassification: Int,
+        @DetectorMode mode: Int
+    ): ObjectDetectorOptions? {
+        val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
+        val enableMultipleObjects =
+            sharedPreferences.getBoolean(context.getString(prefKeyForMultipleObjects), false)
+        val enableClassification =
+            sharedPreferences.getBoolean(context.getString(prefKeyForClassification), true)
+        val builder = ObjectDetectorOptions.Builder().setDetectorMode(mode)
+        if (enableMultipleObjects) {
+            builder.enableMultipleObjects()
+        }
+        if (enableClassification) {
+            builder.enableClassification()
+        }
+        return builder.build()
+    }
 
 }

@@ -1,379 +1,294 @@
+/*
+ * Copyright 2020 Google LLC. All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.example.androidcamerard.views
 
-import android.animation.AnimatorInflater
-import android.animation.AnimatorSet
-import android.content.Intent
-import android.graphics.Bitmap
-import android.graphics.Color
-import android.hardware.Camera
+import android.content.Context
+import android.content.pm.PackageManager
+import android.os.Build.VERSION_CODES
 import android.os.Bundle
 import android.util.Log
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ProgressBar
-import android.widget.TextView
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import com.example.androidcamerard.ODOnBackPressed
+import androidx.annotation.RequiresApi
+import androidx.camera.core.CameraSelector
+import androidx.camera.core.ImageAnalysis
+import androidx.camera.core.ImageProxy
+import androidx.camera.core.Preview
+import androidx.camera.lifecycle.ProcessCameraProvider
+import androidx.camera.view.PreviewView
+import androidx.core.content.ContextCompat
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import com.example.androidcamerard.R
-import com.example.androidcamerard.camera.CameraSource
-import com.example.androidcamerard.camera.CameraSourcePreview
-import com.example.androidcamerard.camera.ObjectDetectionGraphicOverlay
-import com.example.androidcamerard.camera.WorkflowModel
-import com.example.androidcamerard.camera.WorkflowModel.WorkflowState
-import com.example.androidcamerard.objectdetection.MultiObjectProcessor
-import com.example.androidcamerard.objectdetection.ProminentObjectProcessor
-import com.example.androidcamerard.productsearch.BottomSheetScrimView
-import com.example.androidcamerard.productsearch.ProductAdapter
-import com.example.androidcamerard.productsearch.SearchEngine
+import com.example.androidcamerard.camera.GraphicOverlay
+import com.example.androidcamerard.labeldetector.VisionImageProcessor
+import com.example.androidcamerard.objectdetector.ObjectDetectorProcessor
 import com.example.androidcamerard.utils.PreferenceUtils
-import com.google.android.material.bottomsheet.BottomSheetBehavior
-import com.google.android.material.chip.Chip
-import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
-import com.google.common.base.Objects
-import com.google.common.collect.ImmutableList
-import java.io.IOException
+import com.example.androidcamerard.viewmodel.CameraViewModel
+import com.google.android.gms.common.annotation.KeepName
+import com.google.mlkit.common.MlKitException
+import java.util.ArrayList
 
-class ObjectDetectionLiveFragment : Fragment(), View.OnClickListener, ODOnBackPressed {
+/** Live preview demo app for ML Kit APIs using CameraX.  */
+@KeepName
+@RequiresApi(VERSION_CODES.LOLLIPOP)
+class ObjectDetectionLiveFragment : Fragment() {
 
-    private var cameraSource: CameraSource? = null
-    private var preview: CameraSourcePreview? = null
-    private var graphicOverlay: ObjectDetectionGraphicOverlay? = null
-    private var settingsButton: View? = null
-    private var flashButton: View? = null
-    private var promptChip: Chip? = null
-    private var promptChipAnimator: AnimatorSet? = null
-    private var searchButton: ExtendedFloatingActionButton? = null
-    private var searchButtonAnimator: AnimatorSet? = null
-    private var searchProgressBar: ProgressBar? = null
-    private var workflowModel: WorkflowModel? = null
-    private var currentWorkflowState: WorkflowState? = null
-    private var searchEngine: SearchEngine? = null
+    private var previewView: PreviewView? = null
+    private lateinit var graphicOverlay: GraphicOverlay
+    private var cameraProvider: ProcessCameraProvider? = null
+    private var previewUseCase: Preview? = null
+    private var analysisUseCase: ImageAnalysis? = null
+    private var imageProcessor: VisionImageProcessor? = null
+    private var needUpdateGraphicOverlayImageSourceInfo = false
+    private var selectedModel = OBJECT_DETECTION
+    private var lensFacing = CameraSelector.LENS_FACING_BACK
+    private var cameraSelector: CameraSelector? = null
 
-    private var bottomSheetBehavior: BottomSheetBehavior<View>? = null
-    private var bottomSheetScrimView: BottomSheetScrimView? = null
-    private var productRecyclerView: RecyclerView? = null
-    private var bottomSheetTitleView: TextView? = null
-    private var objectThumbnailForBottomSheet: Bitmap? = null
-    private var slidingSheetUpFromHiddenState: Boolean = false
-
+    private val viewModel: CameraViewModel by activityViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        searchEngine = SearchEngine(requireContext())
-
+        // Inflate the layout for this fragment
         val view = inflater.inflate(R.layout.fragment_object_detection_live, container, false)
 
-        searchEngine = SearchEngine(requireContext())
-
-        preview = view.findViewById(R.id.camera_preview)
-        graphicOverlay = view.findViewById<ObjectDetectionGraphicOverlay>(R.id.camera_preview_graphic_overlay).apply {
-            setOnClickListener(this@ObjectDetectionLiveFragment)
-            cameraSource = CameraSource(this as ObjectDetectionGraphicOverlay)
+        cameraSelector = CameraSelector.Builder().requireLensFacing(lensFacing).build()
+        previewView = view.findViewById(R.id.preview_view)
+        if (previewView == null) {
+            Log.d(TAG, "previewView is null")
         }
-        promptChip = view.findViewById(R.id.bottom_prompt_chip)
-        promptChipAnimator =
-            (AnimatorInflater.loadAnimator(requireContext(), R.animator.bottom_prompt_chip_enter) as AnimatorSet).apply {
-                setTarget(promptChip)
-            }
-        searchButton = view.findViewById<ExtendedFloatingActionButton>(R.id.product_search_button).apply {
-            setOnClickListener(this@ObjectDetectionLiveFragment)
+        graphicOverlay = view.findViewById(R.id.graphic_overlay)
+        if (graphicOverlay == null) {
+            Log.d(TAG, "graphicOverlay is null")
         }
-        searchButtonAnimator =
-            (AnimatorInflater.loadAnimator(requireContext(), R.animator.search_button_enter) as AnimatorSet).apply {
-                setTarget(searchButton)
-            }
-        searchProgressBar = view.findViewById(R.id.search_progress_bar)
-        setUpBottomSheet(view)
-        view.findViewById<View>(R.id.close_button).setOnClickListener(this)
-        flashButton = view.findViewById<View>(R.id.flash_button).apply {
-            setOnClickListener(this@ObjectDetectionLiveFragment)
+        viewModel.processCameraProvider
+            .observe(
+                viewLifecycleOwner,
+                { provider: ProcessCameraProvider? ->
+                    cameraProvider = provider
+                    if (allPermissionsGranted()) {
+                        bindAllCameraUseCases()
+                    }
+                }
+            )
+        if (!allPermissionsGranted()) {
+            runtimePermissions
         }
-        setUpWorkflowModel()
 
         return view
     }
 
+    override fun onSaveInstanceState(bundle: Bundle) {
+        super.onSaveInstanceState(bundle)
+        bundle.putString(STATE_SELECTED_MODEL, selectedModel)
+        bundle.putInt(STATE_LENS_FACING, lensFacing)
+    }
+
+
+
     override fun onResume() {
         super.onResume()
-
-        workflowModel?.markCameraFrozen()
-        settingsButton?.isEnabled = true
-        bottomSheetBehavior?.state = BottomSheetBehavior.STATE_HIDDEN
-        currentWorkflowState = WorkflowState.NOT_STARTED
-        cameraSource?.setFrameProcessor(
-            if (PreferenceUtils.isMultipleObjectsMode(requireContext())) {
-                MultiObjectProcessor(graphicOverlay!!, workflowModel!!)
-            } else {
-                ProminentObjectProcessor(graphicOverlay!!, workflowModel!!)
-            }
-        )
-        workflowModel?.setWorkflowState(WorkflowState.DETECTING)
+        bindAllCameraUseCases()
     }
 
     override fun onPause() {
         super.onPause()
-        currentWorkflowState = WorkflowState.NOT_STARTED
-        stopCameraPreview()
+
+        imageProcessor?.run {
+            this.stop()
+        }
     }
 
-    override fun onDestroy() {
+    public override fun onDestroy() {
         super.onDestroy()
-        cameraSource?.release()
-        cameraSource = null
-        searchEngine?.shutdown()
-    }
-
-    override fun onBackPressed() {
-        if (bottomSheetBehavior?.state != BottomSheetBehavior.STATE_HIDDEN) {
-            bottomSheetBehavior?.setState(BottomSheetBehavior.STATE_HIDDEN)
-        } else {
-            activity?.onBackPressed()
+        imageProcessor?.run {
+            this.stop()
         }
     }
 
-    override fun onClick(view: View) {
-        when (view.id) {
-            R.id.product_search_button -> {
-                searchButton?.isEnabled = false
-                workflowModel?.onSearchButtonClicked()
-            }
-            R.id.bottom_sheet_scrim_view -> bottomSheetBehavior?.setState(BottomSheetBehavior.STATE_HIDDEN)
-            R.id.close_button -> onBackPressed()
-            R.id.flash_button -> {
-                if (flashButton?.isSelected == true) {
-                    flashButton?.isSelected = false
-                    cameraSource?.updateFlashMode(Camera.Parameters.FLASH_MODE_OFF)
-                } else {
-                    flashButton?.isSelected = true
-                    cameraSource?.updateFlashMode(Camera.Parameters.FLASH_MODE_TORCH)
-                }
-            }
+    private fun bindAllCameraUseCases() {
+        if (cameraProvider != null) {
+            // As required by CameraX API, unbinds all use cases before trying to re-bind any of them.
+            cameraProvider!!.unbindAll()
+            bindPreviewUseCase()
+            bindAnalysisUseCase()
         }
     }
 
-    private fun startCameraPreview() {
-        val cameraSource = this.cameraSource ?: return
-        val workflowModel = this.workflowModel ?: return
-        if (!workflowModel.isCameraLive) {
-            try {
-                workflowModel.markCameraLive()
-                preview?.start(cameraSource)
-            } catch (e: IOException) {
-                Log.e(TAG, "Failed to start camera preview!", e)
-                cameraSource.release()
-                this.cameraSource = null
-            }
+    private fun bindPreviewUseCase() {
+        if (!PreferenceUtils.isCameraLiveViewportEnabled(requireContext())) {
+            return
         }
+        if (cameraProvider == null) {
+            return
+        }
+        if (previewUseCase != null) {
+            cameraProvider!!.unbind(previewUseCase)
+        }
+
+        val builder = Preview.Builder()
+        val targetResolution = PreferenceUtils.getCameraXTargetResolution(requireContext())
+        if (targetResolution != null) {
+            builder.setTargetResolution(targetResolution)
+        }
+        previewUseCase = builder.build()
+        previewUseCase!!.setSurfaceProvider(previewView!!.getSurfaceProvider())
+        cameraProvider!!.bindToLifecycle(/* lifecycleOwner= */this, cameraSelector!!, previewUseCase)
     }
 
-    private fun stopCameraPreview() {
-        if (workflowModel?.isCameraLive == true) {
-            workflowModel!!.markCameraFrozen()
-            flashButton?.isSelected = false
-            preview?.stop()
+    private fun bindAnalysisUseCase() {
+        if (cameraProvider == null) {
+            return
         }
-    }
+        if (analysisUseCase != null) {
+            cameraProvider!!.unbind(analysisUseCase)
+        }
+        if (imageProcessor != null) {
+            imageProcessor!!.stop()
+        }
+        imageProcessor = try {
+                    Log.i(TAG, "Using Object Detector Processor")
+                    val objectDetectorOptions =
+                        PreferenceUtils.getObjectDetectorOptionsForLivePreview(requireContext())
+                    ObjectDetectorProcessor(requireContext(), objectDetectorOptions!!)
+        } catch (e: Exception) {
+            Log.e(
+                TAG,
+                "Can not create image processor: $selectedModel",
+                e
+            )
+            return
+        }
 
-    private fun setUpBottomSheet(view: View) {
-        bottomSheetBehavior = BottomSheetBehavior.from(view.findViewById(R.id.bottom_sheet))
-        bottomSheetBehavior?.setBottomSheetCallback(
-            object : BottomSheetBehavior.BottomSheetCallback() {
-                override fun onStateChanged(bottomSheet: View, newState: Int) {
-                    Log.d(TAG, "Bottom sheet new state: $newState")
-                    bottomSheetScrimView?.visibility =
-                        if (newState == BottomSheetBehavior.STATE_HIDDEN) View.GONE else View.VISIBLE
-                    graphicOverlay?.clear()
+        val builder = ImageAnalysis.Builder()
+        val targetResolution = PreferenceUtils.getCameraXTargetResolution(requireContext())
+        if (targetResolution != null) {
+            builder.setTargetResolution(targetResolution)
+        }
+        analysisUseCase = builder.build()
 
-                    when (newState) {
-                        BottomSheetBehavior.STATE_HIDDEN -> workflowModel?.setWorkflowState(WorkflowState.DETECTING)
-                        BottomSheetBehavior.STATE_COLLAPSED,
-                        BottomSheetBehavior.STATE_EXPANDED,
-                        BottomSheetBehavior.STATE_HALF_EXPANDED -> slidingSheetUpFromHiddenState = false
-                        BottomSheetBehavior.STATE_DRAGGING, BottomSheetBehavior.STATE_SETTLING -> {
-                        }
-                    }
-                }
+        needUpdateGraphicOverlayImageSourceInfo = true
 
-                override fun onSlide(bottomSheet: View, slideOffset: Float) {
-                    val searchedObject = workflowModel!!.searchedObject.value
-                    if (searchedObject == null || java.lang.Float.isNaN(slideOffset)) {
-                        return
-                    }
-
-                    val graphicOverlay = graphicOverlay ?: return
-                    val bottomSheetBehavior = bottomSheetBehavior ?: return
-                    val collapsedStateHeight = bottomSheetBehavior.peekHeight.coerceAtMost(bottomSheet.height)
-                    val bottomBitmap = objectThumbnailForBottomSheet ?: return
-                    if (slidingSheetUpFromHiddenState) {
-                        val thumbnailSrcRect = graphicOverlay.translateRect(searchedObject.boundingBox)
-                        bottomSheetScrimView?.updateWithThumbnailTranslateAndScale(
-                            bottomBitmap,
-                            collapsedStateHeight,
-                            slideOffset,
-                            thumbnailSrcRect
+        analysisUseCase?.setAnalyzer(
+            // imageProcessor.processImageProxy will use another thread to run the detection underneath,
+            // thus we can just runs the analyzer itself on main thread.
+            ContextCompat.getMainExecutor(requireContext()),
+            ImageAnalysis.Analyzer { imageProxy: ImageProxy ->
+                if (needUpdateGraphicOverlayImageSourceInfo) {
+                    val isImageFlipped =
+                        lensFacing == CameraSelector.LENS_FACING_FRONT
+                    val rotationDegrees =
+                        imageProxy.imageInfo.rotationDegrees
+                    if (rotationDegrees == 0 || rotationDegrees == 180) {
+                        graphicOverlay!!.setImageSourceInfo(
+                            imageProxy.width, imageProxy.height, isImageFlipped
                         )
                     } else {
-                        bottomSheetScrimView?.updateWithThumbnailTranslate(
-                            bottomBitmap, collapsedStateHeight, slideOffset, bottomSheet
+                        graphicOverlay!!.setImageSourceInfo(
+                            imageProxy.height, imageProxy.width, isImageFlipped
                         )
                     }
+                    needUpdateGraphicOverlayImageSourceInfo = false
                 }
-            })
-
-        bottomSheetScrimView = view.findViewById<BottomSheetScrimView>(R.id.bottom_sheet_scrim_view).apply {
-            setOnClickListener(this@ObjectDetectionLiveFragment)
-        }
-
-        bottomSheetTitleView = view.findViewById(R.id.bottom_sheet_title)
-        productRecyclerView = view.findViewById<RecyclerView>(R.id.product_recycler_view).apply {
-            setHasFixedSize(true)
-            layoutManager = LinearLayoutManager(requireContext())
-            adapter = ProductAdapter(ImmutableList.of())
-        }
-    }
-
-    private fun setUpWorkflowModel() {
-        workflowModel = ViewModelProviders.of(this).get(WorkflowModel::class.java).apply {
-
-            // Observes the workflow state changes, if happens, update the overlay view indicators and
-            // camera preview state.
-            workflowState.observe(viewLifecycleOwner, Observer { workflowState ->
-                if (workflowState == null || Objects.equal(currentWorkflowState, workflowState)) {
-                    return@Observer
-                }
-                currentWorkflowState = workflowState
-                Log.d(TAG, "Current workflow state: ${workflowState.name}")
-
-                if (PreferenceUtils.isAutoSearchEnabled(requireContext())) {
-                    stateChangeInAutoSearchMode(workflowState)
-                } else {
-                    stateChangeInManualSearchMode(workflowState)
-                }
-            })
-
-            // Observes changes on the object to search, if happens, fire product search request.
-            objectToSearch.observe(viewLifecycleOwner, Observer { detectObject ->
-                searchEngine!!.search(detectObject) { detectedObject, products ->
-                    workflowModel?.onSearchCompleted(detectedObject, products)
-                }
-            })
-
-            // Observes changes on the object that has search completed, if happens, show the bottom sheet
-            // to present search result.
-            searchedObject.observe(viewLifecycleOwner, Observer { nullableSearchedObject ->
-                val searchedObject = nullableSearchedObject ?: return@Observer
-                val productList = searchedObject.productList
-                objectThumbnailForBottomSheet = searchedObject.getObjectThumbnail()
-                bottomSheetTitleView?.text = resources
-                    .getQuantityString(
-                        R.plurals.bottom_sheet_title, productList.size, productList.size
+                try {
+                    imageProcessor!!.processImageProxy(imageProxy, graphicOverlay)
+                } catch (e: MlKitException) {
+                    Log.e(
+                        TAG,
+                        "Failed to process image. Error: " + e.localizedMessage
                     )
-                productRecyclerView?.adapter = ProductAdapter(productList)
-                slidingSheetUpFromHiddenState = true
-                bottomSheetBehavior?.peekHeight =
-                    preview?.height?.div(2) ?: BottomSheetBehavior.PEEK_HEIGHT_AUTO
-                bottomSheetBehavior?.state = BottomSheetBehavior.STATE_COLLAPSED
-            })
-        }
+                }
+            }
+        )
+        cameraProvider!!.bindToLifecycle( /* lifecycleOwner= */this, cameraSelector!!, analysisUseCase)
     }
 
-    private fun stateChangeInAutoSearchMode(workflowState: WorkflowState) {
-        val wasPromptChipGone = promptChip!!.visibility == View.GONE
+    private val requiredPermissions: Array<String?>
+        get() = try {
+            val info = context?.packageManager?.getPackageInfo(requireContext().packageName, PackageManager.GET_PERMISSIONS)
+            val ps = info?.requestedPermissions
+            if (ps != null && ps.isNotEmpty()) {
+                ps
+            } else {
+                arrayOfNulls(0)
+            }
+        } catch (e: Exception) {
+            arrayOfNulls(0)
+        }
 
-        searchButton?.visibility = View.GONE
-        searchProgressBar?.visibility = View.GONE
-        when (workflowState) {
-            WorkflowState.DETECTING, WorkflowState.DETECTED, WorkflowState.CONFIRMING -> {
-                promptChip?.visibility = View.VISIBLE
-                promptChip?.setText(
-                    if (workflowState == WorkflowState.CONFIRMING)
-                        R.string.prompt_hold_camera_steady
-                    else
-                        R.string.prompt_point_at_an_object
+    private fun allPermissionsGranted(): Boolean {
+        for (permission in requiredPermissions) {
+            if (!isPermissionGranted(requireContext(), permission)) {
+                return false
+            }
+        }
+        return true
+    }
+
+    private val runtimePermissions: Unit
+        get() {
+            val allNeededPermissions: MutableList<String?> = ArrayList()
+            for (permission in requiredPermissions) {
+                if (!isPermissionGranted(requireContext(), permission)) {
+                    allNeededPermissions.add(permission)
+                }
+            }
+            if (allNeededPermissions.isNotEmpty()) {
+                requestPermissions(
+                    allNeededPermissions.toTypedArray(),
+                    PERMISSION_REQUESTS
                 )
-                startCameraPreview()
-            }
-            WorkflowState.CONFIRMED -> {
-                promptChip?.visibility = View.VISIBLE
-                promptChip?.setText(R.string.prompt_searching)
-                stopCameraPreview()
-            }
-            WorkflowState.SEARCHING -> {
-                searchProgressBar?.visibility = View.VISIBLE
-                promptChip?.visibility = View.VISIBLE
-                promptChip?.setText(R.string.prompt_searching)
-                stopCameraPreview()
-            }
-            WorkflowState.SEARCHED -> {
-                promptChip?.visibility = View.GONE
-                stopCameraPreview()
-            }
-            else -> promptChip?.visibility = View.GONE
-        }
-
-        val shouldPlayPromptChipEnteringAnimation = wasPromptChipGone && promptChip?.visibility == View.VISIBLE
-        if (shouldPlayPromptChipEnteringAnimation && promptChipAnimator?.isRunning == false) {
-            promptChipAnimator?.start()
-        }
-    }
-
-    private fun stateChangeInManualSearchMode(workflowState: WorkflowState) {
-        val wasPromptChipGone = promptChip?.visibility == View.GONE
-        val wasSearchButtonGone = searchButton?.visibility == View.GONE
-
-        searchProgressBar?.visibility = View.GONE
-        when (workflowState) {
-            WorkflowState.DETECTING, WorkflowState.DETECTED, WorkflowState.CONFIRMING -> {
-                promptChip?.visibility = View.VISIBLE
-                promptChip?.setText(R.string.prompt_point_at_an_object)
-                searchButton?.visibility = View.GONE
-                startCameraPreview()
-            }
-            WorkflowState.CONFIRMED -> {
-                promptChip?.visibility = View.GONE
-                searchButton?.visibility = View.VISIBLE
-                searchButton?.isEnabled = true
-                searchButton?.setBackgroundColor(Color.WHITE)
-                startCameraPreview()
-            }
-            WorkflowState.SEARCHING -> {
-                promptChip?.visibility = View.GONE
-                searchButton?.visibility = View.VISIBLE
-                searchButton?.isEnabled = false
-                searchButton?.setBackgroundColor(Color.GRAY)
-                searchProgressBar!!.visibility = View.VISIBLE
-                stopCameraPreview()
-            }
-            WorkflowState.SEARCHED -> {
-                promptChip?.visibility = View.GONE
-                searchButton?.visibility = View.GONE
-                stopCameraPreview()
-            }
-            else -> {
-                promptChip?.visibility = View.GONE
-                searchButton?.visibility = View.GONE
             }
         }
 
-        val shouldPlayPromptChipEnteringAnimation = wasPromptChipGone && promptChip?.visibility == View.VISIBLE
-        promptChipAnimator?.let {
-            if (shouldPlayPromptChipEnteringAnimation && !it.isRunning) it.start()
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String>,
+        grantResults: IntArray
+    ) {
+        Log.i(TAG, "Permission granted!")
+        if (allPermissionsGranted()) {
+            bindAllCameraUseCases()
         }
-
-        val shouldPlaySearchButtonEnteringAnimation = wasSearchButtonGone && searchButton?.visibility == View.VISIBLE
-        searchButtonAnimator?.let {
-            if (shouldPlaySearchButtonEnteringAnimation && !it.isRunning) it.start()
-        }
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
     }
 
     companion object {
-        private const val TAG = "ObjectDetectionLiveFrag"
+        private const val TAG = "CameraXLivePreview"
+        private const val PERMISSION_REQUESTS = 1
+        private const val OBJECT_DETECTION = "Object Detection"
+        private const val STATE_SELECTED_MODEL = "selected_model"
+        private const val STATE_LENS_FACING = "lens_facing"
+
+        private fun isPermissionGranted(
+            context: Context,
+            permission: String?
+        ): Boolean {
+            if (ContextCompat.checkSelfPermission(context, permission!!)
+                == PackageManager.PERMISSION_GRANTED
+            ) {
+                Log.i(TAG, "Permission granted: $permission")
+                return true
+            }
+            Log.i(TAG, "Permission NOT granted: $permission")
+            return false
+        }
     }
 }

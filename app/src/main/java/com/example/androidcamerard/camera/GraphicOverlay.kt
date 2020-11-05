@@ -22,7 +22,7 @@ import android.graphics.Canvas
 import android.graphics.Matrix
 import android.util.AttributeSet
 import android.view.View
-import com.example.androidcamerard.camera.LabelDetectionGraphicOverlay.Graphic
+import com.example.androidcamerard.camera.GraphicOverlay.Graphic
 import com.google.common.base.Preconditions
 import java.util.*
 
@@ -48,7 +48,7 @@ import java.util.*
  * coordinate from the image's coordinate system to the view coordinate system.
  *
  */
-class LabelDetectionGraphicOverlay(context: Context?, attrs: AttributeSet?) :
+class GraphicOverlay(context: Context?, attrs: AttributeSet?) :
     View(context, attrs) {
     private val lock = Any()
     private val graphics: MutableList<Graphic> =
@@ -78,9 +78,9 @@ class LabelDetectionGraphicOverlay(context: Context?, attrs: AttributeSet?) :
     /**
      * Base class for a custom graphics object to be rendered within the graphic overlay. Subclass
      * this and implement the [Graphic.draw] method to define the graphics element. Add
-     * instances to the overlay using [LabelDetectionGraphicOverlay.add].
+     * instances to the overlay using [GraphicOverlay.add].
      */
-    abstract class Graphic(private val overlay: LabelDetectionGraphicOverlay) {
+    abstract class Graphic(private val overlay: GraphicOverlay) {
         /**
          * Draw the graphic on the supplied canvas. Drawing should use the following methods to convert
          * to view coordinates for the graphics that are drawn:
@@ -99,14 +99,6 @@ class LabelDetectionGraphicOverlay(context: Context?, attrs: AttributeSet?) :
         /** Adjusts the supplied value from the image scale to the view scale.  */
         fun scale(imagePixel: Float): Float {
             return imagePixel * overlay.scaleFactor
-        }
-
-        /** Returns the application context of the app.  */
-        val applicationContext: Context
-            get() = overlay.context.applicationContext
-
-        fun isImageFlipped(): Boolean {
-            return overlay.isImageFlipped
         }
 
         /**
@@ -148,12 +140,6 @@ class LabelDetectionGraphicOverlay(context: Context?, attrs: AttributeSet?) :
     /** Adds a graphic to the overlay.  */
     fun add(graphic: Graphic) {
         synchronized(lock) { graphics.add(graphic) }
-    }
-
-    /** Removes a graphic from the overlay.  */
-    fun remove(graphic: Graphic) {
-        synchronized(lock) { graphics.remove(graphic) }
-        postInvalidate()
     }
 
     /**

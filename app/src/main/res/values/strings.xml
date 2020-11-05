@@ -39,6 +39,10 @@
     <string name="pref_key_rear_camera_preview_size" translatable="false">rcpvs</string>
     <string name="pref_key_rear_camera_picture_size" translatable="false">rcpts</string>
     <string name="pref_title_rear_camera_preview_size">Rear camera preview size</string>
+    <string name="pref_key_front_camera_preview_size" translatable="false">fcpvs</string>
+    <string name="pref_key_front_camera_picture_size" translatable="false">fcpts</string>
+    <string name="pref_key_camerax_target_resolution" translatable="false">ctas</string>
+    <string name="pref_key_camera_live_viewport" translatable="false">clv</string>
 
     <!-- Strings for object detection settings. -->
     <string name="pref_category_object_detection">Object detection</string>
@@ -46,6 +50,8 @@
     <string name="pref_title_object_detector_enable_multiple_objects">Enable multiple objects</string>
     <string name="pref_key_object_detector_enable_classification" translatable="false">odec</string>
     <string name="pref_title_object_detector_enable_classification">Enable classification</string>
+    <string name="pref_key_live_preview_object_detector_enable_classification" translatable="false">lpodec</string>
+    <string name="pref_key_still_image_object_detector_enable_classification" translatable="false">siodec</string>
 
     <!-- Strings for product search settings. -->
     <string name="pref_category_product_search">Product search</string>
@@ -57,4 +63,13 @@
     <string name="pref_key_confirmation_time_in_auto_search" translatable="false">ctias</string>
     <string name="pref_title_confirmation_time_in_auto_search">Confirmation time in auto search</string>
     <string name="pref_summary_confirmation_time_in_auto_search">Ranges from 500ms to 2000ms</string>
+
+    <!-- Strings for object detector enable multiple objects preference. -->
+    <string name="pref_key_live_preview_object_detector_enable_multiple_objects" translatable="false">lpodemo</string>
+    <string name="pref_key_still_image_object_detector_enable_multiple_objects" translatable="false">siodemo</string>
+
+
+
+
+
 </resources>
