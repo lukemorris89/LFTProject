@@ -10,4 +10,5 @@
     <color name="button_enabled">#5F6368</color>
     <color name="button_disabled">#888888</color>
     <color name="label_confidence">#5F6368</color>
+    <color name="bottom_sheet_titlebar">#FF424242</color>
 </resources>

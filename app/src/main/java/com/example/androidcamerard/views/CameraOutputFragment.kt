@@ -33,6 +33,7 @@ class CameraOutputFragment : Fragment(), View.OnClickListener {
     private var slidingSheetUpFromHiddenState: Boolean = false
     private lateinit var retakePhotoButton: Button
     private lateinit var returnHomeButton: Button
+    private lateinit var expandButton: ImageView
 
     private val viewModel: CameraViewModel by activityViewModels()
 
@@ -46,6 +47,8 @@ class CameraOutputFragment : Fragment(), View.OnClickListener {
             container,
             false
         )
+
+        expandButton = view.findViewById(R.id.expand_arrow)
 
         view.findViewById<ImageView>(R.id.camera_output_imageview).apply {
             Glide.with(this@CameraOutputFragment).load(viewModel.photoFilename.value).into(this)
@@ -69,6 +72,38 @@ class CameraOutputFragment : Fragment(), View.OnClickListener {
 
     private fun setUpBottomSheet() {
         bottomSheetBehavior = BottomSheetBehavior.from(bottom_sheet)
+        bottomSheetBehavior?.setBottomSheetCallback(
+            object : BottomSheetBehavior.BottomSheetCallback() {
+                override fun onStateChanged(bottomSheet: View, newState: Int) {
+                    Log.d(TAG, "Bottom sheet new state: $newState")
+
+                    when (newState) {
+                        BottomSheetBehavior.STATE_HIDDEN,
+                        BottomSheetBehavior.STATE_COLLAPSED -> {
+                            slidingSheetUpFromHiddenState = false
+                            expandButton.setImageResource(R.drawable.expand_up_24)
+                            expandButton.setOnClickListener {
+                                bottomSheetBehavior!!.state = BottomSheetBehavior.STATE_HALF_EXPANDED
+                            }
+                        }
+                        BottomSheetBehavior.STATE_EXPANDED,
+                        BottomSheetBehavior.STATE_HALF_EXPANDED -> {
+                            slidingSheetUpFromHiddenState = false
+                            expandButton.setImageResource(R.drawable.expand_down_24)
+                            expandButton.setOnClickListener {
+                                bottomSheetBehavior!!.state = BottomSheetBehavior.STATE_COLLAPSED
+                            }
+
+                        }
+                        BottomSheetBehavior.STATE_DRAGGING, BottomSheetBehavior.STATE_SETTLING -> {
+                        }
+                    }
+                }
+
+                override fun onSlide(bottomSheet: View, slideOffset: Float) {
+                    return
+                }
+            })
 
 
         bottomSheetTitleView = requireView().findViewById(R.id.bottom_sheet_title)
