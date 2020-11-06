@@ -10,6 +10,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver
+import android.widget.ImageButton
+import android.widget.ImageView
 import android.widget.Toast
 import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
@@ -22,6 +24,7 @@ import com.example.androidcamerard.camera.GraphicOverlay
 import com.example.androidcamerard.imagelabelling.ImageLabellingProcessor
 import com.example.androidcamerard.processor.VisionImageProcessor
 import com.example.androidcamerard.viewmodel.CameraViewModel
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.mlkit.common.MlKitException
 import com.google.mlkit.vision.label.defaults.ImageLabelerOptions
 import kotlinx.android.synthetic.main.fragment_image_labelling_live.view.*
@@ -34,12 +37,16 @@ import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
 
-class ImageLabellingLiveFragment : Fragment() {
+class ImageLabellingLiveFragment : Fragment(), View.OnClickListener {
 
     private lateinit var previewView: PreviewView
     private lateinit var graphicOverlay: GraphicOverlay
+    private lateinit var flashButton: View
+    private lateinit var closeButton: View
+    private lateinit var photoCaptureButton: View
     private var imageProcessor: VisionImageProcessor? = null
     private var needUpdateGraphicOverlayImageSourceInfo = false
+
 
     private var camera: Camera? = null
 
@@ -68,15 +75,21 @@ class ImageLabellingLiveFragment : Fragment() {
             requestPermissions(REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS)
         }
 
-        // Set up the listener for take photo button
-        view.photo_capture_button.setOnClickListener { takePhoto() }
-
         outputDirectory = getOutputDirectory()
         cameraExecutor = Executors.newSingleThreadExecutor()
 
         previewView = view.findViewById(R.id.preview_view)
         graphicOverlay = view.findViewById(R.id.graphic_overlay)
-
+        flashButton = view.findViewById<View>(R.id.flash_button).apply {
+            setOnClickListener(this@ImageLabellingLiveFragment)
+        }
+        photoCaptureButton = view.findViewById<View>(R.id.photo_capture_button).apply {
+            setOnClickListener(this@ImageLabellingLiveFragment)
+            isEnabled = false
+        }
+        closeButton = view.findViewById<View>(R.id.close_button).apply {
+            setOnClickListener(this@ImageLabellingLiveFragment)
+        }
         return view
     }
 
@@ -226,6 +239,25 @@ class ImageLabellingLiveFragment : Fragment() {
         })
     }
 
+    override fun onClick(view: View) {
+        when (view.id) {
+            R.id.photo_capture_button -> {
+                takePhoto()
+            }
+            R.id.close_button -> findNavController().popBackStack()
+            R.id.flash_button -> {
+                updateFlashMode(flashButton.isSelected)
+            }
+        }
+    }
+
+    private fun updateFlashMode(flashMode: Boolean) {
+        flashButton.isSelected = !flashMode
+        if (camera!!.cameraInfo.hasFlashUnit()) {
+            camera!!.cameraControl.enableTorch(!flashMode)
+        }
+    }
+
     private fun takePhoto() {
         // Get a stable reference of the modifiable image capture use case
         val imageCapture = imageCaptureUseCase ?: return
@@ -248,8 +280,7 @@ class ImageLabellingLiveFragment : Fragment() {
                 override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
                     val savedUri = Uri.fromFile(photoFile)
                     viewModel.photoFilename.value = savedUri
-
-//                    findNavController().navigate(R.id.action_labelDetectionLiveFragment_to_cameraOutputFragment)
+                    findNavController().navigate(R.id.action_imageLabellingLiveFragment_to_cameraOutputFragment)
                 }
             }
         )

@@ -6,4 +6,6 @@
     <color name="object_detection_scrim_color">#1F000000</color>
     <color name="object_detected_bg_gradient_start">#00000000</color>
     <color name="object_detected_bg_gradient_end">#66000000</color>
+    <color name="button_enabled">#5F6368</color>
+    <color name="button_disabled">#888888</color>
 </resources>

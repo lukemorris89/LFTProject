@@ -32,8 +32,8 @@
         android:paddingEnd="32dp"
         android:paddingTop="8dp"
         android:paddingBottom="8dp"
-        android:src="@drawable/ic_photo_camera_24"
-        android:background="@drawable/photo_button_rounder_corners" />
+        android:src="@drawable/ic_photo_camera_disabled_v24"
+        android:background="@drawable/selector_button_rounder_corners" />
 
     <com.google.android.material.chip.Chip
         android:id="@+id/overlay_search_chip"

@@ -44,12 +44,20 @@ class ImageLabellingProcessor(private val context: Context, options: ImageLabele
         if (results.isEmpty()) {
             searchChip.text = context.resources.getString(R.string.searching)
             cameraImageButton.isEnabled = false
+            cameraImageButton.setImageResource(R.drawable.ic_photo_camera_disabled_v24)
         }
         else {
             if (results.isNotEmpty()) {
                 searchChip.text =
                     results[0].text + " - Confidence: " + "%.2f".format(results[0].confidence * 100)
-                cameraImageButton.isEnabled = true
+                if (results[0].text.equals("Hand")) {
+                    cameraImageButton.isEnabled = true
+                    cameraImageButton.setImageResource(R.drawable.ic_photo_camera_24)
+                }
+                else {
+                    cameraImageButton.isEnabled = false
+                    cameraImageButton.setImageResource(R.drawable.ic_photo_camera_disabled_v24)
+                }
             }
         }
         logExtrasForTesting(results)
@@ -59,7 +67,6 @@ class ImageLabellingProcessor(private val context: Context, options: ImageLabele
     override fun onFailure(e: Exception) {
         Log.w(TAG, "Label detection failed.$e")
     }
-
 
     companion object {
         private const val TAG = "LabelDetectorProcessor"
