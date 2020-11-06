@@ -25,15 +25,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.RequiresApi
-import androidx.camera.core.CameraSelector
-import androidx.camera.core.ImageAnalysis
-import androidx.camera.core.ImageProxy
-import androidx.camera.core.Preview
+import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.navigation.fragment.findNavController
 import com.example.androidcamerard.R
 import com.example.androidcamerard.camera.GraphicOverlay
 import com.example.androidcamerard.processor.VisionImageProcessor
@@ -48,11 +46,14 @@ import java.util.ArrayList
 /** Live preview demo app for ML Kit APIs using CameraX.  */
 @KeepName
 @RequiresApi(VERSION_CODES.LOLLIPOP)
-class ObjectDetectionLiveFragment : Fragment() {
+class ObjectDetectionLiveFragment : Fragment(), View.OnClickListener {
 
     private lateinit var previewView: PreviewView
     private lateinit var graphicOverlay: GraphicOverlay
     private lateinit var searchChip: Chip
+    private lateinit var flashButton: View
+    private lateinit var closeButton: View
+
     private var cameraProvider: ProcessCameraProvider? = null
     private var previewUseCase: Preview? = null
     private var analysisUseCase: ImageAnalysis? = null
@@ -61,6 +62,7 @@ class ObjectDetectionLiveFragment : Fragment() {
     private var selectedModel = OBJECT_DETECTION
     private var lensFacing = CameraSelector.LENS_FACING_BACK
     private var cameraSelector: CameraSelector? = null
+    private var camera: Camera? = null
 
     private val viewModel: CameraViewModel by activityViewModels()
 
@@ -74,6 +76,12 @@ class ObjectDetectionLiveFragment : Fragment() {
         searchChip = view.findViewById(R.id.overlay_search_chip)
         previewView = view.findViewById(R.id.preview_view)
         graphicOverlay = view.findViewById(R.id.graphic_overlay)
+        flashButton = view.findViewById<View>(R.id.flash_button).apply {
+            setOnClickListener(this@ObjectDetectionLiveFragment)
+        }
+        closeButton = view.findViewById<View>(R.id.close_button).apply {
+            setOnClickListener(this@ObjectDetectionLiveFragment)
+        }
         viewModel.processCameraProvider
             .observe(
                 viewLifecycleOwner,
@@ -144,7 +152,11 @@ class ObjectDetectionLiveFragment : Fragment() {
         }
         previewUseCase = builder.build()
         previewUseCase!!.setSurfaceProvider(previewView.surfaceProvider)
-        cameraProvider!!.bindToLifecycle(this, cameraSelector!!, previewUseCase)
+        try {
+            camera = cameraProvider?.bindToLifecycle(this, cameraSelector!!, previewUseCase)
+        } catch(exc: java.lang.Exception) {
+            Log.e(TAG, "Use case binding failed", exc)
+        }
     }
 
     private fun bindAnalysisUseCase() {
@@ -211,7 +223,11 @@ class ObjectDetectionLiveFragment : Fragment() {
                 }
             }
         )
-        cameraProvider!!.bindToLifecycle(this, cameraSelector!!, analysisUseCase)
+        try {
+            camera = cameraProvider?.bindToLifecycle(this, cameraSelector!!, analysisUseCase)
+         } catch(exc: java.lang.Exception) {
+            Log.e(TAG, "Use case binding failed", exc)
+        }
     }
 
     private val requiredPermissions: Array<String?>
@@ -234,6 +250,22 @@ class ObjectDetectionLiveFragment : Fragment() {
             }
         }
         return true
+    }
+
+    private fun updateFlashMode(flashMode: Boolean) {
+        flashButton.isSelected = !flashMode
+        if (camera!!.cameraInfo.hasFlashUnit()) {
+            camera!!.cameraControl.enableTorch(!flashMode)
+        }
+    }
+
+    override fun onClick(view: View) {
+        when (view.id) {
+            R.id.close_button -> findNavController().popBackStack()
+            R.id.flash_button -> {
+                updateFlashMode(flashButton.isSelected)
+            }
+        }
     }
 
     private val runtimePermissions: Unit

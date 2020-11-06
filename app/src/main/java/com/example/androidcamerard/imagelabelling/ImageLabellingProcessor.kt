@@ -7,6 +7,7 @@ import android.widget.ImageButton
 import com.example.androidcamerard.R
 import com.example.androidcamerard.camera.GraphicOverlay
 import com.example.androidcamerard.processor.VisionProcessorBase
+import com.example.androidcamerard.viewmodel.CameraViewModel
 import com.google.android.gms.tasks.Task
 import com.google.android.material.chip.Chip
 import com.google.mlkit.vision.common.InputImage
@@ -17,7 +18,7 @@ import com.google.mlkit.vision.label.ImageLabeling
 import java.io.IOException
 
 /** Custom InputImage Classifier Demo.  */
-class ImageLabellingProcessor(private val context: Context, options: ImageLabelerOptionsBase, view: View) :
+class ImageLabellingProcessor(private val context: Context, options: ImageLabelerOptionsBase, view: View, private val viewModel: CameraViewModel) :
     VisionProcessorBase<List<ImageLabel>>(context) {
 
     private val imageLabeler: ImageLabeler = ImageLabeling.getClient(options)
@@ -48,6 +49,7 @@ class ImageLabellingProcessor(private val context: Context, options: ImageLabele
         }
         else {
             if (results.isNotEmpty()) {
+                viewModel.imageLabels.value = results
                 searchChip.text =
                     results[0].text + " - Confidence: " + "%.2f".format(results[0].confidence * 100)
                 if (results[0].text.equals("Hand")) {
@@ -67,6 +69,7 @@ class ImageLabellingProcessor(private val context: Context, options: ImageLabele
     override fun onFailure(e: Exception) {
         Log.w(TAG, "Label detection failed.$e")
     }
+
 
     companion object {
         private const val TAG = "LabelDetectorProcessor"

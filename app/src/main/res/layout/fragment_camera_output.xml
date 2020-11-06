@@ -3,6 +3,11 @@
     xmlns:tools="http://schemas.android.com/tools"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".CameraOutputFragment">
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -10,7 +15,7 @@
         android:background="@color/black">
 
         <ImageView
-            android:id="@+id/imageView"
+            android:id="@+id/camera_output_imageview"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_marginStart="32dp"
@@ -18,28 +23,12 @@
             tools:src="@tools:sample/backgrounds/scenic"
             android:contentDescription="@string/image_preview"/>
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/retake_photo_button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                style="@style/CameraOutputButtonStyle"
-                android:text="@string/retake_photo"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintRight_toLeftOf="@id/return_home_button"
-                app:cornerRadius="20dp"/>
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/return_home_button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                style="@style/CameraOutputButtonStyle"
-                android:text="@string/return_home"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintLeft_toRightOf="@id/retake_photo_button"
-                app:layout_constraintRight_toRightOf="parent"
-                app:cornerRadius="20dp"/>
-
-
     </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <include
+            android:id="@+id/bottom_sheet"
+            layout="@layout/image_labelling_bottom_sheet"
+            app:behavior_hideable="true"
+            app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior"/>
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
 </layout>

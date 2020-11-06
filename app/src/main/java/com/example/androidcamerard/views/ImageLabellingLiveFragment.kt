@@ -111,7 +111,7 @@ class ImageLabellingLiveFragment : Fragment(), View.OnClickListener {
             val options = ImageLabelerOptions.Builder()
                 .setConfidenceThreshold(0.7f)
                 .build()
-            imageProcessor = ImageLabellingProcessor(requireContext(), options, requireView())
+            imageProcessor = ImageLabellingProcessor(requireContext(), options, requireView(), viewModel)
 
 //            Replace LabelDetectorProcessor (above) with below when using custom models
 //            IMAGE_LABELING_CUSTOM -> {
@@ -126,22 +126,6 @@ class ImageLabellingLiveFragment : Fragment(), View.OnClickListener {
 //                CustomImageLabelerOptions.Builder(localClassifier).build()
 //            LabelDetectorProcessor(
 //                this, customImageLabelerOptions
-//            )
-//        }
-//            AUTOML_LABELING -> {
-//            Log.i(
-//                TAG,
-//                "Using AutoML Image Label Detector Processor"
-//            )
-//            val autoMLLocalModel = AutoMLImageLabelerLocalModel.Builder()
-//                .setAssetFilePath("automl/manifest.json")
-//                .build()
-//            val autoMLOptions = AutoMLImageLabelerOptions
-//                .Builder(autoMLLocalModel)
-//                .setConfidenceThreshold(0f)
-//                .build()
-//            LabelDetectorProcessor(
-//                this, autoMLOptions
 //            )
 //        }
 
@@ -203,41 +187,41 @@ class ImageLabellingLiveFragment : Fragment(), View.OnClickListener {
         }, ContextCompat.getMainExecutor(context))
     }
 
-    private fun setupAutoFocus() {
-        previewView.afterMeasured {
-            val factory: MeteringPointFactory = SurfaceOrientedMeteringPointFactory(
-                previewView.width.toFloat(), previewView.height.toFloat()
-            )
-            val centerWidth = previewView.width.toFloat() / 2
-            val centerHeight = previewView.height.toFloat() / 2
-            //create a point on the center of the view
-            val autoFocusPoint = factory.createPoint(centerWidth, centerHeight)
-            try {
-                camera?.cameraControl?.startFocusAndMetering(
-                    FocusMeteringAction.Builder(
-                        autoFocusPoint,
-                        FocusMeteringAction.FLAG_AF
-                    ).apply {
-                        //auto-focus every 1 seconds
-                        setAutoCancelDuration(1, TimeUnit.SECONDS)
-                    }.build()
-                )
-            } catch (e: CameraInfoUnavailableException) {
-            }
-        }
-    }
-
-    private inline fun View.afterMeasured(crossinline block: () -> Unit) {
-        viewTreeObserver.addOnGlobalLayoutListener(object :
-            ViewTreeObserver.OnGlobalLayoutListener {
-            override fun onGlobalLayout() {
-                if (measuredWidth > 0 && measuredHeight > 0) {
-                    viewTreeObserver.removeOnGlobalLayoutListener(this)
-                    block()
-                }
-            }
-        })
-    }
+//    private fun setupAutoFocus() {
+//        previewView.afterMeasured {
+//            val factory: MeteringPointFactory = SurfaceOrientedMeteringPointFactory(
+//                previewView.width.toFloat(), previewView.height.toFloat()
+//            )
+//            val centerWidth = previewView.width.toFloat() / 2
+//            val centerHeight = previewView.height.toFloat() / 2
+//            //create a point on the center of the view
+//            val autoFocusPoint = factory.createPoint(centerWidth, centerHeight)
+//            try {
+//                camera?.cameraControl?.startFocusAndMetering(
+//                    FocusMeteringAction.Builder(
+//                        autoFocusPoint,
+//                        FocusMeteringAction.FLAG_AF
+//                    ).apply {
+//                        //auto-focus every 1 seconds
+//                        setAutoCancelDuration(1, TimeUnit.SECONDS)
+//                    }.build()
+//                )
+//            } catch (e: CameraInfoUnavailableException) {
+//            }
+//        }
+//    }
+//
+//    private inline fun View.afterMeasured(crossinline block: () -> Unit) {
+//        viewTreeObserver.addOnGlobalLayoutListener(object :
+//            ViewTreeObserver.OnGlobalLayoutListener {
+//            override fun onGlobalLayout() {
+//                if (measuredWidth > 0 && measuredHeight > 0) {
+//                    viewTreeObserver.removeOnGlobalLayoutListener(this)
+//                    block()
+//                }
+//            }
+//        })
+//    }
 
     override fun onClick(view: View) {
         when (view.id) {

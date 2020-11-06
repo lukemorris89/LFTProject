@@ -8,9 +8,12 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import com.google.mlkit.vision.label.ImageLabel
 import java.util.concurrent.ExecutionException
 
 class CameraViewModel(application: Application) : AndroidViewModel(application) {
+
+    val imageLabels = MutableLiveData<List<ImageLabel>>()
 
     private var cameraProviderLiveData: MutableLiveData<ProcessCameraProvider>? = null
     private val placeholderImageUri: Uri = Uri.parse(
@@ -20,6 +23,11 @@ class CameraViewModel(application: Application) : AndroidViewModel(application) 
 
     init {
         Log.i(TAG, "Photo ViewModel created.")
+    }
+
+    fun onImageLabelledSearchCompleted(labels: List<ImageLabel>) {
+        imageLabels.value = labels
+
     }
 
 
