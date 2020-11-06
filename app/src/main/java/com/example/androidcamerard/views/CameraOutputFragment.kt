@@ -65,29 +65,11 @@ class CameraOutputFragment : Fragment(), View.OnClickListener {
     override fun onResume() {
         super.onResume()
         setUpBottomSheet()
-        bottomSheetBehavior?.state = BottomSheetBehavior.STATE_HIDDEN
     }
 
     private fun setUpBottomSheet() {
         bottomSheetBehavior = BottomSheetBehavior.from(bottom_sheet)
-        bottomSheetBehavior?.setBottomSheetCallback(
-            object : BottomSheetBehavior.BottomSheetCallback() {
-                override fun onStateChanged(bottomSheet: View, newState: Int) {
-                    Log.d(TAG, "Bottom sheet new state: $newState")
 
-                    when (newState) {
-                        BottomSheetBehavior.STATE_COLLAPSED,
-                        BottomSheetBehavior.STATE_EXPANDED,
-                        BottomSheetBehavior.STATE_HALF_EXPANDED -> slidingSheetUpFromHiddenState = false
-                        BottomSheetBehavior.STATE_DRAGGING, BottomSheetBehavior.STATE_SETTLING -> {
-                        }
-                    }
-                }
-
-                override fun onSlide(bottomSheet: View, slideOffset: Float) {
-                    return
-                }
-            })
 
         bottomSheetTitleView = requireView().findViewById(R.id.bottom_sheet_title)
         imageLabelsRecyclerView = requireView().findViewById<RecyclerView>(R.id.image_labels_recycler_view).apply {
