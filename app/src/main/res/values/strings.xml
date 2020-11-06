@@ -1,9 +1,14 @@
 <resources>
     <string name="app_name">Android Camera R&amp;D</string>
-    <string name="mode_odt_live_title">Object Detection: Live Camera with Default Classification (MLKit Models)</string>
-    <string name="mode_odt_live__subtitle">A device\'s live camera can be used to detect default objects.</string>
-    <string name="mode_odt_static_title">Object Detection: Static Image</string>
+    <string name="mode_odt_live_title">Object Detection: Live Camera - DEFAULT</string>
+    <string name="mode_odt_live__subtitle">A device\'s live camera can be used to detect broad categories of default objects.</string>
+    <string name="mode_ilc_live_title">Image Labelling: Live Camera - DEFAULT</string>
+    <string name="mode_ilc_live__subtitle">A device\'s live camera can be used to label a collection of default objects.</string>
+    <string name="mode_odt_static_title">Object Detection: Static Image - DEFAULT</string>
     <string name="mode_odt_static_subtitle">One or more objects can be detected from a provided image.</string>
+    <string name="cd_close_button">Back</string>
+    <string name="cd_flash_button">Toggle camera flash</string>
+    <string name="cd_photo_library_button">Upload image</string>
 
     <!-- Strings for camera settings. -->
     <string name="pref_key_rear_camera_preview_size" translatable="false">rcpvs</string>
@@ -16,5 +21,7 @@
 
     <!-- Strings for product search settings. -->
     <string name="searching">Searching…</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 
 </resources>

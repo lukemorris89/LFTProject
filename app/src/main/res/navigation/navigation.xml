@@ -13,9 +13,17 @@
             android:id="@+id/action_startFragment_to_objectDetectionLiveFragment"
             app:destination="@id/objectDetectionLiveFragment"
             app:launchSingleTop="true" />
+        <action
+            android:id="@+id/action_startFragment_to_imageLabellingLiveFragment"
+            app:destination="@id/imageLabellingLiveFragment"
+            app:launchSingleTop="true" />
     </fragment>
     <fragment
         android:id="@+id/objectDetectionLiveFragment"
         android:name="com.example.androidcamerard.views.ObjectDetectionLiveFragment"
         android:label="ObjectDetectionLiveFragment" />
+    <fragment
+        android:id="@+id/imageLabellingLiveFragment"
+        android:name="com.example.androidcamerard.views.ImageLabellingLiveFragment"
+        android:label="ImageLabellingLiveFragment" />
 </navigation>

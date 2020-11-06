@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.example.androidcamerard.labeldetector
+package com.example.androidcamerard.processor
 
 import android.os.Build.VERSION_CODES
 import androidx.annotation.RequiresApi

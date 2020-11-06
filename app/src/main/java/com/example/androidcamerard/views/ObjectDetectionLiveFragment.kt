@@ -36,8 +36,8 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import com.example.androidcamerard.R
 import com.example.androidcamerard.camera.GraphicOverlay
-import com.example.androidcamerard.labeldetector.VisionImageProcessor
-import com.example.androidcamerard.objectdetector.ObjectDetectorProcessor
+import com.example.androidcamerard.processor.VisionImageProcessor
+import com.example.androidcamerard.processor.ObjectDetectorProcessor
 import com.example.androidcamerard.utils.PreferenceUtils
 import com.example.androidcamerard.viewmodel.CameraViewModel
 import com.google.android.gms.common.annotation.KeepName

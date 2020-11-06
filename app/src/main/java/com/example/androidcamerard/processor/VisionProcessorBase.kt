@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.example.androidcamerard.labeldetector
+package com.example.androidcamerard.processor
 
 import android.app.ActivityManager
 import android.content.Context
@@ -30,6 +30,7 @@ import androidx.camera.core.ImageProxy
 import com.example.androidcamerard.ScopedExecutor
 import com.example.androidcamerard.camera.FrameMetadata
 import com.example.androidcamerard.camera.GraphicOverlay
+import com.example.androidcamerard.camera.CameraImageGraphic
 import com.example.androidcamerard.utils.BitmapUtils
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.tasks.TaskExecutors
@@ -48,6 +49,7 @@ import java.util.TimerTask
 abstract class VisionProcessorBase<T>(context: Context) : VisionImageProcessor {
 
     companion object {
+        const val MANUAL_TESTING_LOG = "LogTagForTest"
         private const val TAG = "VisionProcessorBase"
     }
 

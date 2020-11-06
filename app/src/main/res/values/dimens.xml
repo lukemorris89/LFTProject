@@ -4,4 +4,7 @@
     <dimen name="bottom_prompt_chip_corner_radius">8dp</dimen>
     <dimen name="bounding_box_stroke_width">6dp</dimen>
     <dimen name="bounding_box_corner_radius">12dp</dimen>
+    <dimen name="top_action_bar_padding_horizontal">8dp</dimen>
+    <dimen name="top_action_bar_height">64dp</dimen>
+    <dimen name="top_action_button_padding">12dp</dimen>
 </resources>

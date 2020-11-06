@@ -14,11 +14,10 @@
 * limitations under the License.
 */
 
-package com.example.androidcamerard.labeldetector
+package com.example.androidcamerard.camera
 
 import android.graphics.Bitmap
 import android.graphics.Canvas
-import com.example.androidcamerard.camera.GraphicOverlay
 import com.example.androidcamerard.camera.GraphicOverlay.Graphic
 
 /** Draw camera image to background.  */
