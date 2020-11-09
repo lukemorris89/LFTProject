@@ -50,14 +50,16 @@ class ImageLabellingProcessor(private val context: Context, options: ImageLabele
         else {
             if (results.isNotEmpty()) {
                 viewModel.imageLabels.value = results
-                resultsText.text = context.resources.getString(R.string.image_labelling_results, results[0].text,  "%.2f".format(results[0].confidence * 100))
                 if (results[0].text == "Hand") {
                     cameraImageButton.isEnabled = true
                     cameraImageButton.setImageResource(R.drawable.ic_photo_camera_24)
+                    resultsText.text = context.resources.getString(R.string.image_labelling_results, results[0].text,  "%.2f".format(results[0].confidence * 100))
+
                 }
                 else {
                     cameraImageButton.isEnabled = false
                     cameraImageButton.setImageResource(R.drawable.ic_photo_camera_disabled_v24)
+                    resultsText.text = context.resources.getString(R.string.point_your_camera_at_the_test)
                 }
             }
         }

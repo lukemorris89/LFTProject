@@ -25,12 +25,6 @@ class CameraViewModel(application: Application) : AndroidViewModel(application) 
         Log.i(TAG, "Photo ViewModel created.")
     }
 
-    fun onImageLabelledSearchCompleted(labels: List<ImageLabel>) {
-        imageLabels.value = labels
-
-    }
-
-
     // Handle any errors (including cancellation) here.
     val processCameraProvider: LiveData<ProcessCameraProvider>
         get() {

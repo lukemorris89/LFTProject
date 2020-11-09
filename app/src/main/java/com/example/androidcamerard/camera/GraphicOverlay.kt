@@ -57,10 +57,8 @@ class GraphicOverlay(context: Context?, attrs: AttributeSet?) :
 
     // Matrix for transforming from image coordinates to overlay view coordinates.
     private val transformationMatrix = Matrix()
-    var imageWidth = 0
-        private set
-    var imageHeight = 0
-        private set
+    private var imageWidth = 0
+    private var imageHeight = 0
 
     // The factor of overlay View size to image size. Anything in the image coordinates need to be
     // scaled by this amount to fit with the area of overlay View.
@@ -213,12 +211,6 @@ class GraphicOverlay(context: Context?, attrs: AttributeSet?) :
             for (graphic in graphics) {
                 graphic.draw(canvas)
             }
-        }
-    }
-
-    init {
-        addOnLayoutChangeListener { view: View?, left: Int, top: Int, right: Int, bottom: Int, oldLeft: Int, oldTop: Int, oldRight: Int, oldBottom: Int ->
-            needUpdateTransformation = true
         }
     }
 }

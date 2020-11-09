@@ -22,9 +22,9 @@ import android.util.Log
 import android.widget.TextView
 import com.example.androidcamerard.R
 import com.example.androidcamerard.camera.GraphicOverlay
+import com.example.androidcamerard.objectdetector.ObjectGraphic
 import com.google.android.gms.tasks.Task
 import com.google.mlkit.vision.common.InputImage
-import com.google.mlkit.vision.demo.kotlin.objectdetector.ObjectGraphic
 import com.google.mlkit.vision.objects.DetectedObject
 import com.google.mlkit.vision.objects.ObjectDetection
 import com.google.mlkit.vision.objects.ObjectDetector

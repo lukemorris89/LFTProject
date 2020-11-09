@@ -60,5 +60,4 @@ object PreferenceUtils {
         }
         return builder.build()
     }
-
 }

@@ -11,13 +11,14 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.androidcamerard.R
+import com.example.androidcamerard.utils.Utils
 
 class StartFragment : Fragment() {
 
     enum class DetectionMode(val titleResId: Int, val subtitleResId: Int) {
         ODT_LIVE(R.string.mode_odt_live_title, R.string.mode_odt_live__subtitle),
-        ILC_LIVE(R.string.mode_ilc_live_title, R.string.mode_ilc_live__subtitle)
-//        ODT_STATIC(R.string.mode_odt_static_title, R.string.mode_odt_static_subtitle)
+        ILC_LIVE(R.string.mode_ilc_live_title, R.string.mode_ilc_live__subtitle),
+        ILC_STATIC(R.string.mode_ilc_static_title, R.string.mode_ilc_static_subtitle)
     }
 
     override fun onCreateView(
@@ -63,10 +64,9 @@ class StartFragment : Fragment() {
                     when (detectionMode) {
                         DetectionMode.ODT_LIVE ->
                             findNavController().navigate(R.id.action_startFragment_to_objectDetectionLiveFragment)
-                        else ->
+                        DetectionMode.ILC_LIVE ->
                             findNavController().navigate(R.id.action_startFragment_to_imageLabellingLiveFragment)
-//                        DetectionMode.ODT_STATIC -> Utils.openImagePicker(activity)
-
+                        else -> Utils.openImagePicker(activity)
                     }
                 }
             }

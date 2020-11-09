@@ -38,6 +38,8 @@ import com.google.mlkit.vision.common.InputImage
 import java.nio.ByteBuffer
 import java.util.Timer
 import java.util.TimerTask
+import kotlin.math.max
+import kotlin.math.min
 
 /**
  * Abstract base class for ML Kit frame processors. Subclasses need to implement {@link
@@ -94,53 +96,7 @@ abstract class VisionProcessorBase<T>(context: Context) : VisionImageProcessor {
             1000
         )
     }
-    // -----------------Code for processing single still image----------------------------------------
-//    override fun processBitmap(bitmap: Bitmap?, graphicOverlay: GraphicOverlay?) {
-//        requestDetectInImage(
-//            InputImage.fromBitmap(bitmap!!, 0),
-//            graphicOverlay, /* originalCameraImage= */
-//            null, /* shouldShowFps= */
-//            false
-//        )
-//    }
-//
-//    @Synchronized
-//    private fun processLatestImage(graphicOverlay: GraphicOverlay) {
-//        processingImage = latestImage
-//        processingMetaData = latestImageMetaData
-//        latestImage = null
-//        latestImageMetaData = null
-//        if (processingImage != null && processingMetaData != null && !isShutdown) {
-//            processImage(processingImage!!, processingMetaData!!, graphicOverlay)
-//        }
-//    }
-//
-//    private fun processImage(
-//        data: ByteBuffer,
-//        frameMetadata: FrameMetadata,
-//        graphicOverlay: GraphicOverlay
-//    ) {
-//        // If live viewport is on (that is the underneath surface view takes care of the camera preview
-//        // drawing), skip the unnecessary bitmap creation that used for the manual preview drawing.
-//        val bitmap =
-//            if (PreferenceUtils.isCameraLiveViewportEnabled(graphicOverlay.context)) null
-//            else BitmapUtils.getBitmap(data, frameMetadata)
-//        requestDetectInImage(
-//            InputImage.fromByteBuffer(
-//                data,
-//                frameMetadata.width,
-//                frameMetadata.height,
-//                frameMetadata.rotation,
-//                InputImage.IMAGE_FORMAT_NV21
-//            ),
-//            graphicOverlay,
-//            bitmap, /* shouldShowFps= */
-//            true
-//        )
-//            .addOnSuccessListener(executor) { processLatestImage(graphicOverlay) }
-//    }
 
-    // -----------------Code for processing live preview frame from CameraX API-----------------------
     @RequiresApi(VERSION_CODES.KITKAT)
     @ExperimentalGetImage
     override fun processImageProxy(image: ImageProxy, graphicOverlay: GraphicOverlay?) {
@@ -163,7 +119,6 @@ abstract class VisionProcessorBase<T>(context: Context) : VisionImageProcessor {
         }
     }
 
-    // -----------------Common processing logic-------------------------------------------------------
     private fun requestDetectInImage(
         image: InputImage,
         graphicOverlay: GraphicOverlay,
@@ -175,8 +130,8 @@ abstract class VisionProcessorBase<T>(context: Context) : VisionImageProcessor {
             numRuns++
             frameProcessedInOneSecondInterval++
             totalRunMs += currentLatencyMs
-            maxRunMs = Math.max(currentLatencyMs, maxRunMs)
-            minRunMs = Math.min(currentLatencyMs, minRunMs)
+            maxRunMs = max(currentLatencyMs, maxRunMs)
+            minRunMs = min(currentLatencyMs, minRunMs)
             // Only log inference info once per second. When frameProcessedInOneSecondInterval is
             // equal to 1, it means this is the first frame processed during the current second.
             if (frameProcessedInOneSecondInterval == 1) {

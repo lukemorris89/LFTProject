@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.mlkit.vision.demo.kotlin.objectdetector
+package com.example.androidcamerard.objectdetector
 
 import android.graphics.*
 import androidx.core.content.ContextCompat

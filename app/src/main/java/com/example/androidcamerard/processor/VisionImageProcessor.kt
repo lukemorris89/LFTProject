@@ -24,8 +24,6 @@ import com.google.mlkit.common.MlKitException
 
 /** An interface to process the images with different vision detectors and custom image models.  */
 interface VisionImageProcessor {
-//    /** Processes a bitmap image.  */
-//    fun processBitmap(bitmap: Bitmap?, graphicOverlay: GraphicOverlay?)
 
     /** Processes ImageProxy image data, e.g. used for CameraX live preview case.  */
     @RequiresApi(VERSION_CODES.KITKAT)

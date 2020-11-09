@@ -9,9 +9,6 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.ViewTreeObserver
-import android.widget.ImageButton
-import android.widget.ImageView
 import android.widget.Toast
 import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
@@ -24,18 +21,14 @@ import com.example.androidcamerard.camera.GraphicOverlay
 import com.example.androidcamerard.imagelabelling.ImageLabellingProcessor
 import com.example.androidcamerard.processor.VisionImageProcessor
 import com.example.androidcamerard.viewmodel.CameraViewModel
-import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.mlkit.common.MlKitException
 import com.google.mlkit.vision.label.defaults.ImageLabelerOptions
-import kotlinx.android.synthetic.main.fragment_image_labelling_live.view.*
 import java.io.File
 import java.lang.Exception
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
-import java.util.concurrent.TimeUnit
-
 
 class ImageLabellingLiveFragment : Fragment(), View.OnClickListener {
 
@@ -46,7 +39,6 @@ class ImageLabellingLiveFragment : Fragment(), View.OnClickListener {
     private lateinit var photoCaptureButton: View
     private var imageProcessor: VisionImageProcessor? = null
     private var needUpdateGraphicOverlayImageSourceInfo = false
-
 
     private var camera: Camera? = null
 
@@ -64,8 +56,6 @@ class ImageLabellingLiveFragment : Fragment(), View.OnClickListener {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-
-        // Inflate the layout for this fragment
         val view = inflater.inflate(R.layout.fragment_image_labelling_live, container, false)
 
         // Request camera permissions
@@ -93,11 +83,10 @@ class ImageLabellingLiveFragment : Fragment(), View.OnClickListener {
         return view
     }
 
-
     private fun startCamera() {
         val cameraProviderFuture = ProcessCameraProvider.getInstance(requireContext())
 
-        cameraProviderFuture.addListener(Runnable {
+        cameraProviderFuture.addListener({
             // Used to bind the lifecycle of cameras to the lifecycle owner
             val cameraProvider: ProcessCameraProvider? = cameraProviderFuture.get()
 
@@ -113,7 +102,7 @@ class ImageLabellingLiveFragment : Fragment(), View.OnClickListener {
                 .build()
             imageProcessor = ImageLabellingProcessor(requireContext(), options, requireView(), viewModel)
 
-//            Replace LabelDetectorProcessor (above) with below when using custom models
+//            Replace ImageLabellingProcessor (above) with below when using custom models
 //            IMAGE_LABELING_CUSTOM -> {
 //            Log.i(
 //                TAG,
@@ -124,7 +113,7 @@ class ImageLabellingLiveFragment : Fragment(), View.OnClickListener {
 //                .build()
 //            val customImageLabelerOptions =
 //                CustomImageLabelerOptions.Builder(localClassifier).build()
-//            LabelDetectorProcessor(
+//            ImageLabellingProcessor(
 //                this, customImageLabelerOptions
 //            )
 //        }
@@ -186,42 +175,6 @@ class ImageLabellingLiveFragment : Fragment(), View.OnClickListener {
 
         }, ContextCompat.getMainExecutor(context))
     }
-
-//    private fun setupAutoFocus() {
-//        previewView.afterMeasured {
-//            val factory: MeteringPointFactory = SurfaceOrientedMeteringPointFactory(
-//                previewView.width.toFloat(), previewView.height.toFloat()
-//            )
-//            val centerWidth = previewView.width.toFloat() / 2
-//            val centerHeight = previewView.height.toFloat() / 2
-//            //create a point on the center of the view
-//            val autoFocusPoint = factory.createPoint(centerWidth, centerHeight)
-//            try {
-//                camera?.cameraControl?.startFocusAndMetering(
-//                    FocusMeteringAction.Builder(
-//                        autoFocusPoint,
-//                        FocusMeteringAction.FLAG_AF
-//                    ).apply {
-//                        //auto-focus every 1 seconds
-//                        setAutoCancelDuration(1, TimeUnit.SECONDS)
-//                    }.build()
-//                )
-//            } catch (e: CameraInfoUnavailableException) {
-//            }
-//        }
-//    }
-//
-//    private inline fun View.afterMeasured(crossinline block: () -> Unit) {
-//        viewTreeObserver.addOnGlobalLayoutListener(object :
-//            ViewTreeObserver.OnGlobalLayoutListener {
-//            override fun onGlobalLayout() {
-//                if (measuredWidth > 0 && measuredHeight > 0) {
-//                    viewTreeObserver.removeOnGlobalLayoutListener(this)
-//                    block()
-//                }
-//            }
-//        })
-//    }
 
     override fun onClick(view: View) {
         when (view.id) {

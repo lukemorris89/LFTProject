@@ -40,11 +40,9 @@ import com.example.androidcamerard.processor.ObjectDetectorProcessor
 import com.example.androidcamerard.utils.PreferenceUtils
 import com.example.androidcamerard.viewmodel.CameraViewModel
 import com.google.android.gms.common.annotation.KeepName
-import com.google.android.material.chip.Chip
 import com.google.mlkit.common.MlKitException
 import java.util.ArrayList
 
-/** Live preview demo app for ML Kit APIs using CameraX.  */
 @KeepName
 @RequiresApi(VERSION_CODES.LOLLIPOP)
 class ObjectDetectionLiveFragment : Fragment(), View.OnClickListener {
@@ -72,7 +70,6 @@ class ObjectDetectionLiveFragment : Fragment(), View.OnClickListener {
         savedInstanceState: Bundle?
     ): View? {
         cameraSelector = CameraSelector.Builder().requireLensFacing(lensFacing).build()
-        // Inflate the layout for this fragment
         val view = inflater.inflate(R.layout.fragment_object_detection_live, container, false)
         searchText = view.findViewById(R.id.overlay_results_textview)
         previewView = view.findViewById(R.id.preview_view)

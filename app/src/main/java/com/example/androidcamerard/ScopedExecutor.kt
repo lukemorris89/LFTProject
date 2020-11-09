@@ -19,8 +19,6 @@ package com.example.androidcamerard
 import java.util.concurrent.Executor
 import java.util.concurrent.atomic.AtomicBoolean
 
-
-
 /**
  * Wraps an existing executor to provide a [.shutdown] method that allows subsequent
  * cancellation of submitted runnables.
