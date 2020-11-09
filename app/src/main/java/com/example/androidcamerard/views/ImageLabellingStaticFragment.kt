@@ -28,13 +28,13 @@ import java.io.IOException
 
 class ImageLabellingStaticFragment : Fragment(), View.OnClickListener {
 
-    private var bottomSheetBehavior: BottomSheetBehavior<View>? = null
-    private var bottomSheetTitleView: TextView? = null
-    private var slidingSheetUpFromHiddenState: Boolean = false
     private lateinit var retakePhotoButton: Button
     private lateinit var returnHomeButton: Button
     private lateinit var expandButton: ImageView
     private lateinit var imageLabelsRecyclerView: RecyclerView
+    private lateinit var bottomSheetTitleView: TextView
+    private lateinit var bottomSheetBehavior: BottomSheetBehavior<View>
+    private var slidingSheetUpFromHiddenState: Boolean = false
 
     private val viewModel: CameraViewModel by activityViewModels()
 
@@ -60,7 +60,6 @@ class ImageLabellingStaticFragment : Fragment(), View.OnClickListener {
             Glide.with(this@ImageLabellingStaticFragment).load(viewModel.photoFilename.value).into(this)
         }
         analyzeStaticImage()
-
         return view
     }
 
@@ -72,7 +71,7 @@ class ImageLabellingStaticFragment : Fragment(), View.OnClickListener {
 
     private fun setUpBottomSheet() {
         bottomSheetBehavior = BottomSheetBehavior.from(bottom_sheet)
-        bottomSheetBehavior?.setBottomSheetCallback(
+        bottomSheetBehavior.setBottomSheetCallback(
             object : BottomSheetBehavior.BottomSheetCallback() {
                 override fun onStateChanged(bottomSheet: View, newState: Int) {
                     Log.d(TAG, "Bottom sheet new state: $newState")
@@ -83,7 +82,7 @@ class ImageLabellingStaticFragment : Fragment(), View.OnClickListener {
                             slidingSheetUpFromHiddenState = false
                             expandButton.setImageResource(R.drawable.expand_up_24)
                             expandButton.setOnClickListener {
-                                bottomSheetBehavior!!.state = BottomSheetBehavior.STATE_HALF_EXPANDED
+                                bottomSheetBehavior.state = BottomSheetBehavior.STATE_HALF_EXPANDED
                             }
                         }
                         BottomSheetBehavior.STATE_EXPANDED,
@@ -91,7 +90,7 @@ class ImageLabellingStaticFragment : Fragment(), View.OnClickListener {
                             slidingSheetUpFromHiddenState = false
                             expandButton.setImageResource(R.drawable.expand_down_24)
                             expandButton.setOnClickListener {
-                                bottomSheetBehavior!!.state = BottomSheetBehavior.STATE_COLLAPSED
+                                bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
                             }
                         }
                         BottomSheetBehavior.STATE_DRAGGING, BottomSheetBehavior.STATE_SETTLING -> {
@@ -128,16 +127,16 @@ class ImageLabellingStaticFragment : Fragment(), View.OnClickListener {
 
             imageLabeler.process(image)
                 .addOnSuccessListener { labels ->
-                    imageLabelsRecyclerView = requireView().findViewById<RecyclerView>(R.id.image_labels_recycler_view).apply {
-                        setHasFixedSize(true)
-                        layoutManager = LinearLayoutManager(context)
-                        adapter = ImageLabelsAdapter(context, labels)
-                    }
+                    imageLabelsRecyclerView = requireView()
+                        .findViewById<RecyclerView>(R.id.image_labels_recycler_view).apply {
+                            setHasFixedSize(true)
+                            layoutManager = LinearLayoutManager(context)
+                            adapter = ImageLabelsAdapter(context, labels)
+                        }
                 }
                 .addOnFailureListener { e ->
                     Log.e(TAG, e.message.toString())
                 }
-
         } catch (e: IOException) {
             e.printStackTrace()
         }

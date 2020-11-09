@@ -26,13 +26,14 @@ import java.io.IOException
 
 class CameraOutputFragment : Fragment(), View.OnClickListener {
 
-    private var bottomSheetBehavior: BottomSheetBehavior<View>? = null
-    private var imageLabelsRecyclerView: RecyclerView? = null
-    private var bottomSheetTitleView: TextView? = null
-    private var slidingSheetUpFromHiddenState: Boolean = false
+    private lateinit var imageLabelsRecyclerView: RecyclerView
+    private lateinit var bottomSheetTitleView: TextView
     private lateinit var retakePhotoButton: Button
     private lateinit var returnHomeButton: Button
     private lateinit var expandButton: ImageView
+    private lateinit var bottomSheetBehavior: BottomSheetBehavior<View>
+
+    private var slidingSheetUpFromHiddenState: Boolean = false
 
     private val viewModel: CameraViewModel by activityViewModels()
 
@@ -45,18 +46,15 @@ class CameraOutputFragment : Fragment(), View.OnClickListener {
             container,
             false
         )
-
         expandButton = view.findViewById(R.id.expand_arrow)
-
-        view.findViewById<ImageView>(R.id.camera_output_imageview).apply {
-            Glide.with(this@CameraOutputFragment).load(viewModel.photoFilename.value).into(this)
-        }
-
         retakePhotoButton = view.findViewById<Button>(R.id.retake_photo_button).apply {
             setOnClickListener(this@CameraOutputFragment)
         }
         returnHomeButton = view.findViewById<Button>(R.id.return_home_button).apply {
             setOnClickListener(this@CameraOutputFragment)
+        }
+        view.findViewById<ImageView>(R.id.camera_output_imageview).apply {
+            Glide.with(this@CameraOutputFragment).load(viewModel.photoFilename.value).into(this)
         }
 
         analyzeStaticImage()
@@ -71,7 +69,7 @@ class CameraOutputFragment : Fragment(), View.OnClickListener {
 
     private fun setUpBottomSheet() {
         bottomSheetBehavior = BottomSheetBehavior.from(bottom_sheet)
-        bottomSheetBehavior?.setBottomSheetCallback(
+        bottomSheetBehavior.setBottomSheetCallback(
             object : BottomSheetBehavior.BottomSheetCallback() {
                 override fun onStateChanged(bottomSheet: View, newState: Int) {
                     Log.d(TAG, "Bottom sheet new state: $newState")
@@ -82,7 +80,7 @@ class CameraOutputFragment : Fragment(), View.OnClickListener {
                             slidingSheetUpFromHiddenState = false
                             expandButton.setImageResource(R.drawable.expand_up_24)
                             expandButton.setOnClickListener {
-                                bottomSheetBehavior!!.state = BottomSheetBehavior.STATE_HALF_EXPANDED
+                                bottomSheetBehavior.state = BottomSheetBehavior.STATE_HALF_EXPANDED
                             }
                         }
                         BottomSheetBehavior.STATE_EXPANDED,
@@ -90,9 +88,8 @@ class CameraOutputFragment : Fragment(), View.OnClickListener {
                             slidingSheetUpFromHiddenState = false
                             expandButton.setImageResource(R.drawable.expand_down_24)
                             expandButton.setOnClickListener {
-                                bottomSheetBehavior!!.state = BottomSheetBehavior.STATE_COLLAPSED
+                                bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
                             }
-
                         }
                         BottomSheetBehavior.STATE_DRAGGING, BottomSheetBehavior.STATE_SETTLING -> {
                         }

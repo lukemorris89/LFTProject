@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:paddingTop="16dp"
-    android:paddingStart="16dp"
-    android:paddingEnd="16dp">
+    android:paddingTop="@dimen/recyclerview_item_padding"
+    android:paddingStart="@dimen/recyclerview_item_padding"
+    android:paddingEnd="@dimen/recyclerview_item_padding">
 
     <TextView
         android:layout_width="wrap_content"
@@ -13,7 +13,7 @@
         android:id="@+id/image_label"
         android:maxLines="1"
         android:textColor="@color/black"
-        android:textSize="18sp"/>
+        android:textSize="@dimen/app_text_size_large" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -21,12 +21,12 @@
         android:id="@+id/image_label_confidence"
         android:maxLines="1"
         android:textColor="@color/label_confidence"
-        android:textSize="14sp"/>
+        android:textSize="@dimen/app_text_size_small" />
 
     <View
         android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_marginTop="16dp"
-        android:background="@color/lighter_grey"/>
+        android:layout_height="@dimen/divider_height"
+        android:layout_marginTop="@dimen/recyclerview_divider_margin"
+        android:background="@color/lighter_grey" />
 
 </LinearLayout>

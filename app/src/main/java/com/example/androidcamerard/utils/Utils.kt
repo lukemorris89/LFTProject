@@ -8,8 +8,6 @@ object Utils {
 
     internal const val REQUEST_CODE_PHOTO_LIBRARY = 1
 
-    private const val TAG = "Utils"
-
     internal fun openImagePicker(activity: Activity) {
         val intent = Intent(Intent.ACTION_GET_CONTENT)
         intent.addCategory(Intent.CATEGORY_OPENABLE)

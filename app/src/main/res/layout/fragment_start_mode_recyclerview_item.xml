@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingStart="@dimen/mode_select_recyclerview_item_padding_start_end"
+    android:paddingEnd="@dimen/mode_select_recyclerview_item_padding_start_end"
+    android:background="?android:attr/selectableItemBackground"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/mode_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="@dimen/mode_select_recyclerview_item_title_padding_top"
+        android:paddingBottom="@dimen/mode_select_recyclerview_item_title_padding_bottom"
+        android:textColor="@color/white"
+        android:textSize="@dimen/app_text_size_medium" />
+
+    <TextView
+        android:id="@+id/mode_subtitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingBottom="@dimen/mode_select_recyclerview_item_subtitle_padding_bottom"
+        android:textColor="@color/mode_select_subtitle"
+        android:textSize="@dimen/app_text_size_small" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/divider_height"
+        android:background="@color/lighter_grey" />
+
+</LinearLayout>

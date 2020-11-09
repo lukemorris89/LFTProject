@@ -37,18 +37,18 @@ class ImageLabellingLiveFragment : Fragment(), View.OnClickListener {
     private lateinit var flashButton: View
     private lateinit var closeButton: View
     private lateinit var photoCaptureButton: View
-    private var imageProcessor: VisionImageProcessor? = null
-    private var needUpdateGraphicOverlayImageSourceInfo = false
 
-    private var camera: Camera? = null
+    private lateinit var imageProcessor: VisionImageProcessor
+    private lateinit var cameraExecutor: ExecutorService
 
+    private lateinit var camera: Camera
     //Use cases
-    private var previewUseCase: Preview? = null
-    private var imageCaptureUseCase: ImageCapture? = null
-    private var analysisUseCase: ImageAnalysis? = null
+    private lateinit var previewUseCase: Preview
+    private lateinit var imageCaptureUseCase: ImageCapture
+    private lateinit var analysisUseCase: ImageAnalysis
 
     private var outputDirectory: File? = null
-    private lateinit var cameraExecutor: ExecutorService
+    private var needUpdateGraphicOverlayImageSourceInfo = false
 
     private val viewModel: CameraViewModel by activityViewModels()
 
@@ -59,11 +59,8 @@ class ImageLabellingLiveFragment : Fragment(), View.OnClickListener {
         val view = inflater.inflate(R.layout.fragment_image_labelling_live, container, false)
 
         // Request camera permissions
-        if (allPermissionsGranted()) {
-            startCamera()
-        } else {
-            requestPermissions(REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS)
-        }
+        if (allPermissionsGranted()) startCamera()
+        else requestPermissions(REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS)
 
         outputDirectory = getOutputDirectory()
         cameraExecutor = Executors.newSingleThreadExecutor()
@@ -91,12 +88,12 @@ class ImageLabellingLiveFragment : Fragment(), View.OnClickListener {
             val cameraProvider: ProcessCameraProvider? = cameraProviderFuture.get()
 
             // Preview
-            previewUseCase = Preview.Builder()
-                .build()
+            previewUseCase = Preview.Builder().build()
 
-            imageCaptureUseCase = ImageCapture.Builder()
-                .build()
+            // Image Capture
+            imageCaptureUseCase = ImageCapture.Builder().build()
 
+            // Image Analysis
             val options = ImageLabelerOptions.Builder()
                 .setConfidenceThreshold(0.7f)
                 .build()
@@ -121,31 +118,23 @@ class ImageLabellingLiveFragment : Fragment(), View.OnClickListener {
             analysisUseCase = ImageAnalysis.Builder()
                 .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
                 .build()
-
             needUpdateGraphicOverlayImageSourceInfo = true
-
-            analysisUseCase!!.setAnalyzer(
+            analysisUseCase.setAnalyzer(
                 // imageProcessor.processImageProxy will use another thread to run the detection underneath,
                 // thus we can just runs the analyzer itself on main thread.
                 ContextCompat.getMainExecutor(requireContext()), { imageProxy: ImageProxy ->
                     if (needUpdateGraphicOverlayImageSourceInfo) {
                         val isImageFlipped = false
-//                            lensFacing == CameraSelector.LENS_FACING_FRONT
-                        val rotationDegrees =
-                            imageProxy.imageInfo.rotationDegrees
-                        if (rotationDegrees == 0 || rotationDegrees == 180) {
+                        val rotationDegrees = imageProxy.imageInfo.rotationDegrees
+                        if (rotationDegrees == 0 || rotationDegrees == 180)
                             graphicOverlay.setImageSourceInfo(
-                                imageProxy.width, imageProxy.height, isImageFlipped
-                            )
-                        } else {
-                            graphicOverlay.setImageSourceInfo(
-                                imageProxy.height, imageProxy.width, isImageFlipped
-                            )
-                        }
+                            imageProxy.width, imageProxy.height, isImageFlipped)
+                        else graphicOverlay.setImageSourceInfo(
+                                imageProxy.height, imageProxy.width, isImageFlipped)
                         needUpdateGraphicOverlayImageSourceInfo = false
                     }
                     try {
-                        imageProcessor!!.processImageProxy(imageProxy, graphicOverlay)
+                        imageProcessor.processImageProxy(imageProxy, graphicOverlay)
                     } catch (e: MlKitException) {
                         Log.e(
                             TAG,
@@ -156,48 +145,44 @@ class ImageLabellingLiveFragment : Fragment(), View.OnClickListener {
             )
 
             // Select back camera as a default
-            val cameraSelector =
-                CameraSelector.Builder().requireLensFacing(CameraSelector.LENS_FACING_BACK)
+            val cameraSelector = CameraSelector.Builder()
+                .requireLensFacing(CameraSelector.LENS_FACING_BACK)
                     .build()
 
             try {
                 // Unbind use cases before rebinding
                 cameraProvider?.unbindAll()
 
-                previewUseCase?.setSurfaceProvider(previewView.surfaceProvider)
+                previewUseCase.setSurfaceProvider(previewView.surfaceProvider)
                 // Bind use cases to camera
-                camera = cameraProvider?.bindToLifecycle(
-                    this, cameraSelector, previewUseCase, analysisUseCase, imageCaptureUseCase)
-
+                camera = cameraProvider!!.bindToLifecycle(
+                    this,
+                    cameraSelector,
+                    previewUseCase,
+                    imageCaptureUseCase,
+                    analysisUseCase)
             } catch(exc: Exception) {
                 Log.e(TAG, "Use case binding failed", exc)
             }
-
         }, ContextCompat.getMainExecutor(context))
     }
 
     override fun onClick(view: View) {
         when (view.id) {
-            R.id.photo_capture_button -> {
-                takePhoto()
-            }
+            R.id.photo_capture_button -> takePhoto()
             R.id.close_button -> findNavController().popBackStack()
-            R.id.flash_button -> {
-                updateFlashMode(flashButton.isSelected)
-            }
+            R.id.flash_button -> updateFlashMode(flashButton.isSelected)
         }
     }
 
     private fun updateFlashMode(flashMode: Boolean) {
         flashButton.isSelected = !flashMode
-        if (camera!!.cameraInfo.hasFlashUnit()) {
-            camera!!.cameraControl.enableTorch(!flashMode)
-        }
+        if (camera.cameraInfo.hasFlashUnit()) camera.cameraControl.enableTorch(!flashMode)
     }
 
     private fun takePhoto() {
         // Get a stable reference of the modifiable image capture use case
-        val imageCapture = imageCaptureUseCase ?: return
+        val imageCapture = imageCaptureUseCase
 
         // Create a time-stamped output file to hold the image
         val photoFile = File(outputDirectory,
@@ -217,7 +202,8 @@ class ImageLabellingLiveFragment : Fragment(), View.OnClickListener {
                 override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
                     val savedUri = Uri.fromFile(photoFile)
                     viewModel.photoFilename.value = savedUri
-                    findNavController().navigate(R.id.action_imageLabellingLiveFragment_to_cameraOutputFragment)
+                    findNavController()
+                        .navigate(R.id.action_imageLabellingLiveFragment_to_cameraOutputFragment)
                 }
             }
         )
@@ -245,9 +231,8 @@ class ImageLabellingLiveFragment : Fragment(), View.OnClickListener {
         requestCode: Int, permissions: Array<String>, grantResults:
         IntArray) {
         if (requestCode == REQUEST_CODE_PERMISSIONS) {
-            if (allPermissionsGranted()) {
-                startCamera()
-            } else {
+            if (allPermissionsGranted()) startCamera()
+            else {
                 Toast.makeText(activity,
                     "Permissions not granted by the user.",
                     Toast.LENGTH_SHORT).show()

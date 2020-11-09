@@ -62,14 +62,13 @@ class ObjectDetectorProcessor(
         for (result in results) {
             graphicOverlay.add(ObjectGraphic(graphicOverlay, result))
         }
-        if (results.isEmpty()) {
-            searchText.text = context.resources.getString(R.string.searching)
-        }
+        if (results.isEmpty()) searchText.text = context.resources.getString(R.string.searching)
         else {
             for (result in results) {
                 if (result.labels.isNotEmpty()) {
                     for (label in result.labels) searchText.text =
-                        label.text + " - Confidence: " + "%.2f".format(label.confidence * 100)
+                        label.text + " - Confidence: " + "%.2f"
+                            .format(label.confidence * 100)
                 }
             }
         }

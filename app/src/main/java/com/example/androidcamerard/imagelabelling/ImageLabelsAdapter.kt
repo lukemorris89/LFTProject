@@ -28,7 +28,10 @@ import com.google.mlkit.vision.label.ImageLabel
 
 
 /** Presents the list of product items from cloud product search.  */
-class ImageLabelsAdapter(private val context: Context, private val labelList: List<ImageLabel>?) : Adapter<ImageLabelsAdapter.LabelViewHolder>() {
+class ImageLabelsAdapter(
+    private val context: Context,
+    private val labelList: List<ImageLabel>?)
+    : Adapter<ImageLabelsAdapter.LabelViewHolder>() {
 
     class LabelViewHolder private constructor(view: View) : RecyclerView.ViewHolder(view) {
 
@@ -42,7 +45,8 @@ class ImageLabelsAdapter(private val context: Context, private val labelList: Li
 
         companion object {
             fun create(parent: ViewGroup) =
-                LabelViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.bottom_sheet_recyclerview_item, parent, false))
+                LabelViewHolder(LayoutInflater.from(parent.context)
+                    .inflate(R.layout.bottom_sheet_recyclerview_item, parent, false))
         }
     }
 

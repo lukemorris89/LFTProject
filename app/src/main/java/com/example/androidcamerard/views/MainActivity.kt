@@ -13,8 +13,9 @@ import com.example.androidcamerard.viewmodel.CameraViewModel
 
 class MainActivity : AppCompatActivity() {
 
-    private val viewModel: CameraViewModel by viewModels()
     private lateinit var navController: NavController
+
+    private val viewModel: CameraViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

@@ -76,9 +76,7 @@ class ImageLabellingProcessor(private val context: Context, options: ImageLabele
         private const val TAG = "LabelDetectorProcessor"
 
         private fun logExtrasForTesting(labels: List<ImageLabel>?) {
-            if (labels == null) {
-                Log.v(MANUAL_TESTING_LOG, "No labels detected")
-            } else {
+            if (labels == null) Log.v(MANUAL_TESTING_LOG, "No labels detected") else {
                 for (label in labels) {
                     Log.v(
                         MANUAL_TESTING_LOG,

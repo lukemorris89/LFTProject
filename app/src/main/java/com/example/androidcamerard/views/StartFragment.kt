@@ -41,7 +41,7 @@ class StartFragment : Fragment() {
             return ModeItemViewHolder(
                 LayoutInflater.from(parent.context)
                     .inflate(
-                        R.layout.mode_item, parent, false
+                        R.layout.fragment_start_mode_recyclerview_item, parent, false
                     )
             )
         }
@@ -62,10 +62,10 @@ class StartFragment : Fragment() {
                 itemView.setOnClickListener {
                     val activity = activity as Activity
                     when (detectionMode) {
-                        DetectionMode.ODT_LIVE ->
-                            findNavController().navigate(R.id.action_startFragment_to_objectDetectionLiveFragment)
-                        DetectionMode.ILC_LIVE ->
-                            findNavController().navigate(R.id.action_startFragment_to_imageLabellingLiveFragment)
+                        DetectionMode.ODT_LIVE -> findNavController()
+                            .navigate(R.id.action_startFragment_to_objectDetectionLiveFragment)
+                        DetectionMode.ILC_LIVE -> findNavController()
+                            .navigate(R.id.action_startFragment_to_imageLabellingLiveFragment)
                         else -> Utils.openImagePicker(activity)
                     }
                 }

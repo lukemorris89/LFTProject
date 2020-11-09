@@ -100,23 +100,19 @@ abstract class VisionProcessorBase<T>(context: Context) : VisionImageProcessor {
     @RequiresApi(VERSION_CODES.KITKAT)
     @ExperimentalGetImage
     override fun processImageProxy(image: ImageProxy, graphicOverlay: GraphicOverlay?) {
-        if (isShutdown) {
-            return
-        }
+        if (isShutdown) return
 
         val bitmap = BitmapUtils.getBitmap(image)
 
-        if (graphicOverlay != null) {
-            requestDetectInImage(
-                InputImage.fromMediaImage(image.image!!, image.imageInfo.rotationDegrees),
-                graphicOverlay, /* originalCameraImage= */
-                bitmap
-            )
-                // When the image is from CameraX analysis use case, must call image.close() on received
-                // images when finished using them. Otherwise, new images may not be received or the camera
-                // may stall.
-                .addOnCompleteListener { image.close() }
-        }
+        if (graphicOverlay != null) requestDetectInImage(
+            InputImage.fromMediaImage(image.image!!, image.imageInfo.rotationDegrees),
+            graphicOverlay, /* originalCameraImage= */
+            bitmap
+        )
+            // When the image is from CameraX analysis use case, must call image.close()
+            // on received images when finished using them. Otherwise, new images may not be
+            // received or the camera may stall.
+            .addOnCompleteListener { image.close() }
     }
 
     private fun requestDetectInImage(
@@ -150,14 +146,12 @@ abstract class VisionProcessorBase<T>(context: Context) : VisionImageProcessor {
                 )
             }
             graphicOverlay.clear()
-            if (originalCameraImage != null) {
-                graphicOverlay.add(
-                    CameraImageGraphic(
-                        graphicOverlay,
-                        originalCameraImage
-                    )
+            if (originalCameraImage != null) graphicOverlay.add(
+                CameraImageGraphic(
+                    graphicOverlay,
+                    originalCameraImage
                 )
-            }
+            )
             this@VisionProcessorBase.onSuccess(results, graphicOverlay)
             graphicOverlay.postInvalidate()
         }

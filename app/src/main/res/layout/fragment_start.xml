@@ -10,18 +10,17 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingTop="32dp"
-        android:paddingBottom="16dp"
-        android:fontFamily="google-sans"
+        android:paddingTop="@dimen/app_title_box_padding_top"
+        android:paddingBottom="@dimen/app_title_box_padding_bottom"
         android:gravity="center_horizontal"
         android:textColor="@color/white"
-        android:textSize="18sp"
-        android:text="@string/app_name"/>
+        android:textSize="@dimen/app_text_size_large"
+        android:text="@string/app_name" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/select_mode_recyclerview"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:scrollbars="vertical"/>
+        android:scrollbars="vertical" />
 
 </LinearLayout>

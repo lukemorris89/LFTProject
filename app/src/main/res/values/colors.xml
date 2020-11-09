@@ -3,12 +3,19 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="lighter_grey">#DDDDDD</color>
+
+    <color name="mode_select_subtitle">#CCFFFFFF</color>
+
     <color name="bounding_box_solid_color">#FFFFFF</color>
     <color name="object_detection_scrim_color">#1F000000</color>
     <color name="object_detected_bg_gradient_start">#00000000</color>
     <color name="object_detected_bg_gradient_end">#66000000</color>
+
     <color name="button_enabled">#5F6368</color>
     <color name="button_disabled">#888888</color>
+
+    <color name="search_text_bar">#5F6368</color>
+
     <color name="label_confidence">#5F6368</color>
     <color name="bottom_sheet_titlebar">#FF424242</color>
 </resources>

@@ -66,7 +66,12 @@ class ObjectGraphic constructor(
         rect.right = max(x0, x1)
         rect.top = translateY(rect.top)
         rect.bottom = translateY(rect.bottom)
-        canvas?.drawRect(0f, 0f, canvas.width.toFloat(), canvas.height.toFloat(), scrimPaint)
+        canvas?.drawRect(
+            0f,
+            0f,
+            canvas.width.toFloat(),
+            canvas.height.toFloat(),
+            scrimPaint)
 
         boxPaint.shader = LinearGradient(
             rect.left,

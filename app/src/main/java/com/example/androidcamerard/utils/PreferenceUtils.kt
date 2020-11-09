@@ -55,9 +55,7 @@ object PreferenceUtils {
         val enableClassification =
             sharedPreferences.getBoolean(context.getString(this), true)
         val builder = ObjectDetectorOptions.Builder().setDetectorMode(mode)
-        if (enableClassification) {
-            builder.enableClassification()
-        }
+        if (enableClassification) builder.enableClassification()
         return builder.build()
     }
 }

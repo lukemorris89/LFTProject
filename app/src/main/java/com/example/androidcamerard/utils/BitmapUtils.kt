@@ -41,10 +41,16 @@ object BitmapUtils {
                 imageInBuffer, ImageFormat.NV21, metadata.width, metadata.height, null
             )
             val stream = ByteArrayOutputStream()
-            image.compressToJpeg(Rect(0, 0, metadata.width, metadata.height), 80, stream)
+            image.compressToJpeg(Rect(
+                0,
+                0,
+                metadata.width,
+                metadata.height),
+                80,
+                stream)
             val bmp = BitmapFactory.decodeByteArray(stream.toByteArray(), 0, stream.size())
             stream.close()
-            return rotateBitmap(bmp, metadata.rotation, false, false)
+            return rotateBitmap(bmp, metadata.rotation, flipX = false, flipY = false)
         } catch (e: Exception) {
             Log.e("VisionProcessorBase", "Error: " + e.message)
         }
@@ -78,34 +84,22 @@ object BitmapUtils {
         // Mirror the image along the X or Y axis.
         matrix.postScale(if (flipX) -1.0f else 1.0f, if (flipY) -1.0f else 1.0f)
         val rotatedBitmap =
-            Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
+            Bitmap.createBitmap(bitmap,
+                0,
+                0,
+                bitmap.width,
+                bitmap.height,
+                matrix,
+                true)
 
         // Recycle the old bitmap if it has changed.
-        if (rotatedBitmap != bitmap) {
-            bitmap.recycle()
-        }
+        if (rotatedBitmap != bitmap) bitmap.recycle()
         return rotatedBitmap
     }
 
 
     /**
      * Converts YUV_420_888 to NV21 bytebuffer.
-     *
-     *
-     * The NV21 format consists of a single byte array containing the Y, U and V values. For an
-     * image of size S, the first S positions of the array contain all the Y values. The remaining
-     * positions contain interleaved V and U values. U and V are subsampled by a factor of 2 in both
-     * dimensions, so there are S/4 U values and S/4 V values. In summary, the NV21 array will contain
-     * S Y values followed by S/4 VU values: YYYYYYYYYYYYYY(...)YVUVUVUVU(...)VU
-     *
-     *
-     * YUV_420_888 is a generic format that can describe any YUV image where U and V are subsampled
-     * by a factor of 2 in both dimensions. [Image.getPlanes] returns an array with the Y, U and
-     * V planes. The Y plane is guaranteed not to be interleaved, so we can just copy its values into
-     * the first part of the NV21 array. The U and V planes may already have the representation in the
-     * NV21 format. This happens if the planes share the same buffer, the V buffer is one position
-     * before the U buffer and the planes have a pixelStride of 2. If this is case, we can just copy
-     * them to the NV21 array.
      */
     @RequiresApi(VERSION_CODES.KITKAT)
     private fun yuv420ThreePlanesToNV21(
@@ -147,7 +141,8 @@ object BitmapUtils {
 
         // Advance the V buffer by 1 byte, since the U buffer will not contain the first V value.
         vBuffer.position(vBufferPosition + 1)
-        // Chop off the last byte of the U buffer, since the V buffer will not contain the last U value.
+        // Chop off the last byte of the U buffer, since the V buffer will not contain the last U
+        // value.
         uBuffer.limit(uBufferLimit - 1)
 
         // Check that the buffers are equal and have the expected number of elements.
@@ -177,9 +172,9 @@ object BitmapUtils {
         // Compute the size of the current plane.
         // We assume that it has the aspect ratio as the original image.
         val numRow = (buffer.limit() + plane.rowStride - 1) / plane.rowStride
-        if (numRow == 0) {
-            return
-        }
+
+        if (numRow == 0) return
+
         val scaleFactor = height / numRow
         val numCol = width / scaleFactor
 

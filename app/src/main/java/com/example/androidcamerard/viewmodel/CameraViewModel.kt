@@ -19,7 +19,7 @@ class CameraViewModel(application: Application) : AndroidViewModel(application) 
     private val placeholderImageUri: Uri = Uri.parse(
         "android.resource://" + application.packageName + "/drawable/media"
     )
-    val photoFilename = MutableLiveData<Uri>(placeholderImageUri)
+    val photoFilename = MutableLiveData(placeholderImageUri)
 
     init {
         Log.i(TAG, "Photo ViewModel created.")

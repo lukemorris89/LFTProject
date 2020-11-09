@@ -52,16 +52,17 @@ class ObjectDetectionLiveFragment : Fragment(), View.OnClickListener {
     private lateinit var searchText: TextView
     private lateinit var flashButton: View
     private lateinit var closeButton: View
+    private lateinit var camera: Camera
+    private lateinit var cameraSelector: CameraSelector
+    // Use cases
+    private lateinit var previewUseCase: Preview
+    private lateinit var analysisUseCase: ImageAnalysis
+    private lateinit var imageProcessor: VisionImageProcessor
 
     private var cameraProvider: ProcessCameraProvider? = null
-    private var previewUseCase: Preview? = null
-    private var analysisUseCase: ImageAnalysis? = null
-    private var imageProcessor: VisionImageProcessor? = null
     private var needUpdateGraphicOverlayImageSourceInfo = false
     private var selectedModel = OBJECT_DETECTION
     private var lensFacing = CameraSelector.LENS_FACING_BACK
-    private var cameraSelector: CameraSelector? = null
-    private var camera: Camera? = null
 
     private val viewModel: CameraViewModel by activityViewModels()
 
@@ -69,8 +70,8 @@ class ObjectDetectionLiveFragment : Fragment(), View.OnClickListener {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        cameraSelector = CameraSelector.Builder().requireLensFacing(lensFacing).build()
         val view = inflater.inflate(R.layout.fragment_object_detection_live, container, false)
+        cameraSelector = CameraSelector.Builder().requireLensFacing(lensFacing).build()
         searchText = view.findViewById(R.id.overlay_results_textview)
         previewView = view.findViewById(R.id.preview_view)
         graphicOverlay = view.findViewById(R.id.graphic_overlay)
@@ -85,15 +86,10 @@ class ObjectDetectionLiveFragment : Fragment(), View.OnClickListener {
                 viewLifecycleOwner,
                 { provider: ProcessCameraProvider? ->
                     cameraProvider = provider
-                    if (allPermissionsGranted()) {
-                        bindAllCameraUseCases()
-                    }
+                    if (allPermissionsGranted()) bindAllCameraUseCases()
                 }
             )
-        if (!allPermissionsGranted()) {
-            runtimePermissions
-        }
-
+        if (!allPermissionsGranted()) runtimePermissions
         return view
     }
 
@@ -110,16 +106,15 @@ class ObjectDetectionLiveFragment : Fragment(), View.OnClickListener {
 
     override fun onPause() {
         super.onPause()
-
-        imageProcessor?.run {
-            this.stop()
+        imageProcessor.run {
+            stop()
         }
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        imageProcessor?.run {
-            this.stop()
+        imageProcessor.run {
+            stop()
         }
     }
 
@@ -133,64 +128,45 @@ class ObjectDetectionLiveFragment : Fragment(), View.OnClickListener {
     }
 
     private fun bindPreviewUseCase() {
-        if (!PreferenceUtils.isCameraLiveViewportEnabled(requireContext())) {
-            return
-        }
-        if (cameraProvider == null) {
-            return
-        }
-        if (previewUseCase != null) {
-            cameraProvider!!.unbind(previewUseCase)
-        }
+        if (!PreferenceUtils.isCameraLiveViewportEnabled(requireContext())) return
+        if (cameraProvider == null) return
+        cameraProvider!!.unbind(previewUseCase)
 
         val builder = Preview.Builder()
         val targetResolution = PreferenceUtils.getCameraXTargetResolution(requireContext())
-        if (targetResolution != null) {
-            builder.setTargetResolution(targetResolution)
-        }
+        if (targetResolution != null) builder.setTargetResolution(targetResolution)
         previewUseCase = builder.build()
-        previewUseCase!!.setSurfaceProvider(previewView.surfaceProvider)
+        previewUseCase.setSurfaceProvider(previewView.surfaceProvider)
         try {
-            camera = cameraProvider?.bindToLifecycle(this, cameraSelector!!, previewUseCase)
+            camera = cameraProvider!!.bindToLifecycle(
+                this,
+                cameraSelector,
+                previewUseCase)
         } catch(exc: java.lang.Exception) {
             Log.e(TAG, "Use case binding failed", exc)
         }
     }
 
     private fun bindAnalysisUseCase() {
-        if (cameraProvider == null) {
-            return
-        }
-        if (analysisUseCase != null) {
-            cameraProvider!!.unbind(analysisUseCase)
-        }
-        if (imageProcessor != null) {
-            imageProcessor!!.stop()
-        }
+        if (cameraProvider == null) return
+        cameraProvider!!.unbind(analysisUseCase)
+        imageProcessor.stop()
         imageProcessor = try {
                     Log.i(TAG, "Using Object Detector Processor")
                     val objectDetectorOptions =
                         PreferenceUtils.getObjectDetectorOptionsForLivePreview(requireContext())
                     ObjectDetectorProcessor(requireContext(), objectDetectorOptions!!, searchText)
         } catch (e: Exception) {
-            Log.e(
-                TAG,
-                "Can not create image processor: $selectedModel",
-                e
-            )
+            Log.e(TAG, "Can not create image processor: $selectedModel", e)
             return
         }
 
         val builder = ImageAnalysis.Builder()
         val targetResolution = PreferenceUtils.getCameraXTargetResolution(requireContext())
-        if (targetResolution != null) {
-            builder.setTargetResolution(targetResolution)
-        }
+        if (targetResolution != null) builder.setTargetResolution(targetResolution)
         analysisUseCase = builder.build()
-
         needUpdateGraphicOverlayImageSourceInfo = true
-
-        analysisUseCase?.setAnalyzer(
+        analysisUseCase.setAnalyzer(
             // imageProcessor.processImageProxy will use another thread to run the detection underneath,
             // thus we can just runs the analyzer itself on main thread.
             ContextCompat.getMainExecutor(requireContext()),
@@ -204,25 +180,23 @@ class ObjectDetectionLiveFragment : Fragment(), View.OnClickListener {
                         graphicOverlay.setImageSourceInfo(
                             imageProxy.width, imageProxy.height, isImageFlipped
                         )
-                    } else {
-                        graphicOverlay.setImageSourceInfo(
-                            imageProxy.height, imageProxy.width, isImageFlipped
-                        )
-                    }
+                    } else graphicOverlay.setImageSourceInfo(
+                        imageProxy.height, imageProxy.width, isImageFlipped
+                    )
                     needUpdateGraphicOverlayImageSourceInfo = false
                 }
                 try {
-                    imageProcessor!!.processImageProxy(imageProxy, graphicOverlay)
+                    imageProcessor.processImageProxy(imageProxy, graphicOverlay)
                 } catch (e: MlKitException) {
-                    Log.e(
-                        TAG,
-                        "Failed to process image. Error: " + e.localizedMessage
-                    )
+                    Log.e(TAG, "Failed to process image. Error: " + e.localizedMessage)
                 }
             }
         )
         try {
-            camera = cameraProvider?.bindToLifecycle(this, cameraSelector!!, analysisUseCase)
+            camera = cameraProvider!!.bindToLifecycle(
+                this,
+                cameraSelector,
+                analysisUseCase)
          } catch(exc: java.lang.Exception) {
             Log.e(TAG, "Use case binding failed", exc)
         }
@@ -230,39 +204,31 @@ class ObjectDetectionLiveFragment : Fragment(), View.OnClickListener {
 
     private val requiredPermissions: Array<String?>
         get() = try {
-            val info = context?.packageManager?.getPackageInfo(requireContext().packageName, PackageManager.GET_PERMISSIONS)
+            val info = context?.packageManager?.getPackageInfo(
+                requireContext().packageName,
+                PackageManager.GET_PERMISSIONS)
             val ps = info?.requestedPermissions
-            if (ps != null && ps.isNotEmpty()) {
-                ps
-            } else {
-                arrayOfNulls(0)
-            }
+            if (ps != null && ps.isNotEmpty()) ps else arrayOfNulls(0)
         } catch (e: Exception) {
             arrayOfNulls(0)
         }
 
     private fun allPermissionsGranted(): Boolean {
         for (permission in requiredPermissions) {
-            if (!isPermissionGranted(requireContext(), permission)) {
-                return false
-            }
+            if (!isPermissionGranted(requireContext(), permission)) return false
         }
         return true
     }
 
     private fun updateFlashMode(flashMode: Boolean) {
         flashButton.isSelected = !flashMode
-        if (camera!!.cameraInfo.hasFlashUnit()) {
-            camera!!.cameraControl.enableTorch(!flashMode)
-        }
+        if (camera.cameraInfo.hasFlashUnit()) camera.cameraControl.enableTorch(!flashMode)
     }
 
     override fun onClick(view: View) {
         when (view.id) {
             R.id.close_button -> findNavController().popBackStack()
-            R.id.flash_button -> {
-                updateFlashMode(flashButton.isSelected)
-            }
+            R.id.flash_button -> updateFlashMode(flashButton.isSelected)
         }
     }
 
@@ -270,16 +236,13 @@ class ObjectDetectionLiveFragment : Fragment(), View.OnClickListener {
         get() {
             val allNeededPermissions: MutableList<String?> = ArrayList()
             for (permission in requiredPermissions) {
-                if (!isPermissionGranted(requireContext(), permission)) {
-                    allNeededPermissions.add(permission)
-                }
+                if (!isPermissionGranted(requireContext(), permission)) allNeededPermissions
+                    .add(permission)
             }
-            if (allNeededPermissions.isNotEmpty()) {
-                requestPermissions(
+            if (allNeededPermissions.isNotEmpty()) requestPermissions(
                     allNeededPermissions.toTypedArray(),
                     PERMISSION_REQUESTS
                 )
-            }
         }
 
     override fun onRequestPermissionsResult(
@@ -288,9 +251,7 @@ class ObjectDetectionLiveFragment : Fragment(), View.OnClickListener {
         grantResults: IntArray
     ) {
         Log.i(TAG, "Permission granted!")
-        if (allPermissionsGranted()) {
-            bindAllCameraUseCases()
-        }
+        if (allPermissionsGranted()) bindAllCameraUseCases()
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
     }
 

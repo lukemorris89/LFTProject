@@ -109,11 +109,9 @@ class GraphicOverlay(context: Context?, attrs: AttributeSet?) :
          * Adjusts the x coordinate from the image's coordinate system to the view coordinate system.
          */
         fun translateX(x: Float): Float {
-            return if (overlay.isImageFlipped) {
+            return if (overlay.isImageFlipped)
                 overlay.width - (scale(x) - overlay.postScaleWidthOffset)
-            } else {
-                scale(x) - overlay.postScaleWidthOffset
-            }
+            else scale(x) - overlay.postScaleWidthOffset
         }
 
         /**
@@ -178,9 +176,7 @@ class GraphicOverlay(context: Context?, attrs: AttributeSet?) :
     }
 
     private fun updateTransformationIfNeeded() {
-        if (!needUpdateTransformation || imageWidth <= 0 || imageHeight <= 0) {
-            return
-        }
+        if (!needUpdateTransformation || imageWidth <= 0 || imageHeight <= 0) return
         val viewAspectRatio = width.toFloat() / height
         val imageAspectRatio = imageWidth.toFloat() / imageHeight
         postScaleWidthOffset = 0f
@@ -197,9 +193,8 @@ class GraphicOverlay(context: Context?, attrs: AttributeSet?) :
         transformationMatrix.reset()
         transformationMatrix.setScale(scaleFactor, scaleFactor)
         transformationMatrix.postTranslate(-postScaleWidthOffset, -postScaleHeightOffset)
-        if (isImageFlipped) {
-            transformationMatrix.postScale(-1f, 1f, width / 2f, height / 2f)
-        }
+        if (isImageFlipped) transformationMatrix
+            .postScale(-1f, 1f, width / 2f, height / 2f)
         needUpdateTransformation = false
     }
 
