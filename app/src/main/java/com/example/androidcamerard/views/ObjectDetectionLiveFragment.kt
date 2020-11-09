@@ -24,6 +24,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import androidx.annotation.RequiresApi
 import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
@@ -50,7 +51,7 @@ class ObjectDetectionLiveFragment : Fragment(), View.OnClickListener {
 
     private lateinit var previewView: PreviewView
     private lateinit var graphicOverlay: GraphicOverlay
-    private lateinit var searchChip: Chip
+    private lateinit var searchText: TextView
     private lateinit var flashButton: View
     private lateinit var closeButton: View
 
@@ -73,7 +74,7 @@ class ObjectDetectionLiveFragment : Fragment(), View.OnClickListener {
         cameraSelector = CameraSelector.Builder().requireLensFacing(lensFacing).build()
         // Inflate the layout for this fragment
         val view = inflater.inflate(R.layout.fragment_object_detection_live, container, false)
-        searchChip = view.findViewById(R.id.overlay_search_chip)
+        searchText = view.findViewById(R.id.overlay_results_textview)
         previewView = view.findViewById(R.id.preview_view)
         graphicOverlay = view.findViewById(R.id.graphic_overlay)
         flashButton = view.findViewById<View>(R.id.flash_button).apply {
@@ -173,7 +174,7 @@ class ObjectDetectionLiveFragment : Fragment(), View.OnClickListener {
                     Log.i(TAG, "Using Object Detector Processor")
                     val objectDetectorOptions =
                         PreferenceUtils.getObjectDetectorOptionsForLivePreview(requireContext())
-                    ObjectDetectorProcessor(requireContext(), objectDetectorOptions!!, searchChip)
+                    ObjectDetectorProcessor(requireContext(), objectDetectorOptions!!, searchText)
         } catch (e: Exception) {
             Log.e(
                 TAG,

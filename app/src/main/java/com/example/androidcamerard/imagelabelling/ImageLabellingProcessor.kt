@@ -4,12 +4,12 @@ import android.content.Context
 import android.util.Log
 import android.view.View
 import android.widget.ImageButton
+import android.widget.TextView
 import com.example.androidcamerard.R
 import com.example.androidcamerard.camera.GraphicOverlay
 import com.example.androidcamerard.processor.VisionProcessorBase
 import com.example.androidcamerard.viewmodel.CameraViewModel
 import com.google.android.gms.tasks.Task
-import com.google.android.material.chip.Chip
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.label.ImageLabel
 import com.google.mlkit.vision.label.ImageLabeler
@@ -22,7 +22,7 @@ class ImageLabellingProcessor(private val context: Context, options: ImageLabele
     VisionProcessorBase<List<ImageLabel>>(context) {
 
     private val imageLabeler: ImageLabeler = ImageLabeling.getClient(options)
-    private val searchChip: Chip = view.findViewById(R.id.overlay_search_chip)
+    private val resultsText: TextView = view.findViewById(R.id.overlay_results_textview)
     private val cameraImageButton: ImageButton = view.findViewById(R.id.photo_capture_button)
 
     override fun stop() {
@@ -43,16 +43,15 @@ class ImageLabellingProcessor(private val context: Context, options: ImageLabele
 
     override fun onSuccess(results: List<ImageLabel>, graphicOverlay: GraphicOverlay) {
         if (results.isEmpty()) {
-            searchChip.text = context.resources.getString(R.string.searching)
+            resultsText.text = context.resources.getString(R.string.point_your_camera_at_the_test)
             cameraImageButton.isEnabled = false
             cameraImageButton.setImageResource(R.drawable.ic_photo_camera_disabled_v24)
         }
         else {
             if (results.isNotEmpty()) {
                 viewModel.imageLabels.value = results
-                searchChip.text =
-                    results[0].text + " - Confidence: " + "%.2f".format(results[0].confidence * 100)
-                if (results[0].text.equals("Hand")) {
+                resultsText.text = context.resources.getString(R.string.image_labelling_results, results[0].text,  "%.2f".format(results[0].confidence * 100))
+                if (results[0].text == "Hand") {
                     cameraImageButton.isEnabled = true
                     cameraImageButton.setImageResource(R.drawable.ic_photo_camera_24)
                 }

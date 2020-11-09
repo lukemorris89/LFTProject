@@ -23,10 +23,11 @@
     <!-- Strings for object detection settings. -->
     <string name="pref_key_live_preview_object_detector_enable_classification" translatable="false">lpodec</string>
 
-    <!-- Strings for product search settings. -->
+    <!-- Strings for image labelling settings. -->
     <string name="searching">Searching…</string>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="view_results">View Results</string>
-
+    <string name="point_your_camera_at_the_test">Point your camera at the test</string>
+    <string name="image_labelling_results">%1$s - Confidence: %2$s</string>
+    <string name="image_labelling_results_confidence">Confidence: %1$s</string>
+    <string name="take_photo_button">Take Photo Button</string>
 </resources>

@@ -11,7 +11,6 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.androidcamerard.R
-import com.example.androidcamerard.utils.Utils
 
 class StartFragment : Fragment() {
 

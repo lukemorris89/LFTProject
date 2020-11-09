@@ -110,7 +110,7 @@ class CameraOutputFragment : Fragment(), View.OnClickListener {
         imageLabelsRecyclerView = requireView().findViewById<RecyclerView>(R.id.image_labels_recycler_view).apply {
             setHasFixedSize(true)
             layoutManager = LinearLayoutManager(requireContext())
-            adapter = ImageLabelsAdapter(viewModel.imageLabels.value)
+            adapter = ImageLabelsAdapter(context, viewModel.imageLabels.value)
         }
     }
 

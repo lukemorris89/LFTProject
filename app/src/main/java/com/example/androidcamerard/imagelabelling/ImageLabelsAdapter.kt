@@ -16,6 +16,7 @@
 
 package com.example.androidcamerard.imagelabelling
 
+import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -27,16 +28,16 @@ import com.google.mlkit.vision.label.ImageLabel
 
 
 /** Presents the list of product items from cloud product search.  */
-class ImageLabelsAdapter(private val labelList: List<ImageLabel>?) : Adapter<ImageLabelsAdapter.LabelViewHolder>() {
+class ImageLabelsAdapter(private val context: Context, private val labelList: List<ImageLabel>?) : Adapter<ImageLabelsAdapter.LabelViewHolder>() {
 
     class LabelViewHolder private constructor(view: View) : RecyclerView.ViewHolder(view) {
 
         private val labelView: TextView = view.findViewById(R.id.image_label)
         private val labelConfidenceView: TextView = view.findViewById(R.id.image_label_confidence)
 
-        fun bindLabel(label: ImageLabel) {
+        fun bindLabel(label: ImageLabel, context: Context) {
             labelView.text = label.text
-            labelConfidenceView.text = "Confidence: " + "%.2f".format(label.confidence * 100)
+            labelConfidenceView.text = context.resources.getString(R.string.image_labelling_results_confidence, "%.2f".format(label.confidence * 100))
         }
 
         companion object {
@@ -49,7 +50,7 @@ class ImageLabelsAdapter(private val labelList: List<ImageLabel>?) : Adapter<Ima
         LabelViewHolder.create(parent)
 
     override fun onBindViewHolder(holder: LabelViewHolder, position: Int) {
-        holder.bindLabel(labelList!![position])
+        holder.bindLabel(labelList!![position], context)
     }
 
     override fun getItemCount(): Int = labelList!!.size

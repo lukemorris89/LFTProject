@@ -26,23 +26,26 @@
         android:layout_height="wrap_content"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/overlay_search_chip"
+        app:layout_constraintBottom_toTopOf="@id/overlay_results_textview"
         android:layout_marginBottom="24dp"
         android:paddingStart="32dp"
         android:paddingEnd="32dp"
         android:paddingTop="8dp"
         android:paddingBottom="8dp"
         android:src="@drawable/ic_photo_camera_disabled_v24"
-        android:background="@drawable/selector_button_rounder_corners" />
+        android:background="@drawable/selector_button_rounder_corners"
+        android:contentDescription="@string/take_photo_button"/>
 
-    <com.google.android.material.chip.Chip
-        android:id="@+id/overlay_search_chip"
+    <TextView
+        android:id="@+id/overlay_results_textview"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textColor="@color/white"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"
         android:layout_marginBottom="@dimen/bottom_prompt_chip_margin_bottom"
         android:textSize="18sp"
         android:layout_marginStart="64dp"
@@ -50,8 +53,10 @@
         android:paddingStart="32dp"
         android:paddingEnd="32dp"
         app:chipCornerRadius="@dimen/bottom_prompt_chip_corner_radius"
-        android:background="@color/white"
-        android:text="@string/searching"/>
+        android:background="@drawable/button_rounded_corners"
+        android:text="@string/point_your_camera_at_the_test"
+        android:maxLines="1"
+        android:ellipsize="end"/>
 
     <include
         layout="@layout/top_action_bar_in_live_camera"

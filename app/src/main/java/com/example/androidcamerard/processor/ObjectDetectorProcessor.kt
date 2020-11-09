@@ -19,10 +19,10 @@ package com.example.androidcamerard.processor
 import android.annotation.SuppressLint
 import android.content.Context
 import android.util.Log
+import android.widget.TextView
 import com.example.androidcamerard.R
 import com.example.androidcamerard.camera.GraphicOverlay
 import com.google.android.gms.tasks.Task
-import com.google.android.material.chip.Chip
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.demo.kotlin.objectdetector.ObjectGraphic
 import com.google.mlkit.vision.objects.DetectedObject
@@ -34,7 +34,7 @@ import java.io.IOException
 /** A processor to run object detector.  */
 class ObjectDetectorProcessor(
     private val context: Context, options: ObjectDetectorOptionsBase,
-    private val searchChip: Chip
+    private val searchText: TextView
 ) :
     VisionProcessorBase<List<DetectedObject>>(context) {
 
@@ -63,12 +63,12 @@ class ObjectDetectorProcessor(
             graphicOverlay.add(ObjectGraphic(graphicOverlay, result))
         }
         if (results.isEmpty()) {
-            searchChip.text = context.resources.getString(R.string.searching)
+            searchText.text = context.resources.getString(R.string.searching)
         }
         else {
             for (result in results) {
                 if (result.labels.isNotEmpty()) {
-                    for (label in result.labels) searchChip.text =
+                    for (label in result.labels) searchText.text =
                         label.text + " - Confidence: " + "%.2f".format(label.confidence * 100)
                 }
             }
