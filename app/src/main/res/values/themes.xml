@@ -32,8 +32,8 @@
     <style name="BottomSheetTitleBar">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
-        <item name="android:paddingStart">@dimen/bottom_sheet_padding_start_end</item>
-        <item name="android:paddingEnd">@dimen/bottom_sheet_padding_start_end</item>
+        <item name="android:paddingStart">@dimen/bottom_sheet_padding_start</item>
+        <item name="android:paddingEnd">@dimen/bottom_sheet_padding_end</item>
         <item name="android:paddingTop">@dimen/bottom_sheet_padding_top_bottom</item>
         <item name="android:paddingBottom">@dimen/bottom_sheet_padding_top_bottom</item>
     </style>

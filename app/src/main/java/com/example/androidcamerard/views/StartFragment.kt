@@ -17,6 +17,7 @@ class StartFragment : Fragment() {
 
     enum class DetectionMode(val titleResId: Int, val subtitleResId: Int) {
         ODT_LIVE(R.string.mode_odt_live_title, R.string.mode_odt_live__subtitle),
+//        ODT_CUSTOM_LIVE(R.string.mode_odt_custom_live_title, R.string.mode_odt_custom_live__subtitle),
         ILC_LIVE(R.string.mode_ilc_live_title, R.string.mode_ilc_live__subtitle),
         ILC_STATIC(R.string.mode_ilc_static_title, R.string.mode_ilc_static_subtitle)
     }

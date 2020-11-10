@@ -52,17 +52,16 @@ class ObjectDetectionLiveFragment : Fragment(), View.OnClickListener {
     private lateinit var searchText: TextView
     private lateinit var flashButton: View
     private lateinit var closeButton: View
-    private lateinit var camera: Camera
-    private lateinit var cameraSelector: CameraSelector
-    // Use cases
-    private lateinit var previewUseCase: Preview
-    private lateinit var analysisUseCase: ImageAnalysis
-    private lateinit var imageProcessor: VisionImageProcessor
 
     private var cameraProvider: ProcessCameraProvider? = null
+    private var previewUseCase: Preview? = null
+    private var analysisUseCase: ImageAnalysis? = null
+    private var imageProcessor: VisionImageProcessor? = null
     private var needUpdateGraphicOverlayImageSourceInfo = false
     private var selectedModel = OBJECT_DETECTION
     private var lensFacing = CameraSelector.LENS_FACING_BACK
+    private var cameraSelector: CameraSelector? = null
+    private var camera: Camera? = null
 
     private val viewModel: CameraViewModel by activityViewModels()
 
@@ -106,14 +105,14 @@ class ObjectDetectionLiveFragment : Fragment(), View.OnClickListener {
 
     override fun onPause() {
         super.onPause()
-        imageProcessor.run {
+        imageProcessor?.run {
             stop()
         }
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        imageProcessor.run {
+        imageProcessor?.run {
             stop()
         }
     }
@@ -130,18 +129,15 @@ class ObjectDetectionLiveFragment : Fragment(), View.OnClickListener {
     private fun bindPreviewUseCase() {
         if (!PreferenceUtils.isCameraLiveViewportEnabled(requireContext())) return
         if (cameraProvider == null) return
-        cameraProvider!!.unbind(previewUseCase)
+        if (previewUseCase != null) cameraProvider!!.unbind(previewUseCase)
 
         val builder = Preview.Builder()
         val targetResolution = PreferenceUtils.getCameraXTargetResolution(requireContext())
         if (targetResolution != null) builder.setTargetResolution(targetResolution)
         previewUseCase = builder.build()
-        previewUseCase.setSurfaceProvider(previewView.surfaceProvider)
+        previewUseCase!!.setSurfaceProvider(previewView.surfaceProvider)
         try {
-            camera = cameraProvider!!.bindToLifecycle(
-                this,
-                cameraSelector,
-                previewUseCase)
+            camera = cameraProvider?.bindToLifecycle(this, cameraSelector!!, previewUseCase)
         } catch(exc: java.lang.Exception) {
             Log.e(TAG, "Use case binding failed", exc)
         }
@@ -149,13 +145,15 @@ class ObjectDetectionLiveFragment : Fragment(), View.OnClickListener {
 
     private fun bindAnalysisUseCase() {
         if (cameraProvider == null) return
-        cameraProvider!!.unbind(analysisUseCase)
-        imageProcessor.stop()
+        if (analysisUseCase != null) cameraProvider!!.unbind(analysisUseCase)
+        if (imageProcessor != null) imageProcessor!!.stop()
         imageProcessor = try {
                     Log.i(TAG, "Using Object Detector Processor")
                     val objectDetectorOptions =
                         PreferenceUtils.getObjectDetectorOptionsForLivePreview(requireContext())
-                    ObjectDetectorProcessor(requireContext(), objectDetectorOptions!!, searchText)
+                    ObjectDetectorProcessor(requireContext(), objectDetectorOptions!!
+//                        searchText
+                    )
         } catch (e: Exception) {
             Log.e(TAG, "Can not create image processor: $selectedModel", e)
             return
@@ -166,7 +164,7 @@ class ObjectDetectionLiveFragment : Fragment(), View.OnClickListener {
         if (targetResolution != null) builder.setTargetResolution(targetResolution)
         analysisUseCase = builder.build()
         needUpdateGraphicOverlayImageSourceInfo = true
-        analysisUseCase.setAnalyzer(
+        analysisUseCase?.setAnalyzer(
             // imageProcessor.processImageProxy will use another thread to run the detection underneath,
             // thus we can just runs the analyzer itself on main thread.
             ContextCompat.getMainExecutor(requireContext()),
@@ -186,16 +184,16 @@ class ObjectDetectionLiveFragment : Fragment(), View.OnClickListener {
                     needUpdateGraphicOverlayImageSourceInfo = false
                 }
                 try {
-                    imageProcessor.processImageProxy(imageProxy, graphicOverlay)
+                    imageProcessor!!.processImageProxy(imageProxy, graphicOverlay)
                 } catch (e: MlKitException) {
                     Log.e(TAG, "Failed to process image. Error: " + e.localizedMessage)
                 }
             }
         )
         try {
-            camera = cameraProvider!!.bindToLifecycle(
+            camera = cameraProvider?.bindToLifecycle(
                 this,
-                cameraSelector,
+                cameraSelector!!,
                 analysisUseCase)
          } catch(exc: java.lang.Exception) {
             Log.e(TAG, "Use case binding failed", exc)
@@ -222,7 +220,7 @@ class ObjectDetectionLiveFragment : Fragment(), View.OnClickListener {
 
     private fun updateFlashMode(flashMode: Boolean) {
         flashButton.isSelected = !flashMode
-        if (camera.cameraInfo.hasFlashUnit()) camera.cameraControl.enableTorch(!flashMode)
+        if (camera!!.cameraInfo.hasFlashUnit()) camera!!.cameraControl.enableTorch(!flashMode)
     }
 
     override fun onClick(view: View) {

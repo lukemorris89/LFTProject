@@ -37,9 +37,10 @@
 
     <dimen name="image_preview_margin">16dp</dimen>
 
-    <dimen name="bottom_sheet_peek_height">60dp</dimen>
+    <dimen name="bottom_sheet_peek_height">72dp</dimen>
     <dimen name="bottom_sheet_padding_top_bottom">12dp</dimen>
-    <dimen name="bottom_sheet_padding_start_end">4dp</dimen>
+    <dimen name="bottom_sheet_padding_start">4dp</dimen>
+    <dimen name="bottom_sheet_padding_end">12dp</dimen>
     <dimen name="bottom_sheet_title_margin_start">4dp</dimen>
     <dimen name="bottom_sheet_corner_radius">16dp</dimen>
 </resources>

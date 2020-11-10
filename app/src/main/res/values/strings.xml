@@ -2,6 +2,8 @@
     <string name="app_name">Android Camera R&amp;D</string>
     <string name="mode_odt_live_title">Object Detection: Live Camera - DEFAULT</string>
     <string name="mode_odt_live__subtitle">A device\'s live camera can be used to detect broad categories of default objects.</string>
+    <string name="mode_odt_custom_live_title">Object Detection: Live Camera - CUSTOM</string>
+    <string name="mode_odt_custom_live__subtitle">A device\'s live camera can be used to detect objects using a custom model.</string>
     <string name="mode_ilc_live_title">Image Labelling: Live Camera - HAND</string>
     <string name="mode_ilc_live__subtitle">A device\'s live camera can be used to label a collection of default objects (hand used for test purposes).</string>
     <string name="mode_ilc_static_title">Image Labelling: Static Image - DEFAULT</string>
@@ -28,4 +30,6 @@
     <string name="take_photo_button">Take Photo Button</string>
     <string name="choose_photo">Pick Photo</string>
     <string name="expand_arrow">Expand Arrow</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

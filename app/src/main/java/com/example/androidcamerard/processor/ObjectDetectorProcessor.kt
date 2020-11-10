@@ -34,7 +34,7 @@ import java.io.IOException
 /** A processor to run object detector.  */
 class ObjectDetectorProcessor(
     private val context: Context, options: ObjectDetectorOptionsBase,
-    private val searchText: TextView
+//    private val searchText: TextView
 ) :
     VisionProcessorBase<List<DetectedObject>>(context) {
 
@@ -62,16 +62,16 @@ class ObjectDetectorProcessor(
         for (result in results) {
             graphicOverlay.add(ObjectGraphic(graphicOverlay, result))
         }
-        if (results.isEmpty()) searchText.text = context.resources.getString(R.string.searching)
-        else {
-            for (result in results) {
-                if (result.labels.isNotEmpty()) {
-                    for (label in result.labels) searchText.text =
-                        label.text + " - Confidence: " + "%.2f"
-                            .format(label.confidence * 100)
-                }
-            }
-        }
+//        if (results.isEmpty()) searchText.text = context.resources.getString(R.string.searching)
+//        else {
+//            for (result in results) {
+//                if (result.labels.isNotEmpty()) {
+//                    for (label in result.labels) searchText.text =
+//                        label.text + " - Confidence: " + "%.2f"
+//                            .format(label.confidence * 100)
+//                }
+//            }
+//        }
     }
 
     override fun onFailure(e: Exception) {

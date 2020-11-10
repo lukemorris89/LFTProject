@@ -37,18 +37,18 @@ class ImageLabellingLiveFragment : Fragment(), View.OnClickListener {
     private lateinit var flashButton: View
     private lateinit var closeButton: View
     private lateinit var photoCaptureButton: View
+    private var imageProcessor: VisionImageProcessor? = null
+    private var needUpdateGraphicOverlayImageSourceInfo = false
 
-    private lateinit var imageProcessor: VisionImageProcessor
-    private lateinit var cameraExecutor: ExecutorService
+    private var camera: Camera? = null
 
-    private lateinit var camera: Camera
     //Use cases
-    private lateinit var previewUseCase: Preview
-    private lateinit var imageCaptureUseCase: ImageCapture
-    private lateinit var analysisUseCase: ImageAnalysis
+    private var previewUseCase: Preview? = null
+    private var imageCaptureUseCase: ImageCapture? = null
+    private var analysisUseCase: ImageAnalysis? = null
 
     private var outputDirectory: File? = null
-    private var needUpdateGraphicOverlayImageSourceInfo = false
+    private lateinit var cameraExecutor: ExecutorService
 
     private val viewModel: CameraViewModel by activityViewModels()
 
@@ -119,7 +119,7 @@ class ImageLabellingLiveFragment : Fragment(), View.OnClickListener {
                 .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
                 .build()
             needUpdateGraphicOverlayImageSourceInfo = true
-            analysisUseCase.setAnalyzer(
+            analysisUseCase!!.setAnalyzer(
                 // imageProcessor.processImageProxy will use another thread to run the detection underneath,
                 // thus we can just runs the analyzer itself on main thread.
                 ContextCompat.getMainExecutor(requireContext()), { imageProxy: ImageProxy ->
@@ -134,7 +134,7 @@ class ImageLabellingLiveFragment : Fragment(), View.OnClickListener {
                         needUpdateGraphicOverlayImageSourceInfo = false
                     }
                     try {
-                        imageProcessor.processImageProxy(imageProxy, graphicOverlay)
+                        imageProcessor!!.processImageProxy(imageProxy, graphicOverlay)
                     } catch (e: MlKitException) {
                         Log.e(
                             TAG,
@@ -153,9 +153,9 @@ class ImageLabellingLiveFragment : Fragment(), View.OnClickListener {
                 // Unbind use cases before rebinding
                 cameraProvider?.unbindAll()
 
-                previewUseCase.setSurfaceProvider(previewView.surfaceProvider)
+                previewUseCase?.setSurfaceProvider(previewView.surfaceProvider)
                 // Bind use cases to camera
-                camera = cameraProvider!!.bindToLifecycle(
+                camera = cameraProvider?.bindToLifecycle(
                     this,
                     cameraSelector,
                     previewUseCase,
@@ -177,12 +177,12 @@ class ImageLabellingLiveFragment : Fragment(), View.OnClickListener {
 
     private fun updateFlashMode(flashMode: Boolean) {
         flashButton.isSelected = !flashMode
-        if (camera.cameraInfo.hasFlashUnit()) camera.cameraControl.enableTorch(!flashMode)
+        if (camera!!.cameraInfo.hasFlashUnit()) camera!!.cameraControl.enableTorch(!flashMode)
     }
 
     private fun takePhoto() {
         // Get a stable reference of the modifiable image capture use case
-        val imageCapture = imageCaptureUseCase
+        val imageCapture = imageCaptureUseCase ?: return
 
         // Create a time-stamped output file to hold the image
         val photoFile = File(outputDirectory,
