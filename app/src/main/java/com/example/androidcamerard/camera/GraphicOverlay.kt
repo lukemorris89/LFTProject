@@ -17,16 +17,20 @@
 
 package com.example.androidcamerard.camera
 
+import android.annotation.SuppressLint
 import android.content.Context
-import android.graphics.Canvas
-import android.graphics.Matrix
-import android.graphics.Rect
-import android.graphics.RectF
+import android.graphics.*
+import android.os.Build
 import android.util.AttributeSet
+import android.util.Size
 import android.view.View
-import com.example.androidcamerard.camera.GraphicOverlay.Graphic
-import com.google.common.base.Preconditions
-import java.util.*
+import androidx.core.graphics.withScale
+import androidx.core.graphics.withTranslation
+import com.example.androidcamerard.R
+import com.example.androidcamerard.utils.getEnum
+import com.example.androidcamerard.utils.isPortrait
+import com.example.androidcamerard.utils.px
+import kotlin.math.min
 
 /**
  * A view which renders a series of custom graphics to be overlayed on top of an associated preview
@@ -49,163 +53,90 @@ import java.util.*
  * coordinate from the image's coordinate system to the view coordinate system.
  *
  */
-class GraphicOverlay(context: Context?, attrs: AttributeSet?) :
-    View(context, attrs) {
-    private val lock = Any()
-    private val graphics: MutableList<Graphic> =
-        ArrayList<Graphic>()
+class GraphicOverlay@JvmOverloads constructor(
+    context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
+) : View(context, attrs, defStyleAttr), ScannerOverlay {
 
-    // Matrix for transforming from image coordinates to overlay view coordinates.
-    private val transformationMatrix = Matrix()
-    private var imageWidth = 0
-    private var imageHeight = 0
-
-    // The factor of overlay View size to image size. Anything in the image coordinates need to be
-    // scaled by this amount to fit with the area of overlay View.
-    private var scaleFactor = 1.0f
-
-    // The number of horizontal pixels needed to be cropped on each side to fit the image with the
-    // area of overlay View after scaling.
-    private var postScaleWidthOffset = 0f
-
-    // The number of vertical pixels needed to be cropped on each side to fit the image with the
-    // area of overlay View after scaling.
-    private var postScaleHeightOffset = 0f
-
-    private var widthScaleFactor = 1.0f
-    private var heightScaleFactor = 1.0f
-
-    private var isImageFlipped = false
-    private var needUpdateTransformation = true
-
-    /**
-     * Base class for a custom graphics object to be rendered within the graphic overlay. Subclass
-     * this and implement the [Graphic.draw] method to define the graphics element. Add
-     * instances to the overlay using [GraphicOverlay.add].
-     */
-    abstract class Graphic(val overlay: GraphicOverlay) {
-        protected val context: Context = overlay.context
-        /**
-         * Draw the graphic on the supplied canvas. Drawing should use the following methods to convert
-         * to view coordinates for the graphics that are drawn:
-         *
-         *
-         *  1. [Graphic.scale] adjusts the size of the supplied value from the image
-         * scale to the view scale.
-         *  1. [Graphic.translateX] and [Graphic.translateY] adjust the
-         * coordinate from the image's coordinate system to the view coordinate system.
-         *
-         *
-         * @param canvas drawing canvas
-         */
-        abstract fun draw(canvas: Canvas?)
-
-        /** Adjusts the supplied value from the image scale to the view scale.  */
-        fun scale(imagePixel: Float): Float {
-            return imagePixel * overlay.scaleFactor
-        }
-
-        /**
-         * Adjusts the x coordinate from the image's coordinate system to the view coordinate system.
-         */
-        fun translateX(x: Float): Float {
-            return if (overlay.isImageFlipped)
-                overlay.width - (scale(x) - overlay.postScaleWidthOffset)
-            else scale(x) - overlay.postScaleWidthOffset
-        }
-
-        /**
-         * Adjusts the y coordinate from the image's coordinate system to the view coordinate system.
-         */
-        fun translateY(y: Float): Float {
-            return scale(y) - overlay.postScaleHeightOffset
-        }
-
-        /**
-         * Returns a [Matrix] for transforming from image coordinates to overlay view coordinates.
-         */
-        fun getTransformationMatrix(): Matrix {
-            return overlay.transformationMatrix
+    private val transparentPaint: Paint by lazy {
+        Paint().apply {
+            isAntiAlias = true
+            xfermode = PorterDuffXfermode(PorterDuff.Mode.CLEAR)
         }
     }
 
-    private fun translateX(x: Float): Float = x * widthScaleFactor
-    private fun translateY(y: Float): Float = y * heightScaleFactor
-
-    /**
-     * Adjusts the `rect`'s coordinate from the preview's coordinate system to the view
-     * coordinate system.
-     */
-    fun translateRect(rect: Rect) = RectF(
-        translateX(rect.left.toFloat()),
-        translateY(rect.top.toFloat()),
-        translateX(rect.right.toFloat()),
-        translateY(rect.bottom.toFloat())
-    )
-
-    /** Removes all graphics from the overlay.  */
-    fun clear() {
-        synchronized(lock) { graphics.clear() }
-        postInvalidate()
-    }
-
-    /** Adds a graphic to the overlay.  */
-    fun add(graphic: Graphic) {
-        synchronized(lock) { graphics.add(graphic) }
-    }
-
-    /**
-     * Sets the source information of the image being processed by detectors, including size and
-     * whether it is flipped, which informs how to transform image coordinates later.
-     *
-     * @param imageWidth the width of the image sent to ML Kit detectors
-     * @param imageHeight the height of the image sent to ML Kit detectors
-     * @param isFlipped whether the image is flipped. Should set it to true when the image is from the
-     * front camera.
-     */
-    fun setImageSourceInfo(imageWidth: Int, imageHeight: Int, isFlipped: Boolean) {
-        Preconditions.checkState(imageWidth > 0, "image width must be positive")
-        Preconditions.checkState(imageHeight > 0, "image height must be positive")
-        synchronized(lock) {
-            this.imageWidth = imageWidth
-            this.imageHeight = imageHeight
-            isImageFlipped = isFlipped
-            needUpdateTransformation = true
+    private val strokePaint: Paint by lazy {
+        Paint().apply {
+            isAntiAlias = true
+            color = Color.WHITE
+            strokeWidth = context.px(3f)
+            style = Paint.Style.STROKE
         }
-        postInvalidate()
     }
 
-    private fun updateTransformationIfNeeded() {
-        if (!needUpdateTransformation || imageWidth <= 0 || imageHeight <= 0) return
-        val viewAspectRatio = width.toFloat() / height
-        val imageAspectRatio = imageWidth.toFloat() / imageHeight
-        postScaleWidthOffset = 0f
-        postScaleHeightOffset = 0f
-        if (viewAspectRatio > imageAspectRatio) {
-            // The image needs to be vertically cropped to be displayed in this view.
-            scaleFactor = width.toFloat() / imageWidth
-            postScaleHeightOffset = (width.toFloat() / imageAspectRatio - height) / 2
-        } else {
-            // The image needs to be horizontally cropped to be displayed in this view.
-            scaleFactor = height.toFloat() / imageHeight
-            postScaleWidthOffset = (height.toFloat() * imageAspectRatio - width) / 2
+    var drawBlueRect : Boolean = false
+        set(value) {
+            field = value
+            invalidate()
         }
-        transformationMatrix.reset()
-        transformationMatrix.setScale(scaleFactor, scaleFactor)
-        transformationMatrix.postTranslate(-postScaleWidthOffset, -postScaleHeightOffset)
-        if (isImageFlipped) transformationMatrix
-            .postScale(-1f, 1f, width / 2f, height / 2f)
-        needUpdateTransformation = false
+
+    var type: Type
+
+    private val blueColor = Color.BLUE
+
+    init {
+        setWillNotDraw(false)
+
+        if(Build.VERSION.SDK_INT <= Build.VERSION_CODES.M) {
+            setLayerType(LAYER_TYPE_HARDWARE, null)
+        }
+
+        val typedArray = context.obtainStyledAttributes(attrs, R.styleable.ScannerOverlayImpl, 0, 0)
+        type = typedArray.getEnum(R.styleable.ScannerOverlayImpl_type, Type.LFT)
+        typedArray.recycle()
     }
 
-    /** Draws the overlay with its associated graphic objects.  */
+    @SuppressLint("DrawAllocation")
     override fun onDraw(canvas: Canvas) {
-        super.onDraw(canvas)
-        synchronized(lock) {
-            updateTransformationIfNeeded()
-            for (graphic in graphics) {
-                graphic.draw(canvas)
+        canvas.drawColor(Color.parseColor("#88000000"))
+
+        val radius = context.px(4f)
+        val rectF = scanRect
+        canvas.drawRoundRect(rectF, radius, radius, transparentPaint)
+        strokePaint.color = if(drawBlueRect) blueColor else Color.WHITE
+        canvas.drawRoundRect(rectF, radius, radius, strokePaint)
+    }
+
+    override val size: Size
+        get() = Size(width, height)
+
+    override val scanRect: RectF
+        get() = when (type) {
+            Type.LFT -> {
+                if(context.isPortrait()) {
+                    val size = min(width * 0.6f, MAX_WIDTH_PORTRAIT)
+                    val l = (width - size) / 1.5f
+                    val r = width - l
+                    val t = height * 0.15f
+                    val b = (t + size) * 1.5f
+                    RectF(l, t, r, b)
+                } else {
+                    val size = min(width * 0.25f, MAX_WIDTH_LANDSCAPE)
+                    val l = width * 0.05f
+                    val r = l + size
+                    val t = height * 0.05f
+                    val b = t + size
+                    RectF(l, t, r, b)
+                }
             }
         }
+
+
+    enum class Type {
+        LFT
+    }
+
+    companion object {
+        const val MAX_WIDTH_PORTRAIT = 1200f
+        const val MAX_WIDTH_LANDSCAPE = 1600f
     }
 }

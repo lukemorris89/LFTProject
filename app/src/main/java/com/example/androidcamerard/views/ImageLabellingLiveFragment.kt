@@ -1,10 +1,14 @@
 package com.example.androidcamerard.views
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.pm.PackageManager
+import android.graphics.Rect
+import android.media.Image
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
+import android.util.Size
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -80,6 +84,7 @@ class ImageLabellingLiveFragment : Fragment(), View.OnClickListener {
         return view
     }
 
+    @SuppressLint("UnsafeExperimentalUsageError")
     private fun startCamera() {
         val cameraProviderFuture = ProcessCameraProvider.getInstance(requireContext())
 
@@ -97,7 +102,7 @@ class ImageLabellingLiveFragment : Fragment(), View.OnClickListener {
             val options = ImageLabelerOptions.Builder()
                 .setConfidenceThreshold(0.7f)
                 .build()
-            imageProcessor = ImageLabellingProcessor(requireContext(), options, requireView(), viewModel)
+            imageProcessor = ImageLabellingProcessor(requireContext(), options, requireView(), viewModel, graphicOverlay)
 
 //            Replace ImageLabellingProcessor (above) with below when using custom models
 //            IMAGE_LABELING_CUSTOM -> {
@@ -118,21 +123,10 @@ class ImageLabellingLiveFragment : Fragment(), View.OnClickListener {
             analysisUseCase = ImageAnalysis.Builder()
                 .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
                 .build()
-            needUpdateGraphicOverlayImageSourceInfo = true
             analysisUseCase!!.setAnalyzer(
                 // imageProcessor.processImageProxy will use another thread to run the detection underneath,
                 // thus we can just runs the analyzer itself on main thread.
                 ContextCompat.getMainExecutor(requireContext()), { imageProxy: ImageProxy ->
-                    if (needUpdateGraphicOverlayImageSourceInfo) {
-                        val isImageFlipped = false
-                        val rotationDegrees = imageProxy.imageInfo.rotationDegrees
-                        if (rotationDegrees == 0 || rotationDegrees == 180)
-                            graphicOverlay.setImageSourceInfo(
-                            imageProxy.width, imageProxy.height, isImageFlipped)
-                        else graphicOverlay.setImageSourceInfo(
-                                imageProxy.height, imageProxy.width, isImageFlipped)
-                        needUpdateGraphicOverlayImageSourceInfo = false
-                    }
                     try {
                         imageProcessor!!.processImageProxy(imageProxy, graphicOverlay)
                     } catch (e: MlKitException) {
@@ -209,6 +203,8 @@ class ImageLabellingLiveFragment : Fragment(), View.OnClickListener {
         )
     }
 
+
+
     private fun allPermissionsGranted() = REQUIRED_PERMISSIONS.all {
         activity?.baseContext?.let { it1 ->
             ContextCompat.checkSelfPermission(
@@ -245,6 +241,11 @@ class ImageLabellingLiveFragment : Fragment(), View.OnClickListener {
         super.onDestroy()
         cameraExecutor.shutdown()
     }
+
+    data class ScannerRectToPreviewViewRelation(val relativePosX: Float,
+                                                val relativePosY: Float,
+                                                val relativeWidth: Float,
+                                                val relativeHeight: Float)
 
     companion object {
         private const val TAG = "CameraXBasic"

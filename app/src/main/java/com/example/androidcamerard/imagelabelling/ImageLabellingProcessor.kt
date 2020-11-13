@@ -18,8 +18,12 @@ import com.google.mlkit.vision.label.ImageLabeling
 import java.io.IOException
 
 /** Custom InputImage Classifier Demo.  */
-class ImageLabellingProcessor(private val context: Context, options: ImageLabelerOptionsBase, view: View, private val viewModel: CameraViewModel) :
-    VisionProcessorBase<List<ImageLabel>>(context) {
+class ImageLabellingProcessor(private val context: Context,
+                              options: ImageLabelerOptionsBase,
+                              view: View,
+                              private val viewModel: CameraViewModel,
+                              graphicOverlay: GraphicOverlay) :
+    VisionProcessorBase<List<ImageLabel>>(context, graphicOverlay) {
 
     private val imageLabeler: ImageLabeler = ImageLabeling.getClient(options)
     private val resultsText: TextView = view.findViewById(R.id.overlay_results_textview)
@@ -42,25 +46,19 @@ class ImageLabellingProcessor(private val context: Context, options: ImageLabele
     }
 
     override fun onSuccess(results: List<ImageLabel>, graphicOverlay: GraphicOverlay) {
-        if (results.isEmpty()) {
+        if (results.isEmpty() || results[0].text != "Hand") {
             resultsText.text = context.resources.getString(R.string.point_your_camera_at_the_test)
             cameraImageButton.isEnabled = false
             cameraImageButton.setImageResource(R.drawable.ic_photo_camera_disabled_v24)
+            graphicOverlay.drawBlueRect = false
         }
         else {
-            if (results.isNotEmpty()) {
-                viewModel.imageLabels.value = results
-                if (results[0].text == "Hand") {
-                    cameraImageButton.isEnabled = true
-                    cameraImageButton.setImageResource(R.drawable.ic_photo_camera_24)
-                    resultsText.text = context.resources.getString(R.string.image_labelling_results, results[0].text,  "%.2f".format(results[0].confidence * 100))
-
-                }
-                else {
-                    cameraImageButton.isEnabled = false
-                    cameraImageButton.setImageResource(R.drawable.ic_photo_camera_disabled_v24)
-                    resultsText.text = context.resources.getString(R.string.point_your_camera_at_the_test)
-                }
+            viewModel.imageLabels.value = results
+            if (results[0].text == "Hand") {
+                cameraImageButton.isEnabled = true
+                cameraImageButton.setImageResource(R.drawable.ic_photo_camera_24)
+                resultsText.text = context.resources.getString(R.string.image_labelling_results, results[0].text,  "%.2f".format(results[0].confidence * 100))
+                graphicOverlay.drawBlueRect = true
             }
         }
         logExtrasForTesting(results)

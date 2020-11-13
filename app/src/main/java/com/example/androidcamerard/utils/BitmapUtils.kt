@@ -31,45 +31,20 @@ import java.nio.ByteBuffer
 /** Utils functions for bitmap conversions.  */
 object BitmapUtils {
 
-    /** Converts NV21 format byte buffer to bitmap.  */
-    private fun getBitmap(data: ByteBuffer, metadata: FrameMetadata): Bitmap? {
-        data.rewind()
-        val imageInBuffer = ByteArray(data.limit())
-        data[imageInBuffer, 0, imageInBuffer.size]
-        try {
-            val image = YuvImage(
-                imageInBuffer, ImageFormat.NV21, metadata.width, metadata.height, null
-            )
-            val stream = ByteArrayOutputStream()
-            image.compressToJpeg(Rect(
-                0,
-                0,
-                metadata.width,
-                metadata.height),
-                80,
-                stream)
-            val bmp = BitmapFactory.decodeByteArray(stream.toByteArray(), 0, stream.size())
-            stream.close()
-            return rotateBitmap(bmp, metadata.rotation, flipX = false, flipY = false)
-        } catch (e: Exception) {
-            Log.e("VisionProcessorBase", "Error: " + e.message)
-        }
-        return null
-    }
+    fun getBitmap(data: ByteArray, metadata: FrameMetadata): Bitmap {
 
-    /** Converts a YUV_420_888 image from CameraX API to a bitmap.  */
-    @RequiresApi(VERSION_CODES.KITKAT)
-    @ExperimentalGetImage
-    fun getBitmap(image: ImageProxy): Bitmap? {
-        val frameMetadata: FrameMetadata = FrameMetadata.Builder()
-            .setWidth(image.width)
-            .setHeight(image.height)
-            .setRotation(image.imageInfo.rotationDegrees)
-            .build()
-        val nv21Buffer = yuv420ThreePlanesToNV21(
-            image.image!!.planes, image.width, image.height
+        val image = YuvImage(
+            data, ImageFormat.NV21, metadata.width, metadata.height, null
         )
-        return getBitmap(nv21Buffer, frameMetadata)
+        val stream = ByteArrayOutputStream()
+        image.compressToJpeg(
+            Rect(0, 0, metadata.width, metadata.height),
+            80,
+            stream
+        )
+        val bmp = BitmapFactory.decodeByteArray(stream.toByteArray(), 0, stream.size())
+        stream.close()
+        return rotateBitmap(bmp, metadata.rotation, false, false)
     }
 
     /** Rotates a bitmap if it is converted from a bytebuffer.  */
