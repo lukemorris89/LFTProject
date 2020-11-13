@@ -99,7 +99,7 @@ class GraphicOverlay@JvmOverloads constructor(
     override fun onDraw(canvas: Canvas) {
         canvas.drawColor(Color.parseColor("#88000000"))
 
-        val radius = context.px(4f)
+        val radius = context.px(16f)
         val rectF = scanRect
         canvas.drawRoundRect(rectF, radius, radius, transparentPaint)
         strokePaint.color = if(drawBlueRect) blueColor else Color.WHITE
@@ -109,12 +109,13 @@ class GraphicOverlay@JvmOverloads constructor(
     override val size: Size
         get() = Size(width, height)
 
+    // Position, shape and size of overlay window
     override val scanRect: RectF
         get() = when (type) {
             Type.LFT -> {
                 if(context.isPortrait()) {
                     val size = min(width * 0.6f, MAX_WIDTH_PORTRAIT)
-                    val l = (width - size) / 1.5f
+                    val l = (width - size) / 1.2f
                     val r = width - l
                     val t = height * 0.15f
                     val b = (t + size) * 1.5f
