@@ -22,14 +22,14 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintBottom_toTopOf="@id/overlay_results_textview"
-        android:layout_marginBottom="@dimen/button_bottom_margin_small"
+        android:layout_marginBottom="@dimen/button_bottom_margin_large"
         android:paddingStart="@dimen/button_padding_start_end_large"
         android:paddingEnd="@dimen/button_padding_start_end_large"
-        android:paddingTop="@dimen/button_padding_top_bottom_small"
-        android:paddingBottom="@dimen/button_padding_top_bottom_small"
+        android:paddingTop="@dimen/button_padding_top_bottom_medium"
+        android:paddingBottom="@dimen/button_padding_top_bottom_medium"
         android:src="@drawable/ic_photo_camera_disabled_v24"
-        android:background="@drawable/selector_button_rounder_corners"
-        android:contentDescription="@string/take_photo_button" />
+        android:background="@drawable/selector_button_rounded_corners"
+        android:contentDescription="@string/cd_take_photo_button" />
 
     <TextView
         android:id="@+id/overlay_results_textview"
@@ -37,10 +37,10 @@
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
-        android:text="@string/point_your_camera_at_the_test" />
+        android:text="@string/align_the_test_device_inside_the_box" />
 
     <include
-        layout="@layout/top_action_bar_in_live_camera"
+        layout="@layout/top_action_bar_live_camera"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="top" />

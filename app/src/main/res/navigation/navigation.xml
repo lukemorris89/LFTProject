@@ -14,8 +14,8 @@
             app:destination="@id/imageLabellingLiveFragment"
             app:launchSingleTop="true" />
         <action
-            android:id="@+id/action_startFragment_to_imageLabellingStaticFragment"
-            app:destination="@id/imageLabellingStaticFragment"
+            android:id="@+id/action_startFragment_to_dataCollectionFragment"
+            app:destination="@id/dataCollectionFragment"
             app:launchSingleTop="true" />
     </fragment>
     <fragment
@@ -24,20 +24,20 @@
         android:label="ImageLabellingLiveFragment">
         <action
             android:id="@+id/action_imageLabellingLiveFragment_to_cameraOutputFragment"
-            app:destination="@id/cameraOutputFragment"
+            app:destination="@id/imageAnalysisFragment"
             app:launchSingleTop="true" />
     </fragment>
     <fragment
-        android:id="@+id/cameraOutputFragment"
-        android:name="com.example.androidcamerard.views.CameraOutputFragment"
-        android:label="fragment_camera_output"
-        tools:layout="@layout/fragment_camera_output">
+        android:id="@+id/imageAnalysisFragment"
+        android:name="com.example.androidcamerard.views.ImageAnalysisFragment"
+        android:label="fragment_image_analysis"
+        tools:layout="@layout/fragment_image_analysis">
         <action
             android:id="@+id/action_cameraOutputFragment_to_startFragment"
             app:destination="@id/startFragment" />
     </fragment>
     <fragment
-        android:id="@+id/imageLabellingStaticFragment"
-        android:name="com.example.androidcamerard.views.ImageLabellingStaticFragment"
-        android:label="ImageLabellingStaticFragment" />
+        android:id="@+id/dataCollectionFragment"
+        android:name="com.example.androidcamerard.views.DataCollectionFragment"
+        android:label="DataCollectionFragment" />
 </navigation>

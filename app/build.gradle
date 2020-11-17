@@ -80,6 +80,9 @@ dependencies {
     // Image labeling custom
     implementation 'com.google.mlkit:image-labeling-custom:16.2.1'
 
+    // Image Compression for capturing data to train model
+    implementation 'id.zelory:compressor:3.0.0'
+
     // -------------------------------------------------------
 
     implementation 'com.google.guava:guava:24.1-jre'

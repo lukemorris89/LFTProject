@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.os.bundleOf
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import com.example.androidcamerard.R
@@ -34,7 +35,13 @@ class MainActivity : AppCompatActivity() {
             data != null
         ) {
             viewModel.photoFilename.value = data.data
-            navController.navigate(R.id.imageLabellingStaticFragment)
+            val args = bundleOf("SOURCE" to SOURCE)
+            navController.navigate(R.id.imageAnalysisFragment, args)
         }
+    }
+
+    companion object {
+        private const val TAG = "MainActivity"
+        private const val SOURCE = "ImagePicker"
     }
 }

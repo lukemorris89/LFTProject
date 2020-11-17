@@ -28,7 +28,7 @@ interface VisionImageProcessor {
     /** Processes ImageProxy image data, e.g. used for CameraX live preview case.  */
     @RequiresApi(VERSION_CODES.KITKAT)
     @Throws(MlKitException::class)
-    fun processImageProxy(image: ImageProxy, graphicOverlay: GraphicOverlay?)
+    fun processImageProxy(imageProxy: ImageProxy, graphicOverlay: GraphicOverlay?)
 
     /** Stops the underlying machine learning model and release resources.  */
     fun stop()

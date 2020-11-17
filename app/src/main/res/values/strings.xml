@@ -1,35 +1,32 @@
 <resources>
     <string name="app_name">Android Camera R&amp;D</string>
-    <string name="mode_odt_live_title">Object Detection: Live Camera - DEFAULT</string>
-    <string name="mode_odt_live__subtitle">A device\'s live camera can be used to detect broad categories of default objects.</string>
-    <string name="mode_odt_custom_live_title">Object Detection: Live Camera - CUSTOM</string>
-    <string name="mode_odt_custom_live__subtitle">A device\'s live camera can be used to detect objects using a custom model.</string>
-    <string name="mode_ilc_live_title">Image Labelling: Live Camera - HAND</string>
-    <string name="mode_ilc_live__subtitle">A device\'s live camera can be used to label a collection of default objects (hand used for test purposes).</string>
-    <string name="mode_ilc_static_title">Image Labelling: Static Image - DEFAULT</string>
-    <string name="mode_ilc_static_subtitle">One or more objects can be classified from a provided image.</string>
-    <string name="cd_close_button">Back</string>
-    <string name="cd_flash_button">Toggle camera flash</string>
+
+    <!--    Start fragment options-->
+    <string name="mode_ilc_live_title">Image Labelling: Live Camera - LFT</string>
+    <string name="mode_ilc_live__subtitle">A device\'s live camera can be used to label a lateral flow test using a custom-trained model.</string>
+    <string name="mode_ilc_static_title">Image Labelling: Static Image - LFT</string>
+    <string name="mode_ilc_static_subtitle">A static image from device storage can be analysed to determine the presence of a lateral flow test.</string>
+    <string name="mode_dc_title">Data Collection - LFT</string>
+    <string name="mode_dc_subtitle">A camera module for capturing photos of LFTs en masse to be used to create a custom Tensorflow model.</string>
+
+    <!--    Bottomsheet buttons-->
     <string name="return_home">Home</string>
     <string name="retake_photo">Retake</string>
-    <string name="image_preview">Image Preview</string>
+    <string name="gallery">Gallery</string>
 
-    <!-- Strings for camera settings. -->
-    <string name="pref_key_camerax_target_resolution" translatable="false">ctas</string>
-    <string name="pref_key_camera_live_viewport" translatable="false">clv</string>
-
-    <!-- Strings for object detection settings. -->
-    <string name="pref_key_live_preview_object_detector_enable_classification" translatable="false">lpodec</string>
+    <!--    User instructions-->
+    <string name="align_the_test_device_inside_the_box">Align the test device inside the box</string>
 
     <!-- Strings for image labelling settings. -->
-    <string name="searching">Searching…</string>
     <string name="view_results">View Results</string>
-    <string name="point_your_camera_at_the_test">Point your camera at a hand</string>
     <string name="image_labelling_results">%1$s - Confidence: %2$s</string>
     <string name="image_labelling_results_confidence">Confidence: %1$s</string>
-    <string name="take_photo_button">Take Photo Button</string>
-    <string name="choose_photo">Pick Photo</string>
-    <string name="expand_arrow">Expand Arrow</string>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+
+    <!--    Strings for accessibility-->
+    <string name="cd_flash_button">Toggle camera flash</string>
+    <string name="cd_close_button">Back</string>
+    <string name="cd_take_photo_button">Take Photo Button</string>
+    <string name="cd_expand_arrow">Expand Arrow</string>
+    <string name="cd_image_preview">Image Preview</string>
+
 </resources>

@@ -17,7 +17,8 @@ class StartFragment : Fragment() {
 
     enum class DetectionMode(val titleResId: Int, val subtitleResId: Int) {
         ILC_LIVE(R.string.mode_ilc_live_title, R.string.mode_ilc_live__subtitle),
-        ILC_STATIC(R.string.mode_ilc_static_title, R.string.mode_ilc_static_subtitle)
+        ILC_STATIC(R.string.mode_ilc_static_title, R.string.mode_ilc_static_subtitle),
+        DC_LIVE(R.string.mode_dc_title, R.string.mode_dc_subtitle)
     }
 
     override fun onCreateView(
@@ -27,8 +28,8 @@ class StartFragment : Fragment() {
         val view = inflater.inflate(R.layout.fragment_start, container, false)
         view.findViewById<RecyclerView>(R.id.select_mode_recyclerview).apply {
             setHasFixedSize(true)
-            layoutManager = LinearLayoutManager(context)
             adapter = ModeItemAdapter(DetectionMode.values())
+            layoutManager = LinearLayoutManager(context)
         }
         return view
     }
@@ -63,6 +64,8 @@ class StartFragment : Fragment() {
                     when (detectionMode) {
                         DetectionMode.ILC_LIVE -> findNavController()
                             .navigate(R.id.action_startFragment_to_imageLabellingLiveFragment)
+                        DetectionMode.DC_LIVE -> findNavController()
+                            .navigate(R.id.action_startFragment_to_dataCollectionFragment)
                         else -> Utils.openImagePicker(activity)
                     }
                 }

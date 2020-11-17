@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <shape android:shape="rectangle"
     xmlns:android="http://schemas.android.com/apk/res/android">
-    <solid android:color="@color/search_text_bar" />
+    <gradient android:angle="45"
+        android:startColor="@color/grey_medium"
+        android:endColor="@color/grey_dark"
+        android:type="linear"/>
     <corners android:radius="@dimen/search_text_bar_radius" />
 </shape>

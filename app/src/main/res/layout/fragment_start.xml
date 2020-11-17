@@ -4,23 +4,39 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".views.StartFragment"
-    android:background="@color/black"
+    android:background="@drawable/background_gradient"
     android:orientation="vertical">
 
-    <TextView
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingTop="@dimen/app_title_box_padding_top"
-        android:paddingBottom="@dimen/app_title_box_padding_bottom"
-        android:gravity="center_horizontal"
-        android:textColor="@color/white"
-        android:textSize="@dimen/app_text_size_large"
-        android:text="@string/app_name" />
+        android:background="@color/bond"
+        android:paddingTop="@dimen/app_title_box_padding_top_bottom"
+        android:paddingBottom="@dimen/app_title_box_padding_top_bottom">
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:src="@drawable/ic_eye"
+            android:layout_gravity="center_vertical"
+            android:layout_marginStart="@dimen/app_title_margin_start_end"
+            android:layout_marginEnd="@dimen/app_title_margin_start_end"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+
+
+            android:textColor="@color/white"
+            android:textSize="@dimen/app_text_size_xlarge"
+            android:text="@string/app_name" />
+    </LinearLayout>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/select_mode_recyclerview"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:scrollbars="vertical" />
+        android:scrollbars="vertical"
+        android:padding="@dimen/button_padding_top_bottom_medium"/>
 
 </LinearLayout>

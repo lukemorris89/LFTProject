@@ -24,9 +24,8 @@ import android.os.Build
 import android.util.AttributeSet
 import android.util.Size
 import android.view.View
-import androidx.core.graphics.withScale
-import androidx.core.graphics.withTranslation
 import com.example.androidcamerard.R
+import com.example.androidcamerard.R.*
 import com.example.androidcamerard.utils.getEnum
 import com.example.androidcamerard.utils.isPortrait
 import com.example.androidcamerard.utils.px
@@ -81,7 +80,7 @@ class GraphicOverlay@JvmOverloads constructor(
 
     var type: Type
 
-    private val blueColor = Color.BLUE
+    private val blueColor = resources.getColor(color.bond)
 
     init {
         setWillNotDraw(false)
@@ -90,8 +89,8 @@ class GraphicOverlay@JvmOverloads constructor(
             setLayerType(LAYER_TYPE_HARDWARE, null)
         }
 
-        val typedArray = context.obtainStyledAttributes(attrs, R.styleable.ScannerOverlayImpl, 0, 0)
-        type = typedArray.getEnum(R.styleable.ScannerOverlayImpl_type, Type.LFT)
+        val typedArray = context.obtainStyledAttributes(attrs, styleable.ScannerOverlayImpl, 0, 0)
+        type = typedArray.getEnum(styleable.ScannerOverlayImpl_type, Type.LFT)
         typedArray.recycle()
     }
 
@@ -114,11 +113,11 @@ class GraphicOverlay@JvmOverloads constructor(
         get() = when (type) {
             Type.LFT -> {
                 if(context.isPortrait()) {
-                    val size = min(width * 0.6f, MAX_WIDTH_PORTRAIT)
-                    val l = (width - size) / 1.2f
+                    val size = min(width * 0.7f, MAX_WIDTH_PORTRAIT)
+                    val l = (width - size) / 1.05f
                     val r = width - l
-                    val t = height * 0.15f
-                    val b = (t + size) * 1.5f
+                    val t = height * 0.1f
+                    val b = (t + size) * 1.6f
                     RectF(l, t, r, b)
                 } else {
                     val size = min(width * 0.25f, MAX_WIDTH_LANDSCAPE)

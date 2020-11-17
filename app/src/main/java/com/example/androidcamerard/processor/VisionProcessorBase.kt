@@ -18,30 +18,25 @@ package com.example.androidcamerard.processor
 
 import android.app.ActivityManager
 import android.content.Context
-import android.graphics.Bitmap
-import android.graphics.Rect
+import android.graphics.*
 import android.media.Image
 import android.os.Build.VERSION_CODES
 import android.os.SystemClock
-import androidx.annotation.GuardedBy
-import androidx.annotation.RequiresApi
 import android.util.Log
 import android.util.Size
-import android.widget.Toast
+import androidx.annotation.GuardedBy
+import androidx.annotation.RequiresApi
 import androidx.camera.core.ExperimentalGetImage
 import androidx.camera.core.ImageProxy
 import com.example.androidcamerard.ScopedExecutor
 import com.example.androidcamerard.camera.FrameMetadata
 import com.example.androidcamerard.camera.GraphicOverlay
-import com.example.androidcamerard.utils.BitmapUtils
-import com.example.androidcamerard.utils.YuvNV21Util
 import com.example.androidcamerard.views.ImageLabellingLiveFragment
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.tasks.TaskExecutors
 import com.google.mlkit.vision.common.InputImage
 import java.nio.ByteBuffer
-import java.util.Timer
-import java.util.TimerTask
+import java.util.*
 import kotlin.math.max
 import kotlin.math.min
 
@@ -77,6 +72,9 @@ abstract class VisionProcessorBase<T>(context: Context, private val graphicOverl
     private var frameProcessedInOneSecondInterval = 0
     private var framesPerSecond = 0
 
+    private var scannerRect: ImageLabellingLiveFragment.ScannerRectToPreviewViewRelation? = null
+    private var cropRect: Rect? = null
+
     // To keep the latest images and its metadata.
     @GuardedBy("this")
     private var latestImage: ByteBuffer? = null
@@ -105,21 +103,21 @@ abstract class VisionProcessorBase<T>(context: Context, private val graphicOverl
     @ExperimentalGetImage
     override fun processImageProxy(imageProxy: ImageProxy, graphicOverlay: GraphicOverlay?) {
         if (isShutdown) return
-
         val rotation = imageProxy.imageInfo.rotationDegrees
-        val scannerRect = getScannerRectToPreviewViewRelation(Size(imageProxy.width, imageProxy.height), rotation)
+        scannerRect = getScannerRectToPreviewViewRelation(
+            Size(imageProxy.width, imageProxy.height),
+            rotation
+        )
 
         val image = imageProxy.image!!
-        val cropRect = image.getCropRectAccordingToRotation(scannerRect, rotation)
+        cropRect = image.getCropRectAccordingToRotation(scannerRect!!, rotation)
         image.cropRect = cropRect
 
-        val byteArray = YuvNV21Util.yuv420toNV21(image)
-        val bitmap = BitmapUtils.getBitmap(byteArray, FrameMetadata(cropRect.width(), cropRect.height(), rotation))
+        val inputImage = InputImage.fromMediaImage(image, 0)
 
         if (graphicOverlay != null) requestDetectInImage(
-            InputImage.fromMediaImage(image, rotation),
-            graphicOverlay, /* originalCameraImage= */
-            bitmap
+            inputImage,
+            graphicOverlay
         )
             // When the image is from CameraX analysis use case, must call image.close()
             // on received images when finished using them. Otherwise, new images may not be
@@ -127,14 +125,12 @@ abstract class VisionProcessorBase<T>(context: Context, private val graphicOverl
             .addOnCompleteListener { imageProxy.close() }
     }
 
-    private fun requestDetectInImage(
-        image: InputImage,
+    private fun requestDetectInImage(inputImage: InputImage,
         graphicOverlay: GraphicOverlay,
-        originalCameraImage: Bitmap?,
     ): Task<T> {
         val startMs = SystemClock.elapsedRealtime()
-        val inputImage: InputImage = InputImage.fromBitmap(originalCameraImage!!, 0)
         return detectInImage(inputImage).addOnSuccessListener(executor) { results: T ->
+
             val currentLatencyMs = SystemClock.elapsedRealtime() - startMs
             numRuns++
             frameProcessedInOneSecondInterval++
@@ -158,8 +154,8 @@ abstract class VisionProcessorBase<T>(context: Context, private val graphicOverl
                     "Memory available in system: $availableMegs MB"
                 )
             }
+            this@VisionProcessorBase.onSuccess(results, graphicOverlay, inputImage)
 
-            this@VisionProcessorBase.onSuccess(results, graphicOverlay)
             graphicOverlay.postInvalidate()
         }
             .addOnFailureListener(executor) { e: Exception ->
@@ -168,7 +164,7 @@ abstract class VisionProcessorBase<T>(context: Context, private val graphicOverl
             }
     }
 
-    private fun getScannerRectToPreviewViewRelation(proxySize : Size, rotation : Int): ImageLabellingLiveFragment.ScannerRectToPreviewViewRelation {
+    private fun getScannerRectToPreviewViewRelation(proxySize: Size, rotation: Int): ImageLabellingLiveFragment.ScannerRectToPreviewViewRelation {
         return when(rotation) {
             0, 180 -> {
                 val size = graphicOverlay.size
@@ -210,7 +206,10 @@ abstract class VisionProcessorBase<T>(context: Context, private val graphicOverl
         }
     }
 
-    private fun Image.getCropRectAccordingToRotation(scannerRect: ImageLabellingLiveFragment.ScannerRectToPreviewViewRelation, rotation: Int) : Rect {
+    private fun Image.getCropRectAccordingToRotation(
+        scannerRect: ImageLabellingLiveFragment.ScannerRectToPreviewViewRelation,
+        rotation: Int
+    ) : Rect {
         return when(rotation) {
             0 -> {
                 val startX = (scannerRect.relativePosX * this.width).toInt()
@@ -223,20 +222,24 @@ abstract class VisionProcessorBase<T>(context: Context, private val graphicOverl
                 val startX = (scannerRect.relativePosY * this.width).toInt()
                 val numberPixelW = (scannerRect.relativeHeight * this.width).toInt()
                 val numberPixelH = (scannerRect.relativeWidth * this.height).toInt()
-                val startY = height - (scannerRect.relativePosX * this.height).toInt() - numberPixelH
+                val startY =
+                    height - (scannerRect.relativePosX * this.height).toInt() - numberPixelH
                 Rect(startX, startY, startX + numberPixelW, startY + numberPixelH)
             }
             180 -> {
                 val numberPixelW = (scannerRect.relativeWidth * this.width).toInt()
-                val startX = (this.width - scannerRect.relativePosX * this.width - numberPixelW).toInt()
+                val startX =
+                    (this.width - scannerRect.relativePosX * this.width - numberPixelW).toInt()
                 val numberPixelH = (scannerRect.relativeHeight * this.height).toInt()
-                val startY = (height - scannerRect.relativePosY * this.height - numberPixelH).toInt()
+                val startY =
+                    (height - scannerRect.relativePosY * this.height - numberPixelH).toInt()
                 Rect(startX, startY, startX + numberPixelW, startY + numberPixelH)
             }
             270 -> {
                 val numberPixelW = (scannerRect.relativeHeight * this.width).toInt()
                 val numberPixelH = (scannerRect.relativeWidth * this.height).toInt()
-                val startX = (this.width - scannerRect.relativePosY * this.width - numberPixelW).toInt()
+                val startX =
+                    (this.width - scannerRect.relativePosY * this.width - numberPixelW).toInt()
                 val startY = (scannerRect.relativePosX * this.height).toInt()
                 Rect(startX, startY, startX + numberPixelW, startY + numberPixelH)
             }
@@ -254,7 +257,7 @@ abstract class VisionProcessorBase<T>(context: Context, private val graphicOverl
 
     protected abstract fun detectInImage(image: InputImage): Task<T>
 
-    protected abstract fun onSuccess(results: T, graphicOverlay: GraphicOverlay)
+    protected abstract fun onSuccess(results: T, graphicOverlay: GraphicOverlay, inputImage: InputImage)
 
     protected abstract fun onFailure(e: Exception)
 }

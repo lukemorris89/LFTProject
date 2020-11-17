@@ -1,60 +1,32 @@
 package com.example.androidcamerard.viewmodel
 
 import android.app.Application
+import android.graphics.Bitmap
+import android.graphics.RectF
 import android.net.Uri
 import android.util.Log
-import androidx.camera.lifecycle.ProcessCameraProvider
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import com.example.androidcamerard.camera.GraphicOverlay
 import com.google.mlkit.vision.label.ImageLabel
-import java.util.concurrent.ExecutionException
+import java.io.File
 
 class CameraViewModel(application: Application) : AndroidViewModel(application) {
 
-    val imageLabels = MutableLiveData<List<ImageLabel>>()
-
-    private var cameraProviderLiveData: MutableLiveData<ProcessCameraProvider>? = null
     private val placeholderImageUri: Uri = Uri.parse(
         "android.resource://" + application.packageName + "/drawable/media"
     )
+
+    val imageLabels = MutableLiveData<List<ImageLabel>>()
     val photoFilename = MutableLiveData(placeholderImageUri)
+    val croppedBitmap = MutableLiveData<Bitmap>()
+    val graphicOverlay = MutableLiveData<GraphicOverlay>()
+    var numPhotosCollected = MutableLiveData<Int>()
+    val outputDirectory = MutableLiveData<File>()
 
     init {
         Log.i(TAG, "Photo ViewModel created.")
     }
-
-    // Handle any errors (including cancellation) here.
-    val processCameraProvider: LiveData<ProcessCameraProvider>
-        get() {
-            if (cameraProviderLiveData == null) {
-                cameraProviderLiveData = MutableLiveData()
-                val cameraProviderFuture = ProcessCameraProvider.getInstance(getApplication())
-                cameraProviderFuture.addListener(
-                    {
-                        try {
-                            cameraProviderLiveData!!.setValue(cameraProviderFuture.get())
-                        } catch (e: ExecutionException) {
-                            // Handle any errors (including cancellation) here.
-                            Log.e(
-                                TAG,
-                                "Unhandled exception",
-                                e
-                            )
-                        } catch (e: InterruptedException) {
-                            Log.e(
-                                TAG,
-                                "Unhandled exception",
-                                e
-                            )
-                        }
-                    },
-                    ContextCompat.getMainExecutor(getApplication())
-                )
-            }
-            return cameraProviderLiveData as MutableLiveData<ProcessCameraProvider>
-        }
 
     companion object {
         private val TAG = CameraViewModel::class.simpleName

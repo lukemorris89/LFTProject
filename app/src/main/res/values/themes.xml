@@ -1,7 +1,8 @@
 <resources>
 
     <style name="AppTheme" parent="Theme.MaterialComponents.NoActionBar">
-        <item name="fontFamily">sans-serif</item>
+        <item name="android:fontFamily">google-sans</item>
+        <item name="android:lineSpacingExtra">4sp</item>
     </style>
 
     <style name="SearchTextBar">
@@ -31,7 +32,7 @@
 
     <style name="BottomSheetTitleBar">
         <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_height">@dimen/bottom_sheet_peek_height</item>
         <item name="android:paddingStart">@dimen/bottom_sheet_padding_start</item>
         <item name="android:paddingEnd">@dimen/bottom_sheet_padding_end</item>
         <item name="android:paddingTop">@dimen/bottom_sheet_padding_top_bottom</item>
@@ -44,16 +45,15 @@
         <item name="android:textSize">@dimen/app_text_size_large</item>
         <item name="android:textColor">@color/white</item>
         <item name="android:maxLines">1</item>
-        <item name="android:layout_marginStart">@dimen/bottom_sheet_title_margin_start</item>
     </style>
 
     <style name="BottomSheetButton" parent="Widget.MaterialComponents.Button">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
-        <item name="backgroundTint">@color/button_enabled</item>
+        <item name="backgroundTint">@color/button_default</item>
         <item name="cornerRadius">@dimen/button_corner_radius</item>
-        <item name="android:paddingTop">@dimen/button_padding_top_bottom_small</item>
-        <item name="android:paddingBottom">@dimen/button_padding_top_bottom_small</item>
+        <item name="android:paddingTop">@dimen/button_padding_top_bottom_medium</item>
+        <item name="android:paddingBottom">@dimen/button_padding_top_bottom_medium</item>
         <item name="android:paddingStart">@dimen/button_padding_start_end_small</item>
         <item name="android:paddingEnd">@dimen/button_padding_start_end_small</item>
         <item name="android:textAllCaps">false</item>

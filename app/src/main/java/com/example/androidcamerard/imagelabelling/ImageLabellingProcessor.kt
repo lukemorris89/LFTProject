@@ -45,30 +45,34 @@ class ImageLabellingProcessor(private val context: Context,
         return imageLabeler.process(image)
     }
 
-    override fun onSuccess(results: List<ImageLabel>, graphicOverlay: GraphicOverlay) {
+    override fun onSuccess(results: List<ImageLabel>, graphicOverlay: GraphicOverlay, inputImage: InputImage) {
         if (results.isEmpty() || results[0].text != "Hand") {
-            resultsText.text = context.resources.getString(R.string.point_your_camera_at_the_test)
+            resultsText.text = context.resources.getString(R.string.align_the_test_device_inside_the_box)
             cameraImageButton.isEnabled = false
             cameraImageButton.setImageResource(R.drawable.ic_photo_camera_disabled_v24)
             graphicOverlay.drawBlueRect = false
         }
         else {
-            viewModel.imageLabels.value = results
-            if (results[0].text == "Hand") {
-                cameraImageButton.isEnabled = true
-                cameraImageButton.setImageResource(R.drawable.ic_photo_camera_24)
-                resultsText.text = context.resources.getString(R.string.image_labelling_results, results[0].text,  "%.2f".format(results[0].confidence * 100))
-                graphicOverlay.drawBlueRect = true
+            if (results.isNotEmpty()) {
+                viewModel.imageLabels.value = results
+                if (results[0].text == "Hand") {
+                    cameraImageButton.isEnabled = true
+                    cameraImageButton.setImageResource(R.drawable.ic_photo_camera_24)
+                    resultsText.text = context.resources.getString(
+                        R.string.image_labelling_results,
+                        results[0].text,
+                        "%.2f".format(results[0].confidence * 100)
+                    )
+                    graphicOverlay.drawBlueRect = true
+                }
             }
+            logExtrasForTesting(results)
         }
-        logExtrasForTesting(results)
     }
-
 
     override fun onFailure(e: Exception) {
         Log.w(TAG, "Label detection failed.$e")
     }
-
 
     companion object {
         private const val TAG = "LabelDetectorProcessor"
