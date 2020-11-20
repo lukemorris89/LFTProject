@@ -1,35 +1,38 @@
 package com.example.androidcamerard.views
 
 import android.app.Activity
+import android.graphics.Bitmap
 import android.os.Build
 import android.os.Bundle
+import android.provider.MediaStore
 import android.util.Log
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ImageView
 import androidx.annotation.RequiresApi
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
-import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.androidcamerard.R
-import com.example.androidcamerard.imagelabelling.ImageLabelsAdapter
+import com.example.androidcamerard.camera.CameraViewModel
+import com.example.androidcamerard.ml.Model
+import com.example.androidcamerard.recognition.Recognition
+import com.example.androidcamerard.recognition.RecognitionAdapter
+import com.example.androidcamerard.recognition.RecognitionListViewModel
 import com.example.androidcamerard.utils.Utils
-import com.example.androidcamerard.viewmodel.CameraViewModel
 import com.google.android.material.bottomsheet.BottomSheetBehavior
-import com.google.mlkit.vision.common.InputImage
-import com.google.mlkit.vision.label.ImageLabel
-import com.google.mlkit.vision.label.ImageLabeling
-import com.google.mlkit.vision.label.defaults.ImageLabelerOptions
 import kotlinx.android.synthetic.main.fragment_image_analysis.*
-import java.io.IOException
+import org.tensorflow.lite.gpu.CompatibilityList
+import org.tensorflow.lite.support.image.TensorImage
+
 
 class ImageAnalysisFragment : Fragment(), View.OnClickListener {
 
+    private lateinit var imageOutputView: ImageView
     private lateinit var imageLabelsRecyclerView: RecyclerView
     private lateinit var bottomSheetTitleView: View
     private lateinit var actionButton: Button
@@ -41,8 +44,8 @@ class ImageAnalysisFragment : Fragment(), View.OnClickListener {
     private var slidingSheetUpFromHiddenState: Boolean = false
     private var fromCapture : Boolean? = null
 
-    private val labelData: MutableList<ImageLabel> = mutableListOf()
-    private val viewModel: CameraViewModel by activityViewModels()
+    private val recogViewModel: RecognitionListViewModel by activityViewModels()
+    private val cameraViewModel: CameraViewModel by activityViewModels()
 
     @RequiresApi(Build.VERSION_CODES.P)
     override fun onCreateView(
@@ -57,11 +60,31 @@ class ImageAnalysisFragment : Fragment(), View.OnClickListener {
         if (arguments != null) {
             fromCapture = requireArguments().get("SOURCE")!! == "ImageCapture"
         }
+
+        setUpUI(view)
+
+        analyzeStaticImage()
+
+        return view
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        setUpBottomSheet()
+    }
+
+    private fun setUpUI(view: View) {
         expandButton = view.findViewById(R.id.expand_arrow)
+
         actionButton = view.findViewById<Button>(R.id.action_button).apply {
-            text = if (fromCapture!!) getString(R.string.retake_photo) else getString(R.string.gallery)
+            text = if (fromCapture!!) {
+                getString(R.string.retake_photo)
+            } else {
+                getString(R.string.gallery)
+            }
             setOnClickListener(this@ImageAnalysisFragment)
         }
+
         returnHomeButton = view.findViewById<Button>(R.id.return_home_button).apply {
             setOnClickListener(this@ImageAnalysisFragment)
         }
@@ -69,34 +92,13 @@ class ImageAnalysisFragment : Fragment(), View.OnClickListener {
             setOnClickListener(this@ImageAnalysisFragment)
         }
 
-        view.findViewById<ImageView>(R.id.camera_output_imageview).apply {
+        imageOutputView = view.findViewById<ImageView>(R.id.camera_output_imageview).apply {
             if (fromCapture!!) {
-                setImageBitmap(viewModel.croppedBitmap.value)
+                setImageBitmap(cameraViewModel.capturedImageBitmap.value)
             } else {
-                Glide.with(this).load(viewModel.photoFilename.value).into(this)
-                scaleType = ImageView.ScaleType.CENTER_CROP
+                Glide.with(this).load(cameraViewModel.photoFilename.value).into(this)
             }
         }
-
-        analyzeStaticImage()
-        return view
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        setUpBottomSheet()
-
-        imageLabelsRecyclerView = requireView().findViewById<RecyclerView>(R.id.image_labels_recycler_view)
-            .apply {
-                adapter = ImageLabelsAdapter(context, labelData)
-                layoutManager = LinearLayoutManager(context)
-            }
-    }
-
-
-    override fun onResume() {
-        super.onResume()
-        setUpBottomSheet()
     }
 
     private fun setUpBottomSheet() {
@@ -136,6 +138,15 @@ class ImageAnalysisFragment : Fragment(), View.OnClickListener {
                     return
                 }
             })
+
+        imageLabelsRecyclerView = requireView().findViewById<RecyclerView>(R.id.image_labels_recycler_view).apply {
+            val viewAdapter = RecognitionAdapter(requireContext())
+            adapter = viewAdapter
+
+            recogViewModel.recognitionList.observe(viewLifecycleOwner, {
+                viewAdapter.submitList(it)
+            })
+        }
     }
 
     override fun onClick(view: View) {
@@ -153,34 +164,50 @@ class ImageAnalysisFragment : Fragment(), View.OnClickListener {
     }
 
     private fun analyzeStaticImage() {
-        val image: InputImage
-        try {
-            image = InputImage.fromFilePath(requireContext(), viewModel.photoFilename.value!!)
+        val model: Model by lazy{
 
-            val options = ImageLabelerOptions.Builder()
-                .setConfidenceThreshold(0.7f)
-                .build()
-            val imageLabeler =
-                ImageLabeling.getClient(options)
+            // Optional GPU acceleration
+            val compatList = CompatibilityList()
 
-            imageLabeler.process(image)
-                .addOnSuccessListener { labels ->
-                    labelData.clear()
-                    for (label in labels) {
-                        labelData.add(label)
-                    }
-                    imageLabelsRecyclerView.adapter?.notifyDataSetChanged()
-                }
-                .addOnFailureListener { e ->
-                    Log.e(TAG, e.message.toString())
-                }
+            val options = if(compatList.isDelegateSupportedOnThisDevice) {
+                Log.d(TAG, "This device is GPU Compatible ")
+                org.tensorflow.lite.support.model.Model.Options.Builder().setDevice(org.tensorflow.lite.support.model.Model.Device.GPU).build()
+            } else {
+                Log.d(TAG, "This device is GPU Incompatible ")
+                org.tensorflow.lite.support.model.Model.Options.Builder().setNumThreads(4).build()
+            }
 
-        } catch (e: IOException) {
-            e.printStackTrace()
+            // Initialize the LFT Model
+            Model.newInstance(requireContext(), options)
         }
+
+        val items = mutableListOf<Recognition>()
+
+        val bitmapImage: Bitmap = if (fromCapture!!) {
+            cameraViewModel.capturedImageBitmap.value!!
+        } else {
+            MediaStore.Images.Media.getBitmap(requireContext().contentResolver, cameraViewModel.photoFilename.value)
+        }
+        val tfImage = TensorImage.fromBitmap(bitmapImage)
+
+        // Process the image using the trained model, sort and pick out the top results
+        val outputs = model.process(tfImage)
+            .probabilityAsCategoryList.apply {
+                sortByDescending { it.score } // Sort with highest confidence first
+            }.take(MAX_RESULT_DISPLAY) // take the top results
+
+        // Converting the top probability items into a list of recognitions
+        for (output in outputs) {
+            items.add(Recognition(output.label, output.score))
+        }
+
+        // Return the result
+        recogViewModel.updateData(items)
     }
 
     companion object {
         private const val TAG = "CameraOutputFragment"
+        private const val MAX_RESULT_DISPLAY = 2 // Maximum number of results displayed
+
     }
 }

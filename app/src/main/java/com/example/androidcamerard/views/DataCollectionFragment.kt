@@ -2,11 +2,8 @@ package com.example.androidcamerard.views
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.content.Intent
 import android.content.pm.PackageManager
-import android.net.Uri
 import android.os.Bundle
-import android.os.Environment
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -23,7 +20,7 @@ import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import com.example.androidcamerard.R
 import com.example.androidcamerard.utils.Utils
-import com.example.androidcamerard.viewmodel.CameraViewModel
+import com.example.androidcamerard.camera.CameraViewModel
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*

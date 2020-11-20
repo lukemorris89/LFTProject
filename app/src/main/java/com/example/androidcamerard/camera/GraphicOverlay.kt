@@ -24,10 +24,8 @@ import android.os.Build
 import android.util.AttributeSet
 import android.util.Size
 import android.view.View
-import com.example.androidcamerard.R
 import com.example.androidcamerard.R.*
 import com.example.androidcamerard.utils.getEnum
-import com.example.androidcamerard.utils.isPortrait
 import com.example.androidcamerard.utils.px
 import kotlin.math.min
 
@@ -112,21 +110,12 @@ class GraphicOverlay@JvmOverloads constructor(
     override val scanRect: RectF
         get() = when (type) {
             Type.LFT -> {
-                if(context.isPortrait()) {
                     val size = min(width * 0.7f, MAX_WIDTH_PORTRAIT)
                     val l = (width - size) / 1.05f
                     val r = width - l
                     val t = height * 0.1f
                     val b = (t + size) * 1.6f
                     RectF(l, t, r, b)
-                } else {
-                    val size = min(width * 0.25f, MAX_WIDTH_LANDSCAPE)
-                    val l = width * 0.05f
-                    val r = l + size
-                    val t = height * 0.05f
-                    val b = t + size
-                    RectF(l, t, r, b)
-                }
             }
         }
 
@@ -137,6 +126,5 @@ class GraphicOverlay@JvmOverloads constructor(
 
     companion object {
         const val MAX_WIDTH_PORTRAIT = 1200f
-        const val MAX_WIDTH_LANDSCAPE = 1600f
     }
 }

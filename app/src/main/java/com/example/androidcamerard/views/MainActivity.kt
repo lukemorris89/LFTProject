@@ -10,7 +10,7 @@ import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import com.example.androidcamerard.R
 import com.example.androidcamerard.utils.Utils
-import com.example.androidcamerard.viewmodel.CameraViewModel
+import com.example.androidcamerard.camera.CameraViewModel
 
 class MainActivity : AppCompatActivity() {
 

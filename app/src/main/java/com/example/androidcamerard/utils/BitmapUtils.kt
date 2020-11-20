@@ -16,58 +16,78 @@
 
 package com.example.androidcamerard.utils
 
-import android.graphics.*
-import android.media.Image
-import android.view.View
-import com.example.androidcamerard.camera.GraphicOverlay
-import java.io.ByteArrayOutputStream
+import android.annotation.SuppressLint
+import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.Matrix
+import android.util.Log
+import androidx.camera.core.ImageProxy
+import java.nio.ByteBuffer
 
 
 /** Utils functions for bitmap conversions.  */
 object BitmapUtils {
-    fun cropImage(bitmap: Bitmap, frame: View, graphicOverlay: GraphicOverlay): ByteArray? {
+
+    /**
+     * Convert Image Proxy to Bitmap
+     */
+    private lateinit var bitmapBuffer: Bitmap
+    private lateinit var rotationMatrix: Matrix
+    private const val TAG = "BitmapUtils"
+
+    @SuppressLint("UnsafeExperimentalUsageError")
+    fun toBitmap(context: Context, imageProxy: ImageProxy): Bitmap? {
+        val yuvToRgbConverter = YuvToRgbConverter(context)
+        val image = imageProxy.image ?: return null
+
+
+        // Initialise Buffer
+        if (!::bitmapBuffer.isInitialized) {
+            // The image rotation and RGB image buffer are initialized only once
+            Log.d(TAG, "Initalise toBitmap()")
+            rotationMatrix = Matrix()
+            rotationMatrix.postRotate(imageProxy.imageInfo.rotationDegrees.toFloat())
+            bitmapBuffer = Bitmap.createBitmap(
+                imageProxy.width, imageProxy.height, Bitmap.Config.ARGB_8888
+            )
+        }
+
+        // Pass image to an image analyser
+        yuvToRgbConverter.yuvToRgb(image, bitmapBuffer)
+
+        // Create the Bitmap in the correct orientation
+        return Bitmap.createBitmap(
+            bitmapBuffer,
+            0,
+            0,
+            bitmapBuffer.width,
+            bitmapBuffer.height,
+            rotationMatrix,
+            false
+        )
+    }
+
+    fun imageProxyToBitmap(image: ImageProxy): Bitmap {
+        val planeProxy = image.planes[0]
+        val buffer: ByteBuffer = planeProxy.buffer
+        val bytes = ByteArray(buffer.remaining())
+        buffer.get(bytes)
+        val rawBitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+
         val matrix = Matrix()
+
         matrix.postRotate(90f)
 
-        val rotatedBitmap = Bitmap.createBitmap(
-            bitmap,
+
+        return Bitmap.createBitmap(
+            rawBitmap,
             0,
             0,
-            bitmap.width,
-            bitmap.height,
+            rawBitmap.width,
+            rawBitmap.height,
             matrix,
             true
         )
-
-        val reference = graphicOverlay.scanRect
-        val heightOriginal: Int = frame.height
-        val widthOriginal: Int = frame.width
-
-        val heightFrame: Int = reference.height().toInt()
-        val widthFrame: Int = reference.width().toInt()
-
-        val leftFrame: Int = reference.left.toInt()
-        val topFrame: Int = reference.top.toInt()
-
-        val heightReal = bitmap.height
-        val widthReal = bitmap.width
-
-        val widthFinal = (widthFrame * widthReal / heightOriginal) - 10
-        val heightFinal = (heightFrame * heightReal / widthOriginal) - 1000
-        val leftFinal = (leftFrame * widthReal / widthOriginal) - 100
-        val topFinal = (topFrame * heightReal / heightOriginal) +  100
-
-        val bitmapFinal = Bitmap.createBitmap(
-            rotatedBitmap,
-            leftFinal, topFinal, widthFinal, heightFinal
-        )
-        val stream = ByteArrayOutputStream()
-        bitmapFinal.compress(
-            Bitmap.CompressFormat.JPEG,
-            100,
-            stream
-        )
-        return stream.toByteArray()
     }
-
 }

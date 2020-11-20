@@ -27,6 +27,7 @@
     <dimen name="top_action_button_padding">12dp</dimen>
 
     <dimen name="button_bottom_margin_small">12dp</dimen>
+    <dimen name="button_bottom_margin_medium">18dp</dimen>
     <dimen name="button_bottom_margin_large">24dp</dimen>
     <dimen name="button_padding_start_end_small">16dp</dimen>
     <dimen name="button_padding_start_end_medium">32dp</dimen>

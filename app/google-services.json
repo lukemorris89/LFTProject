@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "180159560069",
+    "firebase_url": "https://androidcamerard.firebaseio.com",
+    "project_id": "androidcamerard",
+    "storage_bucket": "androidcamerard.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:180159560069:android:107fa233a2fda209d0acec",
+        "android_client_info": {
+          "package_name": "com.example.androidcamerard"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "180159560069-rndb3s7jmfk1eg2nu2316lg7e39lo926.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDVU2UOhOv82zswOE2CS32Vvn4bhLAUPj4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "180159560069-rndb3s7jmfk1eg2nu2316lg7e39lo926.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

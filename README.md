@@ -17,7 +17,7 @@ The app will run on devices that meet these requirements:
 
 The app features:
 - User can preview an image from the camera viewfinder and perform live analysis on an incoming stream of image frames
-- Capture a photograph when the image in the preview meets the required criteria/matches the correct image analysis label (currently set to a hand for testing purposes)
+- Capture a photograph when the image in the preview meets the required criteria/matches the correct image analysis label (a lateral flow test)
 - View the results of the image classification analysis of the captured photograph and retake the photograph if required
 - Choose an image from the device's gallery and perform image classification analysis on it
 
@@ -29,7 +29,8 @@ The following libraries are utilised in this project:
 - ***AndroidX Lifecycle Components*** - viewmodels, livedata and lifecycle components
 - ***Android Material*** - material design layout components
 - ***Android CameraX*** - hardware camera image preview and capture
-- ***Google MLKit*** - image classification
+- ***Tensorflow Lite*** - image classification
+- ***Glide*** - displaying saved images
 
 ## Code Style
 

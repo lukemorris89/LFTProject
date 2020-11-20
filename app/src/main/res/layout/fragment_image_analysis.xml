@@ -20,8 +20,8 @@
             android:layout_marginStart="@dimen/image_preview_margin"
             android:layout_marginEnd="@dimen/image_preview_margin"
             tools:src="@tools:sample/backgrounds/scenic"
-            android:contentDescription="@string/cd_image_preview"
             android:scaleType="fitCenter"
+            android:contentDescription="@string/cd_image_preview"
             android:layout_marginBottom="@dimen/bottom_sheet_peek_height"/>
 
         <include layout="@layout/top_action_bar_image_analysis"
