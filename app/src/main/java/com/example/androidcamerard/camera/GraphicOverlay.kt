@@ -19,6 +19,7 @@ package com.example.androidcamerard.camera
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.res.Resources
 import android.graphics.*
 import android.os.Build
 import android.util.AttributeSet
@@ -50,6 +51,7 @@ import kotlin.math.min
  * coordinate from the image's coordinate system to the view coordinate system.
  *
  */
+@SuppressLint("CustomViewStyleable")
 class GraphicOverlay@JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : View(context, attrs, defStyleAttr), ScannerOverlay {

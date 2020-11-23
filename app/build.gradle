@@ -73,8 +73,8 @@ dependencies {
     kapt "com.github.bumptech.glide:compiler:$glide_version"
 
     // Tensorflow Lite for image analysis
-    implementation('org.tensorflow:tensorflow-lite:0.0.0-nightly') { changing = true }
-    implementation('org.tensorflow:tensorflow-lite-gpu:0.0.0-nightly') { changing = true }
+    implementation('org.tensorflow:tensorflow-lite:2.3.0') { changing = true }
+    implementation('org.tensorflow:tensorflow-lite-gpu:2.3.0') { changing = true }
     implementation('org.tensorflow:tensorflow-lite-support:0.0.0-nightly') { changing = true }
     implementation 'org.tensorflow:tensorflow-lite-metadata:0.1.0-rc1'
 
@@ -89,4 +89,6 @@ dependencies {
 
     // Assertions
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
+    androidTestImplementation "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
+
 }

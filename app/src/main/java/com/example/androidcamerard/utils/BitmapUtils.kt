@@ -90,4 +90,23 @@ object BitmapUtils {
             true
         )
     }
+
+    fun cropBitmapToTest(bitmap: Bitmap): Bitmap {
+
+        val width = bitmap.width
+        val height = bitmap.height
+        val size = width * 0.7f
+        val l = (width - size) / 1.05f
+        val r = width - l
+        val t = height * 0.1f
+        val b = (t + size) * 1.6f
+        val cropWidth = r - l
+        val cropHeight = b - t
+
+        return Bitmap.createBitmap(bitmap,
+            l.toInt(),
+            t.toInt(),
+            cropWidth.toInt(),
+            cropHeight.toInt())
+    }
 }

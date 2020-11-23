@@ -6,7 +6,6 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
-import android.util.Size
 import android.view.*
 import android.widget.ImageButton
 import android.widget.ImageView
@@ -27,6 +26,7 @@ import com.example.androidcamerard.utils.BitmapUtils.toBitmap
 import com.example.androidcamerard.camera.CameraViewModel
 import com.example.androidcamerard.recognition.Recognition
 import com.example.androidcamerard.recognition.RecognitionListViewModel
+import com.example.androidcamerard.utils.BitmapUtils.cropBitmapToTest
 import com.example.androidcamerard.utils.BitmapUtils.imageProxyToBitmap
 import org.tensorflow.lite.gpu.CompatibilityList
 import org.tensorflow.lite.support.image.TensorImage
@@ -82,6 +82,16 @@ class ImageLabellingLiveFragment : Fragment(), View.OnClickListener {
         cameraViewModel.graphicOverlay.value = graphicOverlay
     }
 
+    override fun onResume() {
+        super.onResume()
+        // Check permissions on resume as these may be revoked at any time
+        if (allPermissionsGranted()) {
+            startCamera()
+        } else {
+            requestPermissions(REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS)
+        }
+    }
+
     private fun setUpUI(view: View) {
         previewView = view.findViewById(R.id.preview_view)
         graphicOverlay = view.findViewById(R.id.graphic_overlay)
@@ -99,16 +109,17 @@ class ImageLabellingLiveFragment : Fragment(), View.OnClickListener {
         }
 
         recogViewModel.recognitionList.observe(viewLifecycleOwner, {
-            if (it[0].label == "lateral_flow_test" && it[0].confidence >= 0.9f) {
+            if (it[0].label == "lateral_flow_test" && it[0].confidence >= 0.8f) {
                 graphicOverlay.drawBlueRect = true
                 photoCaptureButton.isEnabled = true
                 photoCaptureButton.setImageResource(R.drawable.ic_photo_camera_24)
+                resultTextView.text = String.format("Lateral Flow Test: %.1f", it[0].confidence * 100.0f)
             } else {
                 graphicOverlay.drawBlueRect = false
                 photoCaptureButton.isEnabled = false
                 photoCaptureButton.setImageResource(R.drawable.ic_photo_camera_disabled_v24)
+                resultTextView.text = getString(R.string.center_test_in_box)
             }
-            resultTextView.text = it[0].toString()
         })
     }
 
@@ -122,19 +133,17 @@ class ImageLabellingLiveFragment : Fragment(), View.OnClickListener {
 
             // Preview
             preview = Preview.Builder()
+                .setTargetAspectRatio(AspectRatio.RATIO_16_9)
                 .build()
 
             // Image Capture
             imageCapture = ImageCapture.Builder()
-                .setTargetResolution(Size(224, 224))
+                .setTargetAspectRatio(AspectRatio.RATIO_16_9)
                 .build()
 
             // Image Analysis
             imageAnalyzer = ImageAnalysis.Builder()
-                // This sets the ideal size for the image to be analyse, CameraX will choose the
-                // the most suitable resolution which may not be exactly the same or hold the same
-                // aspect ratio
-                .setTargetResolution(Size(224, 224))
+                .setTargetAspectRatio(AspectRatio.RATIO_16_9)
                 // How the Image Analyser should pipe in input, 1. every frame but drop no frame, or
                 // 2. go to the latest frame and may drop some frame. The default is 2.
                 // STRATEGY_KEEP_ONLY_LATEST. The following line is optional, kept here for clarity
@@ -152,6 +161,11 @@ class ImageLabellingLiveFragment : Fragment(), View.OnClickListener {
                 if (cameraProvider.hasCamera(CameraSelector.DEFAULT_BACK_CAMERA))
                     CameraSelector.DEFAULT_BACK_CAMERA else CameraSelector.DEFAULT_FRONT_CAMERA
 
+            // Set viewport as equal to preview view size to allow for WYSIWYG-style analysis
+            // (prevents imageProxy being cropped to 720 x 720)
+            val viewport = previewView.viewPort
+
+
             setupAutoFocus()
 
             try {
@@ -159,13 +173,18 @@ class ImageLabellingLiveFragment : Fragment(), View.OnClickListener {
                 cameraProvider?.unbindAll()
 
                 // Bind use cases to camera - try to bind everything at once and CameraX will find
-                // the best combination.
+                // the best combination. Use case group used as this allows viewport to be set
+                val useCaseGroup = UseCaseGroup.Builder()
+                    .addUseCase(preview)
+                    .addUseCase(imageCapture)
+                    .addUseCase(imageAnalyzer)
+                    .setViewPort(viewport!!)
+                    .build()
+
                 camera = cameraProvider.bindToLifecycle(
                     this,
                     cameraSelector,
-                    preview,
-                    imageCapture,
-                    imageAnalyzer
+                    useCaseGroup
                 )
 
                 // Attach the preview to preview view, aka View Finder
@@ -185,10 +204,11 @@ class ImageLabellingLiveFragment : Fragment(), View.OnClickListener {
     }
 
     private fun updateFlashMode(flashMode: Boolean) {
-        if (camera.cameraInfo.hasFlashUnit()) {
-            camera.cameraControl.enableTorch(flashMode)
-        }
         flashButton.isSelected = !flashMode
+        if (camera.cameraInfo.hasFlashUnit()) {
+            camera.cameraControl.enableTorch(!flashMode)
+        }
+
     }
 
     private fun takePhoto() {
@@ -206,9 +226,10 @@ class ImageLabellingLiveFragment : Fragment(), View.OnClickListener {
                 @SuppressLint("UnsafeExperimentalUsageError")
                 override fun onCaptureSuccess(imageProxy: ImageProxy) {
                     val imageBitmap = imageProxyToBitmap(imageProxy)
+                    val croppedBitmap = cropBitmapToTest(imageBitmap)
 
                     cameraViewModel.capturedImageProxy.postValue(imageProxy)
-                    cameraViewModel.capturedImageBitmap.postValue(imageBitmap)
+                    cameraViewModel.capturedImageBitmap.postValue(croppedBitmap)
 
                     // Inform analysis fragment of source to determine which UI to show
                     val args = bundleOf("SOURCE" to SOURCE)
@@ -321,8 +342,12 @@ class ImageLabellingLiveFragment : Fragment(), View.OnClickListener {
 
             val items = mutableListOf<Recognition>()
 
+            // Crop imageProxy to shape of test
+            val bitmapImage = toBitmap(context, imageProxy)
+            val croppedBitmap = cropBitmapToTest(bitmapImage!!)
+
             // Convert Image to Bitmap then to TensorImage
-            val tfImage = TensorImage.fromBitmap(toBitmap(context, imageProxy))
+            val tfImage = TensorImage.fromBitmap(croppedBitmap)
 
             // Process the image using the trained model, sort and pick out the top results
             val outputs = model.process(tfImage)
