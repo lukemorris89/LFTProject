@@ -21,7 +21,6 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Matrix
-import android.util.Log
 import androidx.camera.core.ImageProxy
 import java.nio.ByteBuffer
 
@@ -34,7 +33,6 @@ object BitmapUtils {
      */
     private lateinit var bitmapBuffer: Bitmap
     private lateinit var rotationMatrix: Matrix
-    private const val TAG = "BitmapUtils"
 
     @SuppressLint("UnsafeExperimentalUsageError")
     fun toBitmap(context: Context, imageProxy: ImageProxy): Bitmap? {
@@ -45,7 +43,6 @@ object BitmapUtils {
         // Initialise Buffer
         if (!::bitmapBuffer.isInitialized) {
             // The image rotation and RGB image buffer are initialized only once
-            Log.d(TAG, "Initalise toBitmap()")
             rotationMatrix = Matrix()
             rotationMatrix.postRotate(imageProxy.imageInfo.rotationDegrees.toFloat())
             bitmapBuffer = Bitmap.createBitmap(

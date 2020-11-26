@@ -66,25 +66,16 @@ class ImageLabellingLiveFragment : Fragment(), View.OnClickListener {
 
         val view = inflater.inflate(R.layout.fragment_image_labelling_live, container, false)
 
-        // Request camera permissions
-        if (allPermissionsGranted()) {
-            startCamera()
-        } else {
-            requestPermissions(REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS)
-        }
-
         setUpUI(view)
+
         return view
     }
 
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        cameraViewModel.graphicOverlay.value = graphicOverlay
-    }
 
-    override fun onResume() {
-        super.onResume()
-        // Check permissions on resume as these may be revoked at any time
+        // Request camera permissions
         if (allPermissionsGranted()) {
             startCamera()
         } else {
@@ -109,16 +100,19 @@ class ImageLabellingLiveFragment : Fragment(), View.OnClickListener {
         }
 
         recogViewModel.recognitionList.observe(viewLifecycleOwner, {
-            if (it[0].label == "lateral_flow_test" && it[0].confidence >= 0.8f) {
-                graphicOverlay.drawBlueRect = true
-                photoCaptureButton.isEnabled = true
-                photoCaptureButton.setImageResource(R.drawable.ic_photo_camera_24)
-                resultTextView.text = String.format("Lateral Flow Test: %.1f", it[0].confidence * 100.0f)
-            } else {
-                graphicOverlay.drawBlueRect = false
-                photoCaptureButton.isEnabled = false
-                photoCaptureButton.setImageResource(R.drawable.ic_photo_camera_disabled_v24)
-                resultTextView.text = getString(R.string.center_test_in_box)
+            if (it.isNotEmpty()) {
+                if (it[0].label == "lateral_flow_test" && it[0].confidence >= 0.8f) {
+                    graphicOverlay.drawBlueRect = true
+                    photoCaptureButton.isEnabled = true
+                    photoCaptureButton.setImageResource(R.drawable.ic_photo_camera_24)
+                    resultTextView.text =
+                        String.format("Lateral Flow Test: %.1f", it[0].confidence * 100.0f)
+                } else {
+                    graphicOverlay.drawBlueRect = false
+                    photoCaptureButton.isEnabled = false
+                    photoCaptureButton.setImageResource(R.drawable.ic_photo_camera_disabled_v24)
+                    resultTextView.text = getString(R.string.align_the_test_device_inside_the_box)
+                }
             }
         })
     }
@@ -165,9 +159,6 @@ class ImageLabellingLiveFragment : Fragment(), View.OnClickListener {
             // (prevents imageProxy being cropped to 720 x 720)
             val viewport = previewView.viewPort
 
-
-            setupAutoFocus()
-
             try {
                 // Unbind use cases before rebinding
                 cameraProvider?.unbindAll()
@@ -192,6 +183,7 @@ class ImageLabellingLiveFragment : Fragment(), View.OnClickListener {
             } catch (exc: Exception) {
                 Log.e(TAG, "Use case binding failed", exc)
             }
+            setupAutoFocus()
         }, ContextCompat.getMainExecutor(context))
     }
 
@@ -235,7 +227,7 @@ class ImageLabellingLiveFragment : Fragment(), View.OnClickListener {
                     val args = bundleOf("SOURCE" to SOURCE)
                     findNavController()
                         .navigate(
-                            R.id.action_imageLabellingLiveFragment_to_cameraOutputFragment,
+                            R.id.action_imageLabellingLiveFragment_to_imageAnalysisFragment,
                             args
                         )
 
@@ -339,7 +331,7 @@ class ImageLabellingLiveFragment : Fragment(), View.OnClickListener {
 
         @SuppressLint("UnsafeExperimentalUsageError")
         override fun analyze(imageProxy: ImageProxy) {
-
+            val analysisTimeStart = System.currentTimeMillis()
             val items = mutableListOf<Recognition>()
 
             // Crop imageProxy to shape of test
@@ -362,6 +354,10 @@ class ImageLabellingLiveFragment : Fragment(), View.OnClickListener {
 
             // Return the result
             listener(items.toList())
+
+            //Log for testing speed of analysis
+            val analysisTime = System.currentTimeMillis() - analysisTimeStart
+            Log.d(TAG, "Total analysis time: $analysisTime ms")
 
             // Close the image,this tells CameraX to feed the next image to the analyzer
             imageProxy.close()
