@@ -1,0 +1,2 @@
+lateral_flow_test
+not_lateral_flow_test

@@ -16,7 +16,8 @@ import com.example.androidcamerard.utils.Utils
 class StartFragment : Fragment() {
 
     enum class DetectionMode(val titleResId: Int, val subtitleResId: Int) {
-        ILC_LIVE(R.string.mode_ilc_live_title, R.string.mode_ilc_live__subtitle),
+        ILCTF_LIVE(R.string.mode_ilctf_live_title, R.string.mode_ilctf_live__subtitle),
+        ILCFB_LIVE(R.string.mode_ilcfb_live_title, R.string.mode_ilcfb_live__subtitle),
         ILC_STATIC(R.string.mode_ilc_static_title, R.string.mode_ilc_static_subtitle),
         DC_LIVE(R.string.mode_dc_title, R.string.mode_dc_subtitle)
     }
@@ -62,8 +63,10 @@ class StartFragment : Fragment() {
                 itemView.setOnClickListener {
                     val activity = activity as Activity
                     when (detectionMode) {
-                        DetectionMode.ILC_LIVE -> findNavController()
+                        DetectionMode.ILCTF_LIVE -> findNavController()
                             .navigate(R.id.action_startFragment_to_imageLabellingLiveFragment)
+                        DetectionMode.ILCFB_LIVE -> findNavController()
+                            .navigate(R.id.action_startFragment_to_imageLabellingLiveFirebaseFragment)
                         DetectionMode.DC_LIVE -> findNavController()
                             .navigate(R.id.action_startFragment_to_dataCollectionFragment)
                         else -> Utils.openImagePicker(activity)

@@ -17,13 +17,16 @@
             android:id="@+id/action_startFragment_to_dataCollectionFragment"
             app:destination="@id/dataCollectionFragment"
             app:launchSingleTop="true" />
+        <action
+            android:id="@+id/action_startFragment_to_imageLabellingLiveFirebaseFragment"
+            app:destination="@id/imageLabellingLiveFirebaseFragment" />
     </fragment>
     <fragment
         android:id="@+id/imageLabellingLiveFragment"
         android:name="com.example.androidcamerard.views.ImageLabellingLiveFragment"
         android:label="ImageLabellingLiveFragment">
         <action
-            android:id="@+id/action_imageLabellingLiveFragment_to_cameraOutputFragment"
+            android:id="@+id/action_imageLabellingLiveFragment_to_imageAnalysisFragment"
             app:destination="@id/imageAnalysisFragment"
             app:launchSingleTop="true" />
     </fragment>
@@ -40,4 +43,13 @@
         android:id="@+id/dataCollectionFragment"
         android:name="com.example.androidcamerard.views.DataCollectionFragment"
         android:label="DataCollectionFragment" />
+    <fragment
+        android:id="@+id/imageLabellingLiveFirebaseFragment"
+        android:name="com.example.androidcamerard.views.ImageLabellingLiveFirebaseFragment"
+        android:label="fragment_image_labelling_live_firebase"
+        tools:layout="@layout/fragment_image_labelling_live_firebase" >
+        <action
+            android:id="@+id/action_imageLabellingLiveFirebaseFragment_to_imageAnalysisFragment"
+            app:destination="@id/imageAnalysisFragment" />
+    </fragment>
 </navigation>

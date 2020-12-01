@@ -28,26 +28,34 @@ import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
+/**
+* Fragment designed for developer only - to collect large amounts of data in a short period of time.
+ * Taking a photo in this fragment does not trigger any navigation component - user stays on same
+ * fragment and is allowed to continue taking more photos.
+ * Photos are named "Data Collect_" plus date to distinguish these from photos taken in main app.
+*/
 
 class DataCollectionFragment : Fragment(), View.OnClickListener {
 
+    //UI components
     private lateinit var previewView: PreviewView
     private lateinit var flashButton: View
     private lateinit var closeButton: View
     private lateinit var photoCaptureButton: View
 
+    // CameraX
     private var camera: Camera? = null
     private var cameraProvider: ProcessCameraProvider? = null
+    private lateinit var cameraExecutor: ExecutorService
 
-    //Use cases
+    // Use Cases
     private var previewUseCase: Preview? = null
     private var imageCaptureUseCase: ImageCapture? = null
 
+    // Photo collection
     private var outputDirectory: File? = null
-    private lateinit var cameraExecutor: ExecutorService
-
     private lateinit var tvNumPhotosCollected: TextView
-    private var numPhotosCollected: Int? = 0
+    private var numPhotosCollected: Int? = null
 
     private val viewModel: CameraViewModel by activityViewModels()
 
@@ -64,7 +72,10 @@ class DataCollectionFragment : Fragment(), View.OnClickListener {
             REQUEST_CODE_PERMISSIONS
         )
 
+        // Initialise view with number of photos taken so far
         numPhotosCollected = getNumPhotosCollected()
+        viewModel.numPhotosCollected.value = numPhotosCollected
+
         cameraExecutor = Executors.newSingleThreadExecutor()
         outputDirectory = viewModel.outputDirectory.value
 
@@ -127,6 +138,7 @@ class DataCollectionFragment : Fragment(), View.OnClickListener {
                 .requireLensFacing(CameraSelector.LENS_FACING_BACK)
                 .build()
 
+            // Sets camera to focus on centre of viewfinder once a minute
             setupAutoFocus()
 
             try {

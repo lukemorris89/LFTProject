@@ -2,8 +2,10 @@
     <string name="app_name">Android Camera R&amp;D</string>
 
     <!--    Start fragment options-->
-    <string name="mode_ilc_live_title">Image Labelling: Live Camera - LFT</string>
-    <string name="mode_ilc_live__subtitle">A device\'s live camera can be used to label a lateral flow test using a custom-trained model.</string>
+    <string name="mode_ilctf_live_title">Image Labelling: Live Camera - LFT - TensorFlow</string>
+    <string name="mode_ilctf_live__subtitle">A device\'s live camera can be used to label a lateral flow test using a custom-trained model (via Tensorflow Lite Model Maker).</string>
+    <string name="mode_ilcfb_live_title">Image Labelling: Live Camera - LFT - Firebase</string>
+    <string name="mode_ilcfb_live__subtitle">A device\'s live camera can be used to label a lateral flow test using a custom-trained model (via Firebase AutoML Vision Edge).</string>
     <string name="mode_ilc_static_title">Image Labelling: Static Image - LFT</string>
     <string name="mode_ilc_static_subtitle">A static image from device storage can be analysed to determine the presence of a lateral flow test.</string>
     <string name="mode_dc_title">Data Collection - LFT</string>
@@ -28,6 +30,5 @@
     <string name="cd_take_photo_button">Take Photo Button</string>
     <string name="cd_expand_arrow">Expand Arrow</string>
     <string name="cd_image_preview">Image Preview</string>
-    <string name="center_test_in_box">Center test in box</string>
 
 </resources>

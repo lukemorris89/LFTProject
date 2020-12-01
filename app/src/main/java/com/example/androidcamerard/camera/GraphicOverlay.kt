@@ -19,7 +19,6 @@ package com.example.androidcamerard.camera
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.content.res.Resources
 import android.graphics.*
 import android.os.Build
 import android.util.AttributeSet
@@ -56,6 +55,7 @@ class GraphicOverlay@JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : View(context, attrs, defStyleAttr), ScannerOverlay {
 
+    // Paint clear rectangle in centre of dark overlay
     private val transparentPaint: Paint by lazy {
         Paint().apply {
             isAntiAlias = true
@@ -63,6 +63,7 @@ class GraphicOverlay@JvmOverloads constructor(
         }
     }
 
+    // Set default rectangle outline properties
     private val strokePaint: Paint by lazy {
         Paint().apply {
             isAntiAlias = true
@@ -72,6 +73,7 @@ class GraphicOverlay@JvmOverloads constructor(
         }
     }
 
+    // Colours scan overlay - if true, valid item in view so change rectangle stroke colour
     var drawBlueRect : Boolean = false
         set(value) {
             field = value
@@ -80,6 +82,7 @@ class GraphicOverlay@JvmOverloads constructor(
 
     var type: Type
 
+    // Set colour of rectangle outline
     private val blueColor = resources.getColor(color.bond)
 
     init {
