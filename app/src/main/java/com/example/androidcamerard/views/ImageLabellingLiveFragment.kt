@@ -101,7 +101,7 @@ class ImageLabellingLiveFragment : Fragment(), View.OnClickListener {
 
         recogViewModel.recognitionList.observe(viewLifecycleOwner, {
             if (it.isNotEmpty()) {
-                if (it[0].label == "lateral_flow_test" && it[0].confidence >= 0.8f) {
+                if (it[0].label == "lateral_flow_test" && it[0].confidence >= 0.9f) {
                     graphicOverlay.drawBlueRect = true
                     photoCaptureButton.isEnabled = true
                     photoCaptureButton.setImageResource(R.drawable.ic_photo_camera_24)

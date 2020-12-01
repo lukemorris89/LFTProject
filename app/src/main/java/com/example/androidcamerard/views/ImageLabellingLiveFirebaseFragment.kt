@@ -143,7 +143,7 @@ class ImageLabellingLiveFirebaseFragment : Fragment(), View.OnClickListener {
                 .build()
 
             val autoMLImageLabelerOptions = AutoMLImageLabelerOptions.Builder(localModel)
-                .setConfidenceThreshold(0.7f)  // Evaluate your model in the Firebase console
+                .setConfidenceThreshold(0.5f)  // Evaluate your model in the Firebase console
                 // to determine an appropriate value.
                 .build();
             val labeler = ImageLabeling.getClient(autoMLImageLabelerOptions)
