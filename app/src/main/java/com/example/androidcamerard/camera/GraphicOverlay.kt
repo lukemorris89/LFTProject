@@ -51,7 +51,7 @@ import kotlin.math.min
  *
  */
 @SuppressLint("CustomViewStyleable")
-class GraphicOverlay@JvmOverloads constructor(
+class GraphicOverlay @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : View(context, attrs, defStyleAttr), ScannerOverlay {
 
@@ -74,13 +74,13 @@ class GraphicOverlay@JvmOverloads constructor(
     }
 
     // Colours scan overlay - if true, valid item in view so change rectangle stroke colour
-    var drawBlueRect : Boolean = false
+    var drawBlueRect: Boolean = false
         set(value) {
             field = value
             invalidate()
         }
 
-    var type: Type
+    private var type: Type
 
     // Set colour of rectangle outline
     private val blueColor = resources.getColor(color.bond)
@@ -88,7 +88,7 @@ class GraphicOverlay@JvmOverloads constructor(
     init {
         setWillNotDraw(false)
 
-        if(Build.VERSION.SDK_INT <= Build.VERSION_CODES.M) {
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.M) {
             setLayerType(LAYER_TYPE_HARDWARE, null)
         }
 
@@ -104,7 +104,7 @@ class GraphicOverlay@JvmOverloads constructor(
         val radius = context.px(16f)
         val rectF = scanRect
         canvas.drawRoundRect(rectF, radius, radius, transparentPaint)
-        strokePaint.color = if(drawBlueRect) blueColor else Color.WHITE
+        strokePaint.color = if (drawBlueRect) blueColor else Color.WHITE
         canvas.drawRoundRect(rectF, radius, radius, strokePaint)
     }
 
@@ -115,12 +115,12 @@ class GraphicOverlay@JvmOverloads constructor(
     override val scanRect: RectF
         get() = when (type) {
             Type.LFT -> {
-                    val size = min(width * 0.7f, MAX_WIDTH_PORTRAIT)
-                    val l = (width - size) / 1.05f
-                    val r = width - l
-                    val t = height * 0.1f
-                    val b = (t + size) * 1.6f
-                    RectF(l, t, r, b)
+                val size = min(width * 0.7f, MAX_WIDTH_PORTRAIT)
+                val l = (width - size) / 1.05f
+                val r = width - l
+                val t = height * 0.1f
+                val b = (t + size) * 1.6f
+                RectF(l, t, r, b)
             }
         }
 

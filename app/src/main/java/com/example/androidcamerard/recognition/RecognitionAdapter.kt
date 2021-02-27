@@ -24,7 +24,8 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.androidcamerard.databinding.RecognitionItemBinding
 
-// Adapter for displayng image labelling results gained from tensorflow analysis
+// Adapter for displayng image labelling results gained from tensorflow analysis, either from image
+// capture or static image via device image picker
 class RecognitionAdapter(private val ctx: Context) :
     ListAdapter<Recognition, RecognitionViewHolder>(RecognitionDiffUtil()) {
 

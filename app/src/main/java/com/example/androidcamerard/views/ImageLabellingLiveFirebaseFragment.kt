@@ -23,9 +23,8 @@ import com.example.androidcamerard.R
 import com.example.androidcamerard.camera.GraphicOverlay
 import com.example.androidcamerard.camera.CameraViewModel
 import com.example.androidcamerard.recognition.Recognition
-import com.example.androidcamerard.recognition.RecognitionListViewModel
 import com.example.androidcamerard.utils.BitmapUtils.cropBitmapToTest
-import com.example.androidcamerard.utils.BitmapUtils.imageProxyToBitmap
+import com.example.androidcamerard.utils.BitmapUtils.capturedImageProxyToBitmap
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.label.ImageLabeler
 import com.google.mlkit.vision.label.ImageLabeling
@@ -56,12 +55,13 @@ class ImageLabellingLiveFirebaseFragment : Fragment(), View.OnClickListener {
     private lateinit var resultTextView: TextView
 
     // ViewModel variables
-    private val recogViewModel: RecognitionListViewModel by activityViewModels()
     private val cameraViewModel: CameraViewModel by activityViewModels()
 
-    override fun onCreateView(inflater: LayoutInflater,
-                              container: ViewGroup?,
-                              savedInstanceState: Bundle?): View? {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
 
         val view = inflater.inflate(R.layout.fragment_image_labelling_live, container, false)
 
@@ -100,7 +100,7 @@ class ImageLabellingLiveFirebaseFragment : Fragment(), View.OnClickListener {
             isEnabled = false
         }
 
-        recogViewModel.recognitionList.observe(viewLifecycleOwner, {
+        cameraViewModel.recognitionList.observe(viewLifecycleOwner, {
             if (it.isNotEmpty()) {
                 if (it[0].label == "lateral_flow_test" && it[0].confidence >= 0.8f) {
                     graphicOverlay.drawBlueRect = true
@@ -158,7 +158,7 @@ class ImageLabellingLiveFirebaseFragment : Fragment(), View.OnClickListener {
                 .also { analysisUseCase: ImageAnalysis ->
                     analysisUseCase.setAnalyzer(cameraExecutor, ImageAnalyzer(labeler) { items ->
                         // updating the list of recognised objects
-                        recogViewModel.updateData(items)
+                        cameraViewModel.updateData(items)
                     })
                 }
 
@@ -216,7 +216,6 @@ class ImageLabellingLiveFirebaseFragment : Fragment(), View.OnClickListener {
         if (camera.cameraInfo.hasFlashUnit()) {
             camera.cameraControl.enableTorch(!flashMode)
         }
-
     }
 
     private fun takePhoto() {
@@ -233,7 +232,7 @@ class ImageLabellingLiveFirebaseFragment : Fragment(), View.OnClickListener {
 
                 @SuppressLint("UnsafeExperimentalUsageError")
                 override fun onCaptureSuccess(imageProxy: ImageProxy) {
-                    val imageBitmap = imageProxyToBitmap(imageProxy)
+                    val imageBitmap = capturedImageProxyToBitmap(imageProxy)
                     val croppedBitmap = cropBitmapToTest(imageBitmap)
 
                     cameraViewModel.capturedImageProxy.postValue(imageProxy)
@@ -321,8 +320,10 @@ class ImageLabellingLiveFirebaseFragment : Fragment(), View.OnClickListener {
         cameraExecutor.shutdown()
     }
 
-    class ImageAnalyzer(private val labeler: ImageLabeler, private val listener: RecognitionListener)
-        : ImageAnalysis.Analyzer {
+    class ImageAnalyzer(
+        private val labeler: ImageLabeler,
+        private val listener: RecognitionListener
+    ) : ImageAnalysis.Analyzer {
 
         @SuppressLint("UnsafeExperimentalUsageError")
         override fun analyze(imageProxy: ImageProxy) {
@@ -358,7 +359,6 @@ class ImageLabellingLiveFirebaseFragment : Fragment(), View.OnClickListener {
             }
         }
     }
-
 
 
     companion object {

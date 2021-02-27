@@ -6,26 +6,15 @@
     <color name="lighter_grey">#DDDDDD</color>
     <color name="bond">#1D636D</color>
     <color name="bond_medium">#113E45</color>
-    <color name="bond_dark">#0C292E</color>
     <color name="grey_medium">#212121</color>
     <color name="grey_dark">#414141</color>
 
-    <color name="mode_select_title">@color/black</color>
     <color name="mode_select_subtitle">@color/medium_grey</color>
 
-    <color name="bounding_box_solid_color">#FFFFFF</color>
-    <color name="object_detection_scrim_color">@color/grey_medium</color>
-    <color name="object_detected_bg_gradient_start">#00000000</color>
-    <color name="object_detected_bg_gradient_end">@color/grey_dark</color>
-
-<!--    <color name="button_enabled">#5F6368</color>-->
-    <color name="button_enabled">@color/bond</color>
+    <!--    <color name="button_enabled">#5F6368</color>-->
     <color name="button_disabled">#888888</color>
     <color name="button_default">@color/bond_medium</color>
 
-    <color name="search_text_bar">@color/medium_grey</color>
-
-    <color name="label_confidence">@color/medium_grey</color>
     <color name="bottom_sheet_titlebar">@color/bond</color>
 
 </resources>

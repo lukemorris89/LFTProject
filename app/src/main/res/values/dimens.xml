@@ -19,29 +19,19 @@
     <dimen name="search_text_bar_padding_start_end_large">32dp</dimen>
     <dimen name="search_text_bar_bottom_margin_large">28dp</dimen>
 
-    <dimen name="bounding_box_stroke_width">6dp</dimen>
-    <dimen name="bounding_box_corner_radius">12dp</dimen>
-
     <dimen name="top_action_bar_padding_horizontal">8dp</dimen>
     <dimen name="top_action_bar_height">72dp</dimen>
     <dimen name="top_action_button_padding">12dp</dimen>
 
     <dimen name="button_bottom_margin_small">12dp</dimen>
-    <dimen name="button_bottom_margin_medium">18dp</dimen>
     <dimen name="button_bottom_margin_large">24dp</dimen>
     <dimen name="button_padding_start_end_small">16dp</dimen>
-    <dimen name="button_padding_start_end_medium">32dp</dimen>
     <dimen name="button_padding_start_end_large">48dp</dimen>
-    <dimen name="button_padding_top_bottom_small">4dp</dimen>
     <dimen name="button_padding_top_bottom_medium">8dp</dimen>
     <dimen name="button_padding_top_bottom_large">12dp</dimen>
     <dimen name="button_corner_radius">24dp</dimen>
     <dimen name="camera_button_corner_radius">36dp</dimen>
     <dimen name="button_elevation">6dp</dimen>
-
-    <dimen name="divider_height">1dp</dimen>
-    <dimen name="recyclerview_item_padding">16dp</dimen>
-    <dimen name="recyclerview_divider_margin">16dp</dimen>
 
     <dimen name="image_preview_margin">16dp</dimen>
 

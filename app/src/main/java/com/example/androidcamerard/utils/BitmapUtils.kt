@@ -35,7 +35,7 @@ object BitmapUtils {
     private lateinit var rotationMatrix: Matrix
 
     @SuppressLint("UnsafeExperimentalUsageError")
-    fun toBitmap(context: Context, imageProxy: ImageProxy): Bitmap? {
+    fun liveImageProxyToBitmap(context: Context, imageProxy: ImageProxy): Bitmap? {
         val yuvToRgbConverter = YuvToRgbConverter(context)
         val image = imageProxy.image ?: return null
 
@@ -65,7 +65,7 @@ object BitmapUtils {
         )
     }
 
-    fun imageProxyToBitmap(image: ImageProxy): Bitmap {
+    fun capturedImageProxyToBitmap(image: ImageProxy): Bitmap {
         val planeProxy = image.planes[0]
         val buffer: ByteBuffer = planeProxy.buffer
         val bytes = ByteArray(buffer.remaining())
@@ -100,10 +100,12 @@ object BitmapUtils {
         val cropWidth = r - l
         val cropHeight = b - t
 
-        return Bitmap.createBitmap(bitmap,
+        return Bitmap.createBitmap(
+            bitmap,
             l.toInt(),
             t.toInt(),
             cropWidth.toInt(),
-            cropHeight.toInt())
+            cropHeight.toInt()
+        )
     }
 }

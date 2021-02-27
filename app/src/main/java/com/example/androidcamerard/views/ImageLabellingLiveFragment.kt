@@ -22,12 +22,11 @@ import androidx.navigation.fragment.findNavController
 import com.example.androidcamerard.R
 import com.example.androidcamerard.camera.GraphicOverlay
 import com.example.androidcamerard.ml.Model
-import com.example.androidcamerard.utils.BitmapUtils.toBitmap
+import com.example.androidcamerard.utils.BitmapUtils.liveImageProxyToBitmap
 import com.example.androidcamerard.camera.CameraViewModel
 import com.example.androidcamerard.recognition.Recognition
-import com.example.androidcamerard.recognition.RecognitionListViewModel
 import com.example.androidcamerard.utils.BitmapUtils.cropBitmapToTest
-import com.example.androidcamerard.utils.BitmapUtils.imageProxyToBitmap
+import com.example.androidcamerard.utils.BitmapUtils.capturedImageProxyToBitmap
 import org.tensorflow.lite.gpu.CompatibilityList
 import org.tensorflow.lite.support.image.TensorImage
 import java.util.concurrent.Executors
@@ -57,12 +56,13 @@ class ImageLabellingLiveFragment : Fragment(), View.OnClickListener {
     private lateinit var resultTextView: TextView
 
     // ViewModel variables
-    private val recogViewModel: RecognitionListViewModel by activityViewModels()
     private val cameraViewModel: CameraViewModel by activityViewModels()
 
-    override fun onCreateView(inflater: LayoutInflater,
-                              container: ViewGroup?,
-                              savedInstanceState: Bundle?): View? {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
 
         val view = inflater.inflate(R.layout.fragment_image_labelling_live, container, false)
 
@@ -99,7 +99,7 @@ class ImageLabellingLiveFragment : Fragment(), View.OnClickListener {
             isEnabled = false
         }
 
-        recogViewModel.recognitionList.observe(viewLifecycleOwner, {
+        cameraViewModel.recognitionList.observe(viewLifecycleOwner, {
             if (it.isNotEmpty()) {
                 if (it[0].label == "lateral_flow_test" && it[0].confidence >= 0.9f) {
                     graphicOverlay.drawBlueRect = true
@@ -144,10 +144,12 @@ class ImageLabellingLiveFragment : Fragment(), View.OnClickListener {
                 .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
                 .build()
                 .also { analysisUseCase: ImageAnalysis ->
-                    analysisUseCase.setAnalyzer(cameraExecutor, ImageAnalyzer(requireContext()) { items ->
-                        // updating the list of recognised objects
-                        recogViewModel.updateData(items)
-                    })
+                    analysisUseCase.setAnalyzer(
+                        cameraExecutor,
+                        ImageAnalyzer(requireContext()) { items ->
+                            // updating the list of recognised objects
+                            cameraViewModel.updateData(items)
+                        })
                 }
 
             // Select camera, back is the default. If it is not available, choose front camera
@@ -217,7 +219,7 @@ class ImageLabellingLiveFragment : Fragment(), View.OnClickListener {
 
                 @SuppressLint("UnsafeExperimentalUsageError")
                 override fun onCaptureSuccess(imageProxy: ImageProxy) {
-                    val imageBitmap = imageProxyToBitmap(imageProxy)
+                    val imageBitmap = capturedImageProxyToBitmap(imageProxy)
                     val croppedBitmap = cropBitmapToTest(imageBitmap)
 
                     cameraViewModel.capturedImageProxy.postValue(imageProxy)
@@ -335,7 +337,7 @@ class ImageLabellingLiveFragment : Fragment(), View.OnClickListener {
             val items = mutableListOf<Recognition>()
 
             // Crop imageProxy to shape of test
-            val bitmapImage = toBitmap(context, imageProxy)
+            val bitmapImage = liveImageProxyToBitmap(context, imageProxy)
             val croppedBitmap = cropBitmapToTest(bitmapImage!!)
 
             // Convert Image to Bitmap then to TensorImage
@@ -363,7 +365,6 @@ class ImageLabellingLiveFragment : Fragment(), View.OnClickListener {
             imageProxy.close()
         }
     }
-
 
 
     companion object {

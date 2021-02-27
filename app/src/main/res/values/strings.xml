@@ -21,8 +21,6 @@
 
     <!-- Strings for image labelling settings. -->
     <string name="view_results">View Results</string>
-    <string name="image_labelling_results">%1$s - Confidence: %2$s</string>
-    <string name="image_labelling_results_confidence">Confidence: %1$s</string>
 
     <!--    Strings for accessibility-->
     <string name="cd_flash_button">Toggle camera flash</string>

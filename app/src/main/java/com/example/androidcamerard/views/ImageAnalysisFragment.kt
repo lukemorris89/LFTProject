@@ -22,7 +22,6 @@ import com.example.androidcamerard.camera.CameraViewModel
 import com.example.androidcamerard.ml.Model
 import com.example.androidcamerard.recognition.Recognition
 import com.example.androidcamerard.recognition.RecognitionAdapter
-import com.example.androidcamerard.recognition.RecognitionListViewModel
 import com.example.androidcamerard.utils.Utils
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import kotlinx.android.synthetic.main.fragment_image_analysis.*
@@ -42,9 +41,8 @@ class ImageAnalysisFragment : Fragment(), View.OnClickListener {
     private lateinit var bottomSheetBehavior: BottomSheetBehavior<View>
 
     private var slidingSheetUpFromHiddenState: Boolean = false
-    private var fromCapture : Boolean? = null
+    private var fromCapture: Boolean? = null
 
-    private val recogViewModel: RecognitionListViewModel by activityViewModels()
     private val cameraViewModel: CameraViewModel by activityViewModels()
 
     @RequiresApi(Build.VERSION_CODES.P)
@@ -139,14 +137,15 @@ class ImageAnalysisFragment : Fragment(), View.OnClickListener {
                 }
             })
 
-        imageLabelsRecyclerView = requireView().findViewById<RecyclerView>(R.id.image_labels_recycler_view).apply {
-            val viewAdapter = RecognitionAdapter(requireContext())
-            adapter = viewAdapter
+        imageLabelsRecyclerView =
+            requireView().findViewById<RecyclerView>(R.id.image_labels_recycler_view).apply {
+                val viewAdapter = RecognitionAdapter(requireContext())
+                adapter = viewAdapter
 
-            recogViewModel.recognitionList.observe(viewLifecycleOwner, {
-                viewAdapter.submitList(it)
-            })
-        }
+                cameraViewModel.recognitionList.observe(viewLifecycleOwner, {
+                    viewAdapter.submitList(it)
+                })
+            }
     }
 
     override fun onClick(view: View) {
@@ -164,14 +163,15 @@ class ImageAnalysisFragment : Fragment(), View.OnClickListener {
     }
 
     private fun analyzeStaticImage() {
-        val model: Model by lazy{
+        val model: Model by lazy {
 
             // Optional GPU acceleration
             val compatList = CompatibilityList()
 
-            val options = if(compatList.isDelegateSupportedOnThisDevice) {
+            val options = if (compatList.isDelegateSupportedOnThisDevice) {
                 Log.d(TAG, "This device is GPU Compatible ")
-                org.tensorflow.lite.support.model.Model.Options.Builder().setDevice(org.tensorflow.lite.support.model.Model.Device.GPU).build()
+                org.tensorflow.lite.support.model.Model.Options.Builder()
+                    .setDevice(org.tensorflow.lite.support.model.Model.Device.GPU).build()
             } else {
                 Log.d(TAG, "This device is GPU Incompatible ")
                 org.tensorflow.lite.support.model.Model.Options.Builder().setNumThreads(4).build()
@@ -186,7 +186,10 @@ class ImageAnalysisFragment : Fragment(), View.OnClickListener {
         val bitmapImage: Bitmap = if (fromCapture!!) {
             cameraViewModel.capturedImageBitmap.value!!
         } else {
-            MediaStore.Images.Media.getBitmap(requireContext().contentResolver, cameraViewModel.photoFilename.value)
+            MediaStore.Images.Media.getBitmap(
+                requireContext().contentResolver,
+                cameraViewModel.photoFilename.value
+            )
         }
         val tfImage = TensorImage.fromBitmap(bitmapImage)
 
@@ -202,7 +205,7 @@ class ImageAnalysisFragment : Fragment(), View.OnClickListener {
         }
 
         // Return the result
-        recogViewModel.updateData(items)
+        cameraViewModel.updateData(items)
     }
 
     companion object {

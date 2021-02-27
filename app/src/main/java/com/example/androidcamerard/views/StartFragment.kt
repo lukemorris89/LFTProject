@@ -11,16 +11,10 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.androidcamerard.R
+import com.example.androidcamerard.utils.DetectionMode
 import com.example.androidcamerard.utils.Utils
 
 class StartFragment : Fragment() {
-
-    enum class DetectionMode(val titleResId: Int, val subtitleResId: Int) {
-        ILCTF_LIVE(R.string.mode_ilctf_live_title, R.string.mode_ilctf_live__subtitle),
-        ILCFB_LIVE(R.string.mode_ilcfb_live_title, R.string.mode_ilcfb_live__subtitle),
-        ILC_STATIC(R.string.mode_ilc_static_title, R.string.mode_ilc_static_subtitle),
-        DC_LIVE(R.string.mode_dc_title, R.string.mode_dc_subtitle)
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
