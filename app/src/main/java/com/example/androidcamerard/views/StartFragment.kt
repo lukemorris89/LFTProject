@@ -36,7 +36,7 @@ class StartFragment : Fragment() {
             return ModeItemViewHolder(
                 LayoutInflater.from(parent.context)
                     .inflate(
-                        R.layout.fragment_start_mode_recyclerview_item, parent, false
+                        R.layout.start_mode_recyclerview_item, parent, false
                     )
             )
         }
