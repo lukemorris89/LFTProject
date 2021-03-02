@@ -15,10 +15,12 @@ import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.core.content.ContextCompat
+import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import com.example.androidcamerard.R
+import com.example.androidcamerard.databinding.FragmentDataCollectionBinding
 import com.example.androidcamerard.utils.Utils
 import com.example.androidcamerard.viewModels.CameraViewModel
 import java.io.File
@@ -37,11 +39,8 @@ import java.util.concurrent.TimeUnit
 
 class DataCollectionFragment : Fragment(), View.OnClickListener {
 
-    //UI components
-    private lateinit var previewView: PreviewView
-    private lateinit var flashButton: View
-    private lateinit var closeButton: View
-    private lateinit var photoCaptureButton: View
+    // Data binding
+    private lateinit var binding: FragmentDataCollectionBinding
 
     // CameraX
     private var camera: Camera? = null
@@ -53,8 +52,6 @@ class DataCollectionFragment : Fragment(), View.OnClickListener {
     private var imageCaptureUseCase: ImageCapture? = null
 
     // Photo collection
-    private var outputDirectory: File? = null
-    private lateinit var tvNumPhotosCollected: TextView
     private var numPhotosCollected: Int? = null
 
     private val viewModel: CameraViewModel by activityViewModels()
@@ -63,7 +60,14 @@ class DataCollectionFragment : Fragment(), View.OnClickListener {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val view = inflater.inflate(R.layout.fragment_data_collection, container, false)
+
+        binding =
+            DataBindingUtil.inflate(
+                inflater,
+                R.layout.fragment_data_collection,
+                container,
+                false
+            )
 
         // Request camera permissions
         if (allPermissionsGranted()) startCamera()
@@ -72,37 +76,30 @@ class DataCollectionFragment : Fragment(), View.OnClickListener {
             REQUEST_CODE_PERMISSIONS
         )
 
+        cameraExecutor = Executors.newSingleThreadExecutor()
+
         // Initialise view with number of photos taken so far
+        viewModel.outputDirectory.value = Utils.getOutputDirectory(requireContext())
         numPhotosCollected = getNumPhotosCollected()
         viewModel.numPhotosCollected.value = numPhotosCollected
 
-        cameraExecutor = Executors.newSingleThreadExecutor()
-        outputDirectory = viewModel.outputDirectory.value
+        binding.numPhotosCollected.text = getNumPhotosCollected().toString()
+        binding.photoCaptureButton.setOnClickListener(this@DataCollectionFragment)
 
-        tvNumPhotosCollected = view.findViewById<TextView>(R.id.num_photos_collected).apply {
-            text = getNumPhotosCollected().toString()
-        }
+        binding.topActionBarLiveCameraInclude.flashButton.setOnClickListener(this@DataCollectionFragment)
+        binding.topActionBarLiveCameraInclude.closeButton.setOnClickListener(this@DataCollectionFragment)
 
-        previewView = view.findViewById(R.id.preview_view)
-        flashButton = view.findViewById<View>(R.id.flash_button).apply {
-            setOnClickListener(this@DataCollectionFragment)
-        }
-        photoCaptureButton = view.findViewById<View>(R.id.photo_capture_button).apply {
-            setOnClickListener(this@DataCollectionFragment)
-        }
-        closeButton = view.findViewById<View>(R.id.close_button).apply {
-            setOnClickListener(this@DataCollectionFragment)
-        }
+        binding.lifecycleOwner = viewLifecycleOwner
+        binding.cameraViewModel = viewModel
 
-        return view
+        return binding.root
     }
 
     private fun getNumPhotosCollected(): Int {
         if (viewModel.numPhotosCollected.value == null) {
-            val outputDirectory = Utils.getOutputDirectory(requireContext())
-            viewModel.outputDirectory.value = outputDirectory
+            val outputDirectory = viewModel.outputDirectory.value
             var numPhotos = 0
-            if (outputDirectory!!.listFiles()!!.isNotEmpty()) {
+            if (outputDirectory?.listFiles()!!.isNotEmpty()) {
                 for (photo in outputDirectory.listFiles()!!) {
                     if (photo.name.startsWith("DataCollect")) {
                         numPhotos += 1
@@ -110,13 +107,14 @@ class DataCollectionFragment : Fragment(), View.OnClickListener {
                 }
             }
             return numPhotos
+        } else {
+            return viewModel.numPhotosCollected.value!!
         }
-        return 0
     }
 
     override fun onResume() {
         super.onResume()
-        tvNumPhotosCollected.text = getNumPhotosCollected().toString()
+        binding.numPhotosCollected.text = getNumPhotosCollected().toString()
     }
 
     @SuppressLint("UnsafeExperimentalUsageError")
@@ -145,7 +143,7 @@ class DataCollectionFragment : Fragment(), View.OnClickListener {
                 // Unbind use cases before rebinding
                 cameraProvider?.unbindAll()
 
-                previewUseCase?.setSurfaceProvider(previewView.surfaceProvider)
+                previewUseCase?.setSurfaceProvider(binding.previewView.surfaceProvider)
                 // Bind use cases to camera
                 camera = cameraProvider?.bindToLifecycle(
                     this,
@@ -163,12 +161,12 @@ class DataCollectionFragment : Fragment(), View.OnClickListener {
         when (view.id) {
             R.id.photo_capture_button -> takePhoto()
             R.id.close_button -> findNavController().popBackStack()
-            R.id.flash_button -> updateFlashMode(flashButton.isSelected)
+            R.id.flash_button -> updateFlashMode(binding.topActionBarLiveCameraInclude.flashButton.isSelected)
         }
     }
 
     private fun updateFlashMode(flashMode: Boolean) {
-        flashButton.isSelected = !flashMode
+        binding.topActionBarLiveCameraInclude.flashButton.isSelected = !flashMode
         if (camera!!.cameraInfo.hasFlashUnit()) {
             camera!!.cameraControl.enableTorch(!flashMode)
         }
@@ -179,7 +177,7 @@ class DataCollectionFragment : Fragment(), View.OnClickListener {
         val imageCapture = imageCaptureUseCase ?: return
         // Create a time-stamped output file to hold the image
         val photoFile = File(
-            outputDirectory,
+            viewModel.outputDirectory.value,
             "DataCollect_" + SimpleDateFormat(FILENAME_FORMAT, Locale.ENGLISH)
                 .format(System.currentTimeMillis()) + ".jpg"
         )
@@ -198,19 +196,19 @@ class DataCollectionFragment : Fragment(), View.OnClickListener {
                 override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
                     numPhotosCollected = numPhotosCollected?.plus(1)
                     viewModel.numPhotosCollected.value = numPhotosCollected
-                    tvNumPhotosCollected.text = numPhotosCollected.toString()
+                    binding.numPhotosCollected.text = numPhotosCollected.toString()
                 }
             }
         )
     }
 
     private fun setupAutoFocus() {
-        previewView.afterMeasured {
+        binding.previewView.afterMeasured {
             val factory: MeteringPointFactory = SurfaceOrientedMeteringPointFactory(
-                previewView.width.toFloat(), previewView.height.toFloat()
+                binding.previewView.width.toFloat(), binding.previewView.height.toFloat()
             )
-            val centerWidth = previewView.width.toFloat() / 2
-            val centerHeight = previewView.height.toFloat() / 2
+            val centerWidth = binding.previewView.width.toFloat() / 2
+            val centerHeight = binding.previewView.height.toFloat() / 2
             //create a point on the center of the view
             val autoFocusPoint = factory.createPoint(centerWidth, centerHeight)
             try {

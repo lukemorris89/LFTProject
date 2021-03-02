@@ -58,6 +58,7 @@
 
         <include
             layout="@layout/top_action_bar_live_camera"
+            android:id="@+id/top_action_bar_live_camera_include"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="top" />
