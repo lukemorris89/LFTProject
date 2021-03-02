@@ -12,14 +12,21 @@
         <action
             android:id="@+id/action_startFragment_to_imageLabellingLiveFragment"
             app:destination="@id/imageLabellingLiveFragment"
-            app:launchSingleTop="true" />
+            app:launchSingleTop="true"
+            app:popUpTo="@id/startFragment"
+            app:popUpToInclusive="false"/>
         <action
             android:id="@+id/action_startFragment_to_dataCollectionFragment"
             app:destination="@id/dataCollectionFragment"
-            app:launchSingleTop="true" />
+            app:launchSingleTop="true"
+            app:popUpTo="@id/startFragment"
+            app:popUpToInclusive="false"/>
         <action
             android:id="@+id/action_startFragment_to_imageLabellingLiveFirebaseFragment"
-            app:destination="@id/imageLabellingLiveFirebaseFragment" />
+            app:destination="@id/imageLabellingLiveFirebaseFragment"
+            app:launchSingleTop="true"
+            app:popUpTo="@id/startFragment"
+            app:popUpToInclusive="false"/>
     </fragment>
     <fragment
         android:id="@+id/imageLabellingLiveFragment"
@@ -28,7 +35,9 @@
         <action
             android:id="@+id/action_imageLabellingLiveFragment_to_imageAnalysisFragment"
             app:destination="@id/imageAnalysisFragment"
-            app:launchSingleTop="true" />
+            app:launchSingleTop="true"
+            app:popUpTo="@id/imageLabellingLiveFragment"
+            app:popUpToInclusive="false"/>
     </fragment>
     <fragment
         android:id="@+id/imageAnalysisFragment"
@@ -37,7 +46,14 @@
         tools:layout="@layout/fragment_image_analysis">
         <action
             android:id="@+id/action_cameraOutputFragment_to_startFragment"
-            app:destination="@id/startFragment" />
+            app:destination="@id/startFragment"
+            app:launchSingleTop="true"
+            app:popUpTo="@id/startFragment"
+            app:popUpToInclusive="false"/>
+        <argument
+            android:name="source"
+            app:argType="string"
+            android:defaultValue="image_picker_fragment"/>
     </fragment>
     <fragment
         android:id="@+id/dataCollectionFragment"
@@ -46,10 +62,12 @@
     <fragment
         android:id="@+id/imageLabellingLiveFirebaseFragment"
         android:name="com.example.androidcamerard.views.ImageLabellingLiveFirebaseFragment"
-        android:label="fragment_image_labelling_live_firebase"
-        tools:layout="@layout/fragment_image_labelling_live_firebase" >
+        android:label="fragment_image_labelling_live_firebase" >
         <action
             android:id="@+id/action_imageLabellingLiveFirebaseFragment_to_imageAnalysisFragment"
-            app:destination="@id/imageAnalysisFragment" />
+            app:destination="@id/imageAnalysisFragment"
+            app:launchSingleTop="true"
+            app:popUpTo="@id/imageLabellingLiveFirebaseFragment"
+            app:popUpToInclusive="false"/>
     </fragment>
 </navigation>

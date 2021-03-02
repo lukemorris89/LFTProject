@@ -57,12 +57,21 @@ class StartFragment : Fragment() {
                 itemView.setOnClickListener {
                     val activity = activity as Activity
                     when (detectionMode) {
-                        DetectionMode.ILCTF_LIVE -> findNavController()
-                            .navigate(R.id.action_startFragment_to_imageLabellingLiveFragment)
-                        DetectionMode.ILCFB_LIVE -> findNavController()
-                            .navigate(R.id.action_startFragment_to_imageLabellingLiveFirebaseFragment)
-                        DetectionMode.DC_LIVE -> findNavController()
-                            .navigate(R.id.action_startFragment_to_dataCollectionFragment)
+                        DetectionMode.ILCTF_LIVE -> {
+                            val action =
+                                StartFragmentDirections.actionStartFragmentToImageLabellingLiveFragment()
+                            findNavController().navigate(action)
+                        }
+                        DetectionMode.ILCFB_LIVE -> {
+                            val action =
+                                StartFragmentDirections.actionStartFragmentToImageLabellingLiveFirebaseFragment()
+                            findNavController().navigate(action)
+                        }
+                        DetectionMode.DC_LIVE -> {
+                            val action =
+                                StartFragmentDirections.actionStartFragmentToDataCollectionFragment()
+                            findNavController().navigate(action)
+                        }
                         else -> Utils.openImagePicker(activity)
                     }
                 }

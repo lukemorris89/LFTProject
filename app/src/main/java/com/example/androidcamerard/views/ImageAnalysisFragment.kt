@@ -15,6 +15,7 @@ import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.androidcamerard.R
@@ -22,6 +23,7 @@ import com.example.androidcamerard.viewModels.CameraViewModel
 import com.example.androidcamerard.ml.Model
 import com.example.androidcamerard.recognition.Recognition
 import com.example.androidcamerard.recognition.RecognitionAdapter
+import com.example.androidcamerard.utils.SOURCE_IMAGE_CAPTURE
 import com.example.androidcamerard.utils.Utils
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import kotlinx.android.synthetic.main.fragment_image_analysis.*
@@ -43,6 +45,8 @@ class ImageAnalysisFragment : Fragment(), View.OnClickListener {
     private var slidingSheetUpFromHiddenState: Boolean = false
     private var fromCapture: Boolean? = null
 
+    private val args: ImageAnalysisFragmentArgs by navArgs()
+
     private val cameraViewModel: CameraViewModel by activityViewModels()
 
     @RequiresApi(Build.VERSION_CODES.P)
@@ -56,7 +60,7 @@ class ImageAnalysisFragment : Fragment(), View.OnClickListener {
             false
         )
         if (arguments != null) {
-            fromCapture = requireArguments().get("SOURCE")!! == "ImageCapture"
+            fromCapture = args.source == SOURCE_IMAGE_CAPTURE
         }
 
         setUpUI(view)
@@ -103,7 +107,6 @@ class ImageAnalysisFragment : Fragment(), View.OnClickListener {
         bottomSheetTitleView = requireView().findViewById(R.id.transparent_expand_view)
         bottomSheetBehavior = BottomSheetBehavior.from(bottom_sheet)
         bottomSheetTitleView.setOnClickListener {
-            Log.d(TAG, "Title view clicked")
             when (bottomSheetBehavior.state) {
                 BottomSheetBehavior.STATE_HIDDEN,
                 BottomSheetBehavior.STATE_COLLAPSED -> bottomSheetBehavior.state =
@@ -114,8 +117,6 @@ class ImageAnalysisFragment : Fragment(), View.OnClickListener {
         bottomSheetBehavior.setBottomSheetCallback(
             object : BottomSheetBehavior.BottomSheetCallback() {
                 override fun onStateChanged(bottomSheet: View, newState: Int) {
-                    Log.d(TAG, "Bottom sheet new state: $newState")
-
                     when (newState) {
                         BottomSheetBehavior.STATE_HIDDEN,
                         BottomSheetBehavior.STATE_COLLAPSED -> {
@@ -151,8 +152,11 @@ class ImageAnalysisFragment : Fragment(), View.OnClickListener {
     override fun onClick(view: View) {
         val activity = activity as Activity
         when (view.id) {
-            R.id.return_home_button ->
-                findNavController().navigate(R.id.action_cameraOutputFragment_to_startFragment)
+            R.id.return_home_button -> {
+                val action =
+                    ImageAnalysisFragmentDirections.actionCameraOutputFragmentToStartFragment()
+                findNavController().navigate(action)
+            }
             R.id.action_button -> {
                 if (fromCapture!!) findNavController().popBackStack()
                 else Utils.openImagePicker(activity)
