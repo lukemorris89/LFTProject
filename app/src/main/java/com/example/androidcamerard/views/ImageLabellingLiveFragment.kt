@@ -23,7 +23,7 @@ import com.example.androidcamerard.R
 import com.example.androidcamerard.camera.GraphicOverlay
 import com.example.androidcamerard.ml.Model
 import com.example.androidcamerard.utils.BitmapUtils.liveImageProxyToBitmap
-import com.example.androidcamerard.camera.CameraViewModel
+import com.example.androidcamerard.viewModels.CameraViewModel
 import com.example.androidcamerard.recognition.Recognition
 import com.example.androidcamerard.utils.BitmapUtils.cropBitmapToTest
 import com.example.androidcamerard.utils.BitmapUtils.capturedImageProxyToBitmap

@@ -21,7 +21,7 @@ import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import com.example.androidcamerard.R
 import com.example.androidcamerard.camera.GraphicOverlay
-import com.example.androidcamerard.camera.CameraViewModel
+import com.example.androidcamerard.viewModels.CameraViewModel
 import com.example.androidcamerard.recognition.Recognition
 import com.example.androidcamerard.utils.BitmapUtils.cropBitmapToTest
 import com.example.androidcamerard.utils.BitmapUtils.capturedImageProxyToBitmap

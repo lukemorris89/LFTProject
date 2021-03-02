@@ -18,7 +18,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.androidcamerard.R
-import com.example.androidcamerard.camera.CameraViewModel
+import com.example.androidcamerard.viewModels.CameraViewModel
 import com.example.androidcamerard.ml.Model
 import com.example.androidcamerard.recognition.Recognition
 import com.example.androidcamerard.recognition.RecognitionAdapter

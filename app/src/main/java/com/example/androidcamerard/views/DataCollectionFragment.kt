@@ -20,7 +20,7 @@ import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import com.example.androidcamerard.R
 import com.example.androidcamerard.utils.Utils
-import com.example.androidcamerard.camera.CameraViewModel
+import com.example.androidcamerard.viewModels.CameraViewModel
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*

@@ -1,4 +1,4 @@
-package com.example.androidcamerard.camera
+package com.example.androidcamerard.viewModels
 
 import android.app.Application
 import android.graphics.Bitmap
