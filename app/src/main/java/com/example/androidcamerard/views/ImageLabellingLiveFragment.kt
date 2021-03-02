@@ -16,11 +16,13 @@ import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
+import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import com.example.androidcamerard.R
 import com.example.androidcamerard.camera.GraphicOverlay
+import com.example.androidcamerard.databinding.FragmentImageLabellingLiveBinding
 import com.example.androidcamerard.ml.Model
 import com.example.androidcamerard.utils.BitmapUtils.liveImageProxyToBitmap
 import com.example.androidcamerard.viewModels.CameraViewModel
@@ -32,6 +34,7 @@ import org.tensorflow.lite.gpu.CompatibilityList
 import org.tensorflow.lite.support.image.TensorImage
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
+import kotlin.text.*
 
 // Listener for the result of the ImageAnalyzer
 typealias RecognitionListener = (recognition: List<Recognition>) -> Unit
@@ -40,6 +43,9 @@ typealias RecognitionListener = (recognition: List<Recognition>) -> Unit
  * Main source of live image analysis within the app
  */
 class ImageLabellingLiveFragment : Fragment(), View.OnClickListener {
+
+    // Data binding
+    private lateinit var binding: FragmentImageLabellingLiveBinding
 
     // CameraX variables
     private lateinit var preview: Preview
@@ -50,26 +56,30 @@ class ImageLabellingLiveFragment : Fragment(), View.OnClickListener {
 
     // UI Variables
     private lateinit var previewView: PreviewView
-    private lateinit var graphicOverlay: GraphicOverlay
-    private lateinit var flashButton: ImageView
-    private lateinit var closeButton: ImageView
     private lateinit var photoCaptureButton: ImageButton
-    private lateinit var resultTextView: TextView
 
     // ViewModel variables
-    private val cameraViewModel: CameraViewModel by activityViewModels()
+    private val viewModel: CameraViewModel by activityViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+        binding =
+            DataBindingUtil.inflate(
+                inflater,
+                R.layout.fragment_image_labelling_live,
+                container,
+                false
+            )
 
-        val view = inflater.inflate(R.layout.fragment_image_labelling_live, container, false)
+        setUpUI()
 
-        setUpUI(view)
+        binding.lifecycleOwner = viewLifecycleOwner
+        binding.cameraViewModel = viewModel
 
-        return view
+        return binding.root
     }
 
 
@@ -84,35 +94,34 @@ class ImageLabellingLiveFragment : Fragment(), View.OnClickListener {
         }
     }
 
-    private fun setUpUI(view: View) {
-        previewView = view.findViewById(R.id.preview_view)
-        graphicOverlay = view.findViewById(R.id.graphic_overlay)
-        resultTextView = view.findViewById(R.id.overlay_results_textview)
-        flashButton = view.findViewById<ImageView>(R.id.flash_button).apply {
-            setOnClickListener(this@ImageLabellingLiveFragment)
-        }
-        closeButton = view.findViewById<ImageView>(R.id.close_button).apply {
-            setOnClickListener(this@ImageLabellingLiveFragment)
-        }
-        photoCaptureButton = view.findViewById<ImageButton>(R.id.photo_capture_button).apply {
+    private fun setUpUI() {
+        binding.topActionBarLiveCameraInclude.flashButton.setOnClickListener(this@ImageLabellingLiveFragment)
+        binding.topActionBarLiveCameraInclude.closeButton.setOnClickListener(this@ImageLabellingLiveFragment)
+        binding.photoCaptureButton.apply {
             setOnClickListener(this@ImageLabellingLiveFragment)
             // Begin session with capture button disabled - should only be enabled when valid object detected
             isEnabled = false
         }
 
-        cameraViewModel.recognitionList.observe(viewLifecycleOwner, {
+        viewModel.recognitionList.observe(viewLifecycleOwner, {
+            var overlayText: String?
             if (it.isNotEmpty()) {
                 if (it[0].label == "lateral_flow_test" && it[0].confidence >= 0.9f) {
-                    graphicOverlay.drawBlueRect = true
-                    photoCaptureButton.isEnabled = true
-                    photoCaptureButton.setImageResource(R.drawable.ic_photo_camera_24)
-                    resultTextView.text =
+                    binding.graphicOverlay.drawBlueRect = true
+                    binding.photoCaptureButton.apply {
+                        isEnabled = true
+                        setImageResource(R.drawable.ic_photo_camera_24)
+                    }
+                    binding.overlayText =
                         String.format("Lateral Flow Test: %.1f", it[0].confidence * 100.0f)
+
                 } else {
-                    graphicOverlay.drawBlueRect = false
-                    photoCaptureButton.isEnabled = false
-                    photoCaptureButton.setImageResource(R.drawable.ic_photo_camera_disabled_v24)
-                    resultTextView.text = getString(R.string.align_the_test_device_inside_the_box)
+                    binding.graphicOverlay.drawBlueRect = false
+                    binding.photoCaptureButton.apply {
+                        isEnabled = false
+                        setImageResource(R.drawable.ic_photo_camera_disabled_v24)
+                    }
+                    binding.overlayText = getString(R.string.align_the_test_device_inside_the_box)
                 }
             }
         })
@@ -149,7 +158,7 @@ class ImageLabellingLiveFragment : Fragment(), View.OnClickListener {
                         cameraExecutor,
                         ImageAnalyzer(requireContext()) { items ->
                             // updating the list of recognised objects
-                            cameraViewModel.updateData(items)
+                            viewModel.updateData(items)
                         })
                 }
 
@@ -194,12 +203,12 @@ class ImageLabellingLiveFragment : Fragment(), View.OnClickListener {
         when (view.id) {
             R.id.photo_capture_button -> takePhoto()
             R.id.close_button -> findNavController().popBackStack()
-            R.id.flash_button -> updateFlashMode(flashButton.isSelected)
+            R.id.flash_button -> updateFlashMode(binding.topActionBarLiveCameraInclude.flashButton.isSelected)
         }
     }
 
     private fun updateFlashMode(flashMode: Boolean) {
-        flashButton.isSelected = !flashMode
+        binding.topActionBarLiveCameraInclude.flashButton.isSelected = !flashMode
         if (camera.cameraInfo.hasFlashUnit()) {
             camera.cameraControl.enableTorch(!flashMode)
         }
@@ -223,8 +232,8 @@ class ImageLabellingLiveFragment : Fragment(), View.OnClickListener {
                     val imageBitmap = capturedImageProxyToBitmap(imageProxy)
                     val croppedBitmap = cropBitmapToTest(imageBitmap)
 
-                    cameraViewModel.capturedImageProxy.postValue(imageProxy)
-                    cameraViewModel.capturedImageBitmap.postValue(croppedBitmap)
+                    viewModel.capturedImageProxy.postValue(imageProxy)
+                    viewModel.capturedImageBitmap.postValue(croppedBitmap)
 
                     // Inform analysis fragment of source to determine which UI to show
                     val source = SOURCE_IMAGE_CAPTURE
