@@ -7,6 +7,7 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.os.bundleOf
 import androidx.navigation.NavController
+import androidx.navigation.findNavController
 import androidx.navigation.fragment.NavHostFragment
 import com.example.androidcamerard.R
 import com.example.androidcamerard.utils.Utils
@@ -22,9 +23,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val navHostFragment =
-            supportFragmentManager.findFragmentById(R.id.myNavHostFragment) as NavHostFragment
-        navController = navHostFragment.navController
+        navController = findNavController(R.id.main_nav_host_fragment)
         navController.navigate(R.id.startFragment)
     }
 

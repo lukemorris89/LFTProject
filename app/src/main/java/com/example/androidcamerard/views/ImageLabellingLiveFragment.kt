@@ -27,6 +27,7 @@ import com.example.androidcamerard.viewModels.CameraViewModel
 import com.example.androidcamerard.recognition.Recognition
 import com.example.androidcamerard.utils.BitmapUtils.cropBitmapToTest
 import com.example.androidcamerard.utils.BitmapUtils.capturedImageProxyToBitmap
+import com.example.androidcamerard.utils.SOURCE_IMAGE_CAPTURE
 import org.tensorflow.lite.gpu.CompatibilityList
 import org.tensorflow.lite.support.image.TensorImage
 import java.util.concurrent.Executors
@@ -226,12 +227,12 @@ class ImageLabellingLiveFragment : Fragment(), View.OnClickListener {
                     cameraViewModel.capturedImageBitmap.postValue(croppedBitmap)
 
                     // Inform analysis fragment of source to determine which UI to show
-                    val args = bundleOf("SOURCE" to SOURCE)
-                    findNavController()
-                        .navigate(
-                            R.id.action_imageLabellingLiveFragment_to_imageAnalysisFragment,
-                            args
+                    val source = SOURCE_IMAGE_CAPTURE
+                    val action =
+                        ImageLabellingLiveFragmentDirections.actionImageLabellingLiveFragmentToImageAnalysisFragment(
+                            source
                         )
+                    findNavController().navigate(action)
 
                     imageProxy.close()
                 }
@@ -371,7 +372,6 @@ class ImageLabellingLiveFragment : Fragment(), View.OnClickListener {
         // Constants
         private const val TAG = "ImageLabellingLive"
         private const val REQUEST_CODE_PERMISSIONS = 10
-        private const val SOURCE = "ImageCapture"
         private const val MAX_RESULT_DISPLAY = 1 // Maximum number of results displayed
         private val REQUIRED_PERMISSIONS = arrayOf(Manifest.permission.CAMERA)
 
