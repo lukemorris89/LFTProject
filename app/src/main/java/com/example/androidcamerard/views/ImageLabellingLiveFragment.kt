@@ -7,21 +7,15 @@ import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
 import android.view.*
-import android.widget.ImageButton
-import android.widget.ImageView
-import android.widget.TextView
 import android.widget.Toast
 import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
-import androidx.camera.view.PreviewView
 import androidx.core.content.ContextCompat
-import androidx.core.os.bundleOf
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import com.example.androidcamerard.R
-import com.example.androidcamerard.camera.GraphicOverlay
 import com.example.androidcamerard.databinding.FragmentImageLabellingLiveBinding
 import com.example.androidcamerard.ml.Model
 import com.example.androidcamerard.utils.BitmapUtils.liveImageProxyToBitmap
@@ -30,6 +24,7 @@ import com.example.androidcamerard.recognition.Recognition
 import com.example.androidcamerard.utils.BitmapUtils.cropBitmapToTest
 import com.example.androidcamerard.utils.BitmapUtils.capturedImageProxyToBitmap
 import com.example.androidcamerard.utils.SOURCE_IMAGE_CAPTURE
+import kotlinx.android.synthetic.main.fragment_image_labelling_live.*
 import org.tensorflow.lite.gpu.CompatibilityList
 import org.tensorflow.lite.support.image.TensorImage
 import java.util.concurrent.Executors
@@ -54,10 +49,6 @@ class ImageLabellingLiveFragment : Fragment(), View.OnClickListener {
     private lateinit var camera: Camera
     private val cameraExecutor = Executors.newSingleThreadExecutor()
 
-    // UI Variables
-    private lateinit var previewView: PreviewView
-    private lateinit var photoCaptureButton: ImageButton
-
     // ViewModel variables
     private val viewModel: CameraViewModel by activityViewModels()
 
@@ -65,7 +56,7 @@ class ImageLabellingLiveFragment : Fragment(), View.OnClickListener {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         binding =
             DataBindingUtil.inflate(
                 inflater,
@@ -104,11 +95,10 @@ class ImageLabellingLiveFragment : Fragment(), View.OnClickListener {
         }
 
         viewModel.recognitionList.observe(viewLifecycleOwner, {
-            var overlayText: String?
             if (it.isNotEmpty()) {
                 if (it[0].label == "lateral_flow_test" && it[0].confidence >= 0.9f) {
-                    binding.graphicOverlay.drawBlueRect = true
-                    binding.photoCaptureButton.apply {
+                    graphic_overlay.drawBlueRect = true
+                    photo_capture_button.apply {
                         isEnabled = true
                         setImageResource(R.drawable.ic_photo_camera_24)
                     }
@@ -116,8 +106,8 @@ class ImageLabellingLiveFragment : Fragment(), View.OnClickListener {
                         String.format("Lateral Flow Test: %.1f", it[0].confidence * 100.0f)
 
                 } else {
-                    binding.graphicOverlay.drawBlueRect = false
-                    binding.photoCaptureButton.apply {
+                    graphic_overlay.drawBlueRect = false
+                    photo_capture_button.apply {
                         isEnabled = false
                         setImageResource(R.drawable.ic_photo_camera_disabled_v24)
                     }
@@ -169,7 +159,7 @@ class ImageLabellingLiveFragment : Fragment(), View.OnClickListener {
 
             // Set viewport as equal to preview view size to allow for WYSIWYG-style analysis
             // (prevents imageProxy being cropped to 720 x 720)
-            val viewport = previewView.viewPort
+            val viewport = preview_view.viewPort
 
             try {
                 // Unbind use cases before rebinding
@@ -191,7 +181,7 @@ class ImageLabellingLiveFragment : Fragment(), View.OnClickListener {
                 )
 
                 // Attach the preview to preview view, aka View Finder
-                preview.setSurfaceProvider(previewView.surfaceProvider)
+                preview.setSurfaceProvider(preview_view.surfaceProvider)
             } catch (exc: Exception) {
                 Log.e(TAG, "Use case binding failed", exc)
             }
@@ -212,12 +202,11 @@ class ImageLabellingLiveFragment : Fragment(), View.OnClickListener {
         if (camera.cameraInfo.hasFlashUnit()) {
             camera.cameraControl.enableTorch(!flashMode)
         }
-
     }
 
     private fun takePhoto() {
         // Disable the photo capture button to prevent errors when the camera closes
-        photoCaptureButton.isClickable = false
+        photo_capture_button.isClickable = false
         // Get a stable reference of the modifiable image capture use case
         // Create a time-stamped output file to hold the image
 
@@ -250,12 +239,12 @@ class ImageLabellingLiveFragment : Fragment(), View.OnClickListener {
     }
 
     private fun setupAutoFocus() {
-        previewView.afterMeasured {
+        preview_view.afterMeasured {
             val factory: MeteringPointFactory = SurfaceOrientedMeteringPointFactory(
-                previewView.width.toFloat(), previewView.height.toFloat()
+                preview_view.width.toFloat(), preview_view.height.toFloat()
             )
-            val centerWidth = previewView.width.toFloat() / 2
-            val centerHeight = previewView.height.toFloat() / 2
+            val centerWidth = preview_view.width.toFloat() / 2
+            val centerHeight = preview_view.height.toFloat() / 2
             //create a point on the center of the view
             val autoFocusPoint = factory.createPoint(centerWidth, centerHeight)
             try {
@@ -376,14 +365,11 @@ class ImageLabellingLiveFragment : Fragment(), View.OnClickListener {
         }
     }
 
-
     companion object {
         // Constants
         private const val TAG = "ImageLabellingLive"
         private const val REQUEST_CODE_PERMISSIONS = 10
         private const val MAX_RESULT_DISPLAY = 1 // Maximum number of results displayed
         private val REQUIRED_PERMISSIONS = arrayOf(Manifest.permission.CAMERA)
-
-
     }
 }

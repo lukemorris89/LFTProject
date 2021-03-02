@@ -1,10 +1,8 @@
 package com.example.androidcamerard.viewModels
 
-import android.app.Application
 import android.graphics.Bitmap
 import android.net.Uri
 import androidx.camera.core.ImageProxy
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -21,7 +19,7 @@ class CameraViewModel : ViewModel() {
     val photoFilename = MutableLiveData<Uri>()
 
     //For storing photo capture as file
-    val outputDirectory = MutableLiveData<File>()
+    var outputDirectory: File? = null
 
     // For logging photos collected so far in util class
     var numPhotosCollected = MutableLiveData<Int>()

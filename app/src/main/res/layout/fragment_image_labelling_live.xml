@@ -48,7 +48,7 @@
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"
-            android:text="@string/align_the_test_device_inside_the_box" />
+            android:text="@{overlayText}" />
 
         <!--    <androidx.recyclerview.widget.RecyclerView-->
         <!--        android:id="@+id/recognitionResults"-->
