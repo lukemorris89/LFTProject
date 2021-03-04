@@ -24,7 +24,6 @@ import com.example.androidcamerard.recognition.Recognition
 import com.example.androidcamerard.utils.BitmapUtils.cropBitmapToTest
 import com.example.androidcamerard.utils.BitmapUtils.capturedImageProxyToBitmap
 import com.example.androidcamerard.utils.SOURCE_IMAGE_CAPTURE
-import kotlinx.android.synthetic.main.fragment_image_labelling_live.*
 import org.tensorflow.lite.gpu.CompatibilityList
 import org.tensorflow.lite.support.image.TensorImage
 import java.util.concurrent.Executors
@@ -68,7 +67,7 @@ class ImageLabellingLiveFragment : Fragment(), View.OnClickListener {
         setUpUI()
 
         binding.lifecycleOwner = viewLifecycleOwner
-        binding.cameraViewModel = viewModel
+        binding.viewModel = viewModel
 
         return binding.root
     }
@@ -86,7 +85,6 @@ class ImageLabellingLiveFragment : Fragment(), View.OnClickListener {
     }
 
     private fun setUpUI() {
-        binding.topActionBarLiveCameraInclude.flashButton.setOnClickListener(this@ImageLabellingLiveFragment)
         binding.topActionBarLiveCameraInclude.closeButton.setOnClickListener(this@ImageLabellingLiveFragment)
         binding.photoCaptureButton.apply {
             setOnClickListener(this@ImageLabellingLiveFragment)
@@ -96,9 +94,9 @@ class ImageLabellingLiveFragment : Fragment(), View.OnClickListener {
 
         viewModel.recognitionList.observe(viewLifecycleOwner, {
             if (it.isNotEmpty()) {
-                if (it[0].label == "lateral_flow_test" && it[0].confidence >= 0.9f) {
-                    graphic_overlay.drawBlueRect = true
-                    photo_capture_button.apply {
+                if (it[0].label == "lateral_flow_test" && it[0].confidence >= 0.8f) {
+                    binding.graphicOverlay.drawBlueRect = true
+                    binding.photoCaptureButton.apply {
                         isEnabled = true
                         setImageResource(R.drawable.ic_photo_camera_24)
                     }
@@ -106,8 +104,8 @@ class ImageLabellingLiveFragment : Fragment(), View.OnClickListener {
                         String.format("Lateral Flow Test: %.1f", it[0].confidence * 100.0f)
 
                 } else {
-                    graphic_overlay.drawBlueRect = false
-                    photo_capture_button.apply {
+                    binding.graphicOverlay.drawBlueRect = false
+                    binding.photoCaptureButton.apply {
                         isEnabled = false
                         setImageResource(R.drawable.ic_photo_camera_disabled_v24)
                     }
@@ -159,7 +157,7 @@ class ImageLabellingLiveFragment : Fragment(), View.OnClickListener {
 
             // Set viewport as equal to preview view size to allow for WYSIWYG-style analysis
             // (prevents imageProxy being cropped to 720 x 720)
-            val viewport = preview_view.viewPort
+            val viewport = binding.previewView.viewPort
 
             try {
                 // Unbind use cases before rebinding
@@ -181,7 +179,11 @@ class ImageLabellingLiveFragment : Fragment(), View.OnClickListener {
                 )
 
                 // Attach the preview to preview view, aka View Finder
-                preview.setSurfaceProvider(preview_view.surfaceProvider)
+                preview.setSurfaceProvider(binding.previewView.surfaceProvider)
+
+                viewModel.torchOn.observe(viewLifecycleOwner, {
+                    updateTorchMode(it)
+                })
             } catch (exc: Exception) {
                 Log.e(TAG, "Use case binding failed", exc)
             }
@@ -193,20 +195,19 @@ class ImageLabellingLiveFragment : Fragment(), View.OnClickListener {
         when (view.id) {
             R.id.photo_capture_button -> takePhoto()
             R.id.close_button -> findNavController().popBackStack()
-            R.id.flash_button -> updateFlashMode(binding.topActionBarLiveCameraInclude.flashButton.isSelected)
         }
     }
 
-    private fun updateFlashMode(flashMode: Boolean) {
-        binding.topActionBarLiveCameraInclude.flashButton.isSelected = !flashMode
+    private fun updateTorchMode(torchOn: Boolean) {
+        binding.topActionBarLiveCameraInclude.torchButton.isSelected = torchOn
         if (camera.cameraInfo.hasFlashUnit()) {
-            camera.cameraControl.enableTorch(!flashMode)
+            camera.cameraControl.enableTorch(torchOn)
         }
     }
 
     private fun takePhoto() {
         // Disable the photo capture button to prevent errors when the camera closes
-        photo_capture_button.isClickable = false
+        binding.photoCaptureButton.isClickable = false
         // Get a stable reference of the modifiable image capture use case
         // Create a time-stamped output file to hold the image
 
@@ -239,12 +240,12 @@ class ImageLabellingLiveFragment : Fragment(), View.OnClickListener {
     }
 
     private fun setupAutoFocus() {
-        preview_view.afterMeasured {
+        binding.previewView.afterMeasured {
             val factory: MeteringPointFactory = SurfaceOrientedMeteringPointFactory(
-                preview_view.width.toFloat(), preview_view.height.toFloat()
+                binding.previewView.width.toFloat(), binding.previewView.height.toFloat()
             )
-            val centerWidth = preview_view.width.toFloat() / 2
-            val centerHeight = preview_view.height.toFloat() / 2
+            val centerWidth = binding.previewView.width.toFloat() / 2
+            val centerHeight = binding.previewView.height.toFloat() / 2
             //create a point on the center of the view
             val autoFocusPoint = factory.createPoint(centerWidth, centerHeight)
             try {
@@ -365,11 +366,14 @@ class ImageLabellingLiveFragment : Fragment(), View.OnClickListener {
         }
     }
 
+
     companion object {
         // Constants
         private const val TAG = "ImageLabellingLive"
         private const val REQUEST_CODE_PERMISSIONS = 10
         private const val MAX_RESULT_DISPLAY = 1 // Maximum number of results displayed
         private val REQUIRED_PERMISSIONS = arrayOf(Manifest.permission.CAMERA)
+
+
     }
 }

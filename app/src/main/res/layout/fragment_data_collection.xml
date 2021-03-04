@@ -1,15 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:bind="http://schemas.android.com/apk/res-auto">
 
     <data>
         <variable
-            name="cameraViewModel"
+            name="viewModel"
             type="com.example.androidcamerard.viewModels.CameraViewModel" />
 
         <variable
             name="numPhotosCollected"
-            type="String" />
+            type="int" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -47,7 +48,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textColor="@color/white"
-            android:text="@{numPhotosCollected}"
+            android:text="@{String.valueOf(numPhotosCollected)}"
             android:textSize="@dimen/app_text_size_xlarge"
             android:layout_gravity="center_horizontal"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -64,7 +65,8 @@
             android:id="@+id/top_action_bar_live_camera_include"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="top" />
+            android:layout_gravity="top"
+            bind:viewModel="@{viewModel}"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

@@ -26,7 +26,6 @@ import kotlinx.android.synthetic.main.top_action_bar_live_camera.*
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
-import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
@@ -43,13 +42,12 @@ class DataCollectionFragment : Fragment(), View.OnClickListener {
     private lateinit var binding: FragmentDataCollectionBinding
 
     // CameraX
-    private var camera: Camera? = null
-    private var cameraProvider: ProcessCameraProvider? = null
-    private lateinit var cameraExecutor: ExecutorService
+    private lateinit var camera: Camera
+    private val cameraExecutor = Executors.newSingleThreadExecutor()
 
     // Use Cases
-    private var previewUseCase: Preview? = null
-    private var imageCaptureUseCase: ImageCapture? = null
+    private lateinit var previewUseCase: Preview
+    private lateinit var imageCaptureUseCase: ImageCapture
 
     private val viewModel: CameraViewModel by activityViewModels()
 
@@ -66,50 +64,38 @@ class DataCollectionFragment : Fragment(), View.OnClickListener {
                 false
             )
 
-        // Request camera permissions
-        if (allPermissionsGranted()) startCamera()
-        else requestPermissions(
-            REQUIRED_PERMISSIONS,
-            REQUEST_CODE_PERMISSIONS
-        )
-
-        cameraExecutor = Executors.newSingleThreadExecutor()
-
         // Initialise view with number of photos taken so far
         viewModel.outputDirectory = Utils.getOutputDirectory(requireContext())
-
-        getNumPhotosCollected()
-        viewModel.numPhotosCollected.observe(viewLifecycleOwner, {
-            binding.numPhotosCollected = it.toString()
-        })
-
-        photo_capture_button.setOnClickListener(this@DataCollectionFragment)
-        flash_button.setOnClickListener(this@DataCollectionFragment)
-        close_button.setOnClickListener(this@DataCollectionFragment)
+        viewModel.getNumPhotos()
+        setUpUI()
 
         binding.lifecycleOwner = viewLifecycleOwner
-        binding.cameraViewModel = viewModel
+        binding.viewModel = viewModel
 
         return binding.root
     }
 
-    private fun getNumPhotosCollected() {
-        var numPhotos = 0
-        if (viewModel.numPhotosCollected.value == null) {
-            viewModel.numPhotosCollected.value = 0
-        }
-        val outputDirectory = viewModel.outputDirectory
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
-        if (outputDirectory?.listFiles()!!.isNotEmpty()) {
-            for (photo in outputDirectory.listFiles()!!) {
-                if (photo.name.startsWith("DataCollect")) {
-                    numPhotos += 1
-                }
-            }
+        // Request camera permissions
+        if (allPermissionsGranted()) {
+            startCamera()
+        } else {
+            requestPermissions(
+                REQUIRED_PERMISSIONS,
+                REQUEST_CODE_PERMISSIONS
+            )
         }
-        viewModel.numPhotosCollected.value = numPhotos
     }
 
+    private fun setUpUI() {
+        viewModel.numPhotosCollectedLD.observe(viewLifecycleOwner, {
+            binding.numPhotosCollected = it
+        })
+        binding.photoCaptureButton.setOnClickListener(this@DataCollectionFragment)
+        binding.topActionBarLiveCameraInclude.closeButton.setOnClickListener(this@DataCollectionFragment)
+    }
 
     @SuppressLint("UnsafeExperimentalUsageError")
     private fun startCamera() {
@@ -117,7 +103,7 @@ class DataCollectionFragment : Fragment(), View.OnClickListener {
 
         cameraProviderFuture.addListener({
             // Used to bind the lifecycle of cameras to the lifecycle owner
-            cameraProvider = cameraProviderFuture.get()
+            val cameraProvider = cameraProviderFuture.get()
 
             // Preview
             previewUseCase = Preview.Builder().build()
@@ -137,14 +123,18 @@ class DataCollectionFragment : Fragment(), View.OnClickListener {
                 // Unbind use cases before rebinding
                 cameraProvider?.unbindAll()
 
-                previewUseCase?.setSurfaceProvider(preview_view.surfaceProvider)
+                previewUseCase.setSurfaceProvider(preview_view.surfaceProvider)
                 // Bind use cases to camera
-                camera = cameraProvider?.bindToLifecycle(
+                camera = cameraProvider.bindToLifecycle(
                     this,
                     cameraSelector,
                     previewUseCase,
                     imageCaptureUseCase,
                 )
+
+                viewModel.torchOn.observe(viewLifecycleOwner, {
+                    updateTorchMode(it)
+                })
             } catch (exc: Exception) {
                 Log.e(TAG, "Use case binding failed", exc)
             }
@@ -155,20 +145,19 @@ class DataCollectionFragment : Fragment(), View.OnClickListener {
         when (view.id) {
             R.id.photo_capture_button -> takePhoto()
             R.id.close_button -> findNavController().popBackStack()
-            R.id.flash_button -> updateFlashMode(flash_button.isSelected)
         }
     }
 
-    private fun updateFlashMode(flashMode: Boolean) {
-        flash_button.isSelected = !flashMode
-        if (camera!!.cameraInfo.hasFlashUnit()) {
-            camera!!.cameraControl.enableTorch(!flashMode)
+    private fun updateTorchMode(torchOn: Boolean) {
+        binding.topActionBarLiveCameraInclude.torchButton.isSelected = torchOn
+        if (camera.cameraInfo.hasFlashUnit()) {
+            camera.cameraControl.enableTorch(torchOn)
         }
     }
 
     private fun takePhoto() {
         // Get a stable reference of the modifiable image capture use case
-        val imageCapture = imageCaptureUseCase ?: return
+        val imageCapture = imageCaptureUseCase
         // Create a time-stamped output file to hold the image
         val photoFile = File(
             viewModel.outputDirectory,
@@ -188,7 +177,7 @@ class DataCollectionFragment : Fragment(), View.OnClickListener {
                 }
 
                 override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
-                    getNumPhotosCollected()
+                    viewModel.incrementNumPhotos()
                 }
             }
         )
@@ -204,7 +193,7 @@ class DataCollectionFragment : Fragment(), View.OnClickListener {
             //create a point on the center of the view
             val autoFocusPoint = factory.createPoint(centerWidth, centerHeight)
             try {
-                camera?.cameraControl?.startFocusAndMetering(
+                camera.cameraControl.startFocusAndMetering(
                     FocusMeteringAction.Builder(
                         autoFocusPoint,
                         FocusMeteringAction.FLAG_AF
