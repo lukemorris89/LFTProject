@@ -23,7 +23,7 @@
     <string name="view_results">View Results</string>
 
     <!--    Strings for accessibility-->
-    <string name="cd_flash_button">Toggle camera flash</string>
+    <string name="cd_torch_button">Toggle camera torch</string>
     <string name="cd_close_button">Back</string>
     <string name="cd_take_photo_button">Take Photo Button</string>
     <string name="cd_expand_arrow">Expand Arrow</string>

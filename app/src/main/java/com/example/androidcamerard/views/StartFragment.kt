@@ -7,26 +7,37 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.databinding.DataBindingUtil
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.androidcamerard.R
+import com.example.androidcamerard.databinding.FragmentStartBinding
 import com.example.androidcamerard.utils.DetectionMode
 import com.example.androidcamerard.utils.Utils
 
 class StartFragment : Fragment() {
 
+    // Data binding
+    private lateinit var binding: FragmentStartBinding
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val view = inflater.inflate(R.layout.fragment_start, container, false)
-        view.findViewById<RecyclerView>(R.id.select_mode_recyclerview).apply {
+        binding =
+            DataBindingUtil.inflate(
+                inflater,
+                R.layout.fragment_start,
+                container,
+                false
+            )
+        binding.selectModeRecyclerview.apply {
             setHasFixedSize(true)
             adapter = ModeItemAdapter(DetectionMode.values())
             layoutManager = LinearLayoutManager(context)
         }
-        return view
+        return binding.root
     }
 
     private inner class ModeItemAdapter(private val detectionModes: Array<DetectionMode>) :
@@ -36,7 +47,7 @@ class StartFragment : Fragment() {
             return ModeItemViewHolder(
                 LayoutInflater.from(parent.context)
                     .inflate(
-                        R.layout.fragment_start_mode_recyclerview_item, parent, false
+                        R.layout.start_mode_recyclerview_item, parent, false
                     )
             )
         }

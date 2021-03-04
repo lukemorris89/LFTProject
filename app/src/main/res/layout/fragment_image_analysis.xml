@@ -1,40 +1,48 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".views.ImageAnalysisFragment">
+    xmlns:tools="http://schemas.android.com/tools">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <data>
+        <variable
+            name="cameraViewModel"
+            type="com.example.androidcamerard.viewModels.CameraViewModel" />
+    </data>
+
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".views.ImageAnalysisFragment"
-        android:background="@drawable/background_gradient">
+        tools:context=".views.ImageAnalysisFragment">
 
-        <ImageView
-            android:id="@+id/camera_output_imageview"
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_marginStart="@dimen/image_preview_margin"
-            android:layout_marginEnd="@dimen/image_preview_margin"
-            tools:src="@tools:sample/backgrounds/scenic"
-            android:scaleType="fitCenter"
-            android:contentDescription="@string/cd_image_preview"
-            android:layout_marginBottom="@dimen/bottom_sheet_peek_height"/>
+            tools:context=".views.ImageAnalysisFragment"
+            android:background="@drawable/background_gradient">
 
-        <include layout="@layout/top_action_bar_image_analysis"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="top" />
+            <ImageView
+                android:id="@+id/camera_output_imageview"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginStart="@dimen/image_preview_margin"
+                android:layout_marginEnd="@dimen/image_preview_margin"
+                tools:src="@tools:sample/backgrounds/scenic"
+                android:scaleType="fitCenter"
+                android:contentDescription="@string/cd_image_preview"
+                android:layout_marginBottom="@dimen/bottom_sheet_peek_height"/>
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+            <include layout="@layout/top_action_bar_image_analysis"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="top" />
 
-    <include
-        android:id="@+id/bottom_sheet"
-        layout="@layout/image_analysis_bottom_sheet"
-        app:behavior_hideable="true"
-        app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+        <include
+            android:id="@+id/bottom_sheet"
+            layout="@layout/image_analysis_bottom_sheet"
+            app:behavior_hideable="true"
+            app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior" />
+
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+</layout>

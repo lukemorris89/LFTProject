@@ -1,58 +1,71 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:keepScreenOn="true">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <androidx.camera.view.PreviewView
-        android:id="@+id/preview_view"
+    <data>
+        <variable
+            name="viewModel"
+            type="com.example.androidcamerard.viewModels.CameraViewModel" />
+        <variable
+            name="overlayText"
+            type="String" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:keepScreenOn="true">
 
-    <com.example.androidcamerard.camera.GraphicOverlay
-        android:id="@+id/graphic_overlay"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        <androidx.camera.view.PreviewView
+            android:id="@+id/preview_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
 
-    <ImageButton
-        android:id="@+id/photo_capture_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/overlay_results_textview"
-        android:layout_marginBottom="@dimen/button_bottom_margin_small"
-        android:paddingStart="@dimen/button_padding_start_end_large"
-        android:paddingEnd="@dimen/button_padding_start_end_large"
-        android:paddingTop="@dimen/button_padding_top_bottom_medium"
-        android:paddingBottom="@dimen/button_padding_top_bottom_medium"
-        android:src="@drawable/ic_photo_camera_disabled_v24"
-        android:background="@drawable/selector_button_rounded_corners"
-        android:contentDescription="@string/cd_take_photo_button" />
+        <com.example.androidcamerard.camera.GraphicOverlay
+            android:id="@+id/graphic_overlay"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
 
-    <TextView
-        android:id="@+id/overlay_results_textview"
-        style="@style/SearchTextBar"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        android:text="@string/align_the_test_device_inside_the_box" />
+        <ImageButton
+            android:id="@+id/photo_capture_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/overlay_results_textview"
+            android:layout_marginBottom="@dimen/button_bottom_margin_small"
+            android:paddingStart="@dimen/button_padding_start_end_large"
+            android:paddingEnd="@dimen/button_padding_start_end_large"
+            android:paddingTop="@dimen/button_padding_top_bottom_medium"
+            android:paddingBottom="@dimen/button_padding_top_bottom_medium"
+            android:src="@drawable/ic_photo_camera_disabled_v24"
+            android:background="@drawable/selector_button_rounded_corners"
+            android:contentDescription="@string/cd_take_photo_button" />
 
-<!--    <androidx.recyclerview.widget.RecyclerView-->
-<!--        android:id="@+id/recognitionResults"-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:orientation="vertical"-->
-<!--        app:layout_constraintRight_toRightOf="parent"-->
-<!--        app:layout_constraintBottom_toBottomOf="parent"-->
-<!--        app:layout_constraintLeft_toLeftOf="parent"-->
-<!--        app:layoutManager="LinearLayoutManager"  />-->
+        <TextView
+            android:id="@+id/overlay_results_textview"
+            style="@style/SearchTextBar"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            android:text="@{overlayText}" />
 
-    <include
-        layout="@layout/top_action_bar_live_camera"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="top" />
+        <!--    <androidx.recyclerview.widget.RecyclerView-->
+        <!--        android:id="@+id/recognitionResults"-->
+        <!--        android:layout_width="match_parent"-->
+        <!--        android:layout_height="wrap_content"-->
+        <!--        android:orientation="vertical"-->
+        <!--        app:layout_constraintRight_toRightOf="parent"-->
+        <!--        app:layout_constraintBottom_toBottomOf="parent"-->
+        <!--        app:layout_constraintLeft_toLeftOf="parent"-->
+        <!--        app:layoutManager="LinearLayoutManager"  />-->
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+        <include
+            layout="@layout/top_action_bar_live_camera"
+            android:id="@+id/top_action_bar_live_camera_include"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>
