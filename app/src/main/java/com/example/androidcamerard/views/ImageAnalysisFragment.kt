@@ -9,7 +9,6 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
 import android.widget.ImageView
 import androidx.annotation.RequiresApi
 import androidx.databinding.DataBindingUtil
@@ -17,17 +16,15 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
-import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.androidcamerard.R
 import com.example.androidcamerard.databinding.FragmentImageAnalysisBinding
-import com.example.androidcamerard.viewModels.CameraViewModel
+import com.example.androidcamerard.viewModels.ImageLabellingAnalysisViewModel
 import com.example.androidcamerard.ml.Model
 import com.example.androidcamerard.recognition.Recognition
 import com.example.androidcamerard.recognition.RecognitionAdapter
 import com.example.androidcamerard.utils.SOURCE_IMAGE_CAPTURE
 import com.example.androidcamerard.utils.Utils
-import com.example.androidcamerard.viewModels.ImageAnalysisViewModel
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import kotlinx.android.synthetic.main.fragment_image_analysis.*
 import kotlinx.android.synthetic.main.image_analysis_bottom_sheet.*
@@ -48,7 +45,7 @@ class ImageAnalysisFragment : Fragment(), View.OnClickListener {
 
     private val args: ImageAnalysisFragmentArgs by navArgs()
 
-    private val viewModel: ImageAnalysisViewModel by activityViewModels()
+    private val viewModel: ImageLabellingAnalysisViewModel by activityViewModels()
 
     @RequiresApi(Build.VERSION_CODES.P)
     override fun onCreateView(
@@ -64,6 +61,9 @@ class ImageAnalysisFragment : Fragment(), View.OnClickListener {
             )
         if (arguments != null) {
             fromCapture = args.source == SOURCE_IMAGE_CAPTURE
+            if (args.photoFileName != null) {
+
+            }
         }
 
         setUpUI()

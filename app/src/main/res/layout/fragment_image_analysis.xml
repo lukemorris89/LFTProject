@@ -6,7 +6,7 @@
     <data>
         <variable
             name="viewModel"
-            type="com.example.androidcamerard.viewModels.CameraViewModel" />
+            type="com.example.androidcamerard.viewModels.ImageLabellingAnalysisViewModel" />
     </data>
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout

@@ -3,21 +3,16 @@ package com.example.androidcamerard.views
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
-import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.os.bundleOf
 import androidx.navigation.NavController
 import androidx.navigation.findNavController
-import androidx.navigation.fragment.NavHostFragment
 import com.example.androidcamerard.R
 import com.example.androidcamerard.utils.Utils
-import com.example.androidcamerard.viewModels.CameraViewModel
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var navController: NavController
-
-    private val viewModel: CameraViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,8 +28,10 @@ class MainActivity : AppCompatActivity() {
             resultCode == Activity.RESULT_OK &&
             data != null
         ) {
-            viewModel.photoFilename.value = data.data
-            val args = bundleOf("SOURCE" to SOURCE)
+            val args = bundleOf(
+                "SOURCE" to SOURCE,
+                "PHOTO_FILENAME" to data.data.toString()
+            )
             navController.navigate(R.id.imageAnalysisFragment, args)
         }
     }

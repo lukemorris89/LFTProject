@@ -19,7 +19,7 @@ import com.example.androidcamerard.R
 import com.example.androidcamerard.databinding.FragmentImageLabellingLiveBinding
 import com.example.androidcamerard.ml.Model
 import com.example.androidcamerard.utils.BitmapUtils.liveImageProxyToBitmap
-import com.example.androidcamerard.viewModels.CameraViewModel
+import com.example.androidcamerard.viewModels.ImageLabellingAnalysisViewModel
 import com.example.androidcamerard.recognition.Recognition
 import com.example.androidcamerard.utils.BitmapUtils.cropBitmapToTest
 import com.example.androidcamerard.utils.BitmapUtils.capturedImageProxyToBitmap
@@ -49,7 +49,7 @@ class ImageLabellingLiveFragment : Fragment(), View.OnClickListener {
     private val cameraExecutor = Executors.newSingleThreadExecutor()
 
     // ViewModel variables
-    private val viewModel: CameraViewModel by activityViewModels()
+    private val viewModel: ImageLabellingAnalysisViewModel by activityViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -85,13 +85,7 @@ class ImageLabellingLiveFragment : Fragment(), View.OnClickListener {
     }
 
     private fun setUpUI() {
-        binding.topActionBarLiveCameraInclude.closeButton.setOnClickListener(this@ImageLabellingLiveFragment)
-        binding.photoCaptureButton.apply {
-            setOnClickListener(this@ImageLabellingLiveFragment)
-            // Begin session with capture button disabled - should only be enabled when valid object detected
-            isEnabled = false
-        }
-
+        binding.overlayText = getString(R.string.align_the_test_device_inside_the_box)
         viewModel.recognitionList.observe(viewLifecycleOwner, {
             if (it.isNotEmpty()) {
                 if (it[0].label == "lateral_flow_test" && it[0].confidence >= 0.8f) {
@@ -113,6 +107,12 @@ class ImageLabellingLiveFragment : Fragment(), View.OnClickListener {
                 }
             }
         })
+        binding.closeButton.setOnClickListener(this@ImageLabellingLiveFragment)
+        binding.photoCaptureButton.apply {
+            setOnClickListener(this@ImageLabellingLiveFragment)
+            // Begin session with capture button disabled - should only be enabled when valid object detected
+            isEnabled = false
+        }
     }
 
     @SuppressLint("UnsafeExperimentalUsageError")
@@ -199,7 +199,7 @@ class ImageLabellingLiveFragment : Fragment(), View.OnClickListener {
     }
 
     private fun updateTorchMode(torchOn: Boolean) {
-        binding.topActionBarLiveCameraInclude.torchButton.isSelected = torchOn
+        binding.torchButton.isSelected = torchOn
         if (camera.cameraInfo.hasFlashUnit()) {
             camera.cameraControl.enableTorch(torchOn)
         }
@@ -229,7 +229,7 @@ class ImageLabellingLiveFragment : Fragment(), View.OnClickListener {
                     val source = SOURCE_IMAGE_CAPTURE
                     val action =
                         ImageLabellingLiveFragmentDirections.actionImageLabellingLiveFragmentToImageAnalysisFragment(
-                            source
+                            source, null
                         )
                     findNavController().navigate(action)
 

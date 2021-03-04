@@ -15,14 +15,13 @@ import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.example.androidcamerard.R
 import com.example.androidcamerard.databinding.FragmentDataCollectionBinding
 import com.example.androidcamerard.utils.Utils
-import com.example.androidcamerard.viewModels.CameraViewModel
+import com.example.androidcamerard.viewModels.DataCollectionViewModel
 import kotlinx.android.synthetic.main.fragment_data_collection.*
-import kotlinx.android.synthetic.main.top_action_bar_live_camera.*
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
@@ -49,7 +48,7 @@ class DataCollectionFragment : Fragment(), View.OnClickListener {
     private lateinit var previewUseCase: Preview
     private lateinit var imageCaptureUseCase: ImageCapture
 
-    private val viewModel: CameraViewModel by activityViewModels()
+    private val viewModel: DataCollectionViewModel by viewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -94,7 +93,7 @@ class DataCollectionFragment : Fragment(), View.OnClickListener {
             binding.numPhotosCollected = it
         })
         binding.photoCaptureButton.setOnClickListener(this@DataCollectionFragment)
-        binding.topActionBarLiveCameraInclude.closeButton.setOnClickListener(this@DataCollectionFragment)
+        binding.closeButton.setOnClickListener(this@DataCollectionFragment)
     }
 
     @SuppressLint("UnsafeExperimentalUsageError")
@@ -149,7 +148,7 @@ class DataCollectionFragment : Fragment(), View.OnClickListener {
     }
 
     private fun updateTorchMode(torchOn: Boolean) {
-        binding.topActionBarLiveCameraInclude.torchButton.isSelected = torchOn
+        binding.torchButton.isSelected = torchOn
         if (camera.cameraInfo.hasFlashUnit()) {
             camera.cameraControl.enableTorch(torchOn)
         }
@@ -190,7 +189,7 @@ class DataCollectionFragment : Fragment(), View.OnClickListener {
             )
             val centerWidth = preview_view.width.toFloat() / 2
             val centerHeight = preview_view.height.toFloat() / 2
-            //create a point on the center of the view
+            // create a point on the center of the view
             val autoFocusPoint = factory.createPoint(centerWidth, centerHeight)
             try {
                 camera.cameraControl.startFocusAndMetering(

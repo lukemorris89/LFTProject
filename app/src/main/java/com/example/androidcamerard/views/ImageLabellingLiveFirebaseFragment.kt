@@ -7,23 +7,17 @@ import android.os.Bundle
 import android.util.Log
 import android.view.*
 import android.view.ViewTreeObserver.OnGlobalLayoutListener
-import android.widget.ImageButton
-import android.widget.ImageView
-import android.widget.TextView
 import android.widget.Toast
 import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
-import androidx.camera.view.PreviewView
 import androidx.core.content.ContextCompat
-import androidx.core.os.bundleOf
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import com.example.androidcamerard.R
-import com.example.androidcamerard.camera.GraphicOverlay
 import com.example.androidcamerard.databinding.FragmentImageLabellingLiveBinding
-import com.example.androidcamerard.viewModels.CameraViewModel
+import com.example.androidcamerard.viewModels.ImageLabellingAnalysisViewModel
 import com.example.androidcamerard.recognition.Recognition
 import com.example.androidcamerard.utils.BitmapUtils.cropBitmapToTest
 import com.example.androidcamerard.utils.BitmapUtils.capturedImageProxyToBitmap
@@ -52,11 +46,8 @@ class ImageLabellingLiveFirebaseFragment : Fragment(), View.OnClickListener {
     private lateinit var camera: Camera
     private val cameraExecutor = Executors.newSingleThreadExecutor()
 
-    // UI Variables
-    private lateinit var previewView: PreviewView
-
     // ViewModel variables
-    private val viewModel: CameraViewModel by activityViewModels()
+    private val viewModel: ImageLabellingAnalysisViewModel by activityViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -95,13 +86,7 @@ class ImageLabellingLiveFirebaseFragment : Fragment(), View.OnClickListener {
     }
 
     private fun setUpUI() {
-        binding.topActionBarLiveCameraInclude.closeButton.setOnClickListener(this@ImageLabellingLiveFirebaseFragment)
-        binding.photoCaptureButton.apply {
-            setOnClickListener(this@ImageLabellingLiveFirebaseFragment)
-            // Begin session with capture button disabled - should only be enabled when valid object detected
-            isEnabled = false
-        }
-
+        binding.overlayText = getString(R.string.align_the_test_device_inside_the_box)
         viewModel.recognitionList.observe(viewLifecycleOwner, {
             if (it.isNotEmpty()) {
                 if (it[0].label == "lateral_flow_test" && it[0].confidence >= 0.8f) {
@@ -123,6 +108,12 @@ class ImageLabellingLiveFirebaseFragment : Fragment(), View.OnClickListener {
                 }
             }
         })
+        binding.closeButton.setOnClickListener(this@ImageLabellingLiveFirebaseFragment)
+        binding.photoCaptureButton.apply {
+            setOnClickListener(this@ImageLabellingLiveFirebaseFragment)
+            // Begin session with capture button disabled - should only be enabled when valid object detected
+            isEnabled = false
+        }
     }
 
     @SuppressLint("UnsafeExperimentalUsageError")
@@ -152,7 +143,7 @@ class ImageLabellingLiveFirebaseFragment : Fragment(), View.OnClickListener {
             val autoMLImageLabelerOptions = AutoMLImageLabelerOptions.Builder(localModel)
                 .setConfidenceThreshold(0.5f)  // Evaluate your model in the Firebase console
                 // to determine an appropriate value.
-                .build();
+                .build()
             val labeler = ImageLabeling.getClient(autoMLImageLabelerOptions)
 
             imageAnalyzer = ImageAnalysis.Builder()
@@ -198,7 +189,7 @@ class ImageLabellingLiveFirebaseFragment : Fragment(), View.OnClickListener {
                 )
 
                 // Attach the preview to preview view, aka View Finder
-                preview.setSurfaceProvider(previewView.surfaceProvider)
+                preview.setSurfaceProvider(binding.previewView.surfaceProvider)
 
                 viewModel.torchOn.observe(viewLifecycleOwner, {
                     updateTorchMode(it)
@@ -219,7 +210,7 @@ class ImageLabellingLiveFirebaseFragment : Fragment(), View.OnClickListener {
     }
 
     private fun updateTorchMode(torchOn: Boolean) {
-        binding.topActionBarLiveCameraInclude.torchButton.isSelected = torchOn
+        binding.torchButton.isSelected = torchOn
         if (camera.cameraInfo.hasFlashUnit()) {
             camera.cameraControl.enableTorch(torchOn)
         }
@@ -249,7 +240,8 @@ class ImageLabellingLiveFirebaseFragment : Fragment(), View.OnClickListener {
                     val source = SOURCE_IMAGE_CAPTURE
                     val action =
                         ImageLabellingLiveFirebaseFragmentDirections.actionImageLabellingLiveFirebaseFragmentToImageAnalysisFragment(
-                            source
+                            source,
+                            null
                         )
                     findNavController().navigate(action)
 
@@ -367,14 +359,11 @@ class ImageLabellingLiveFirebaseFragment : Fragment(), View.OnClickListener {
         }
     }
 
-
     companion object {
         // Constants
         private const val TAG = "ImageLabellingLiveFB"
         private const val REQUEST_CODE_PERMISSIONS = 10
         private const val MAX_RESULT_DISPLAY = 1 // Maximum number of results displayed
         private val REQUIRED_PERMISSIONS = arrayOf(Manifest.permission.CAMERA)
-
-
     }
 }
