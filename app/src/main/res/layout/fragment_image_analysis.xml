@@ -5,7 +5,7 @@
 
     <data>
         <variable
-            name="cameraViewModel"
+            name="viewModel"
             type="com.example.androidcamerard.viewModels.CameraViewModel" />
     </data>
 
@@ -31,7 +31,9 @@
                 android:contentDescription="@string/cd_image_preview"
                 android:layout_marginBottom="@dimen/bottom_sheet_peek_height"/>
 
-            <include layout="@layout/top_action_bar_image_analysis"
+            <include
+                layout="@layout/top_action_bar_image_analysis"
+                android:id="@+id/top_action_bar_image_analysis_include"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="top" />
@@ -39,8 +41,8 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
 
         <include
-            android:id="@+id/bottom_sheet"
             layout="@layout/image_analysis_bottom_sheet"
+            android:id="@+id/image_analysis_bottom_sheet_include"
             app:behavior_hideable="true"
             app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior" />
 

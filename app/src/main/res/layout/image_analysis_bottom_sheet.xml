@@ -1,83 +1,92 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    style="@style/BottomSheet"
-    android:id="@+id/bottom_sheet">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+        <variable
+            name="viewModel"
+            type="com.example.androidcamerard.viewModels.CameraViewModel" />
+    </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        style="@style/BottomSheetTitleBar"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        android:id="@+id/bottom_sheet_title_view">
+        style="@style/BottomSheet"
+        android:id="@+id/bottom_sheet">
 
         <androidx.constraintlayout.widget.ConstraintLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/touch_to_expand_layout"
-            app:layout_constraintStart_toStartOf="parent"
+            style="@style/BottomSheetTitleBar"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent">
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            android:id="@+id/bottom_sheet_title_view">
 
-            <ImageView
-                android:id="@+id/expand_arrow"
+            <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:src="@drawable/expand_up_24"
-                android:layout_marginStart="4dp"
-                android:contentDescription="@string/cd_expand_arrow"
+                android:id="@+id/touch_to_expand_layout"
                 app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent">
+
+                <ImageView
+                    android:id="@+id/expand_arrow"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/expand_up_24"
+                    android:layout_marginStart="4dp"
+                    android:contentDescription="@string/cd_expand_arrow"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"/>
+
+                <TextView
+                    android:id="@+id/bottom_sheet_title"
+                    style="@style/BottomSheetTitle"
+                    android:text="@string/view_results"
+                    app:layout_constraintStart_toEndOf="@id/expand_arrow"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"/>
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:id="@+id/transparent_expand_view"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/action_button"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"/>
 
-            <TextView
-                android:id="@+id/bottom_sheet_title"
-                style="@style/BottomSheetTitle"
-                android:text="@string/view_results"
-                app:layout_constraintStart_toEndOf="@id/expand_arrow"
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/action_button"
+                style="@style/BottomSheetButton"
+                android:text="@string/retake_photo"
+                app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintTop_toTopOf="parent"/>
+                app:layout_constraintEnd_toStartOf="@id/return_home_button"
+                android:layout_marginEnd="8dp"
+                android:textAlignment="center"/>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/return_home_button"
+                style="@style/BottomSheetButton"
+                android:text="@string/return_home"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                android:textAlignment="center"/>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
-        <View
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:id="@+id/transparent_expand_view"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/action_button"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"/>
-
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/action_button"
-            style="@style/BottomSheetButton"
-            android:text="@string/retake_photo"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/return_home_button"
-            android:layout_marginEnd="8dp"
-            android:textAlignment="center"/>
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/return_home_button"
-            style="@style/BottomSheetButton"
-            android:text="@string/return_home"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/image_labels_recycler_view"
+            style="@style/BottomSheetRecyclerView"
+            android:orientation="vertical"
+            app:layout_constraintTop_toBottomOf="@id/bottom_sheet_title_view"
+            app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
-            android:textAlignment="center"/>
+            app:layoutManager="LinearLayoutManager" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/image_labels_recycler_view"
-        style="@style/BottomSheetRecyclerView"
-        android:orientation="vertical"
-        app:layout_constraintTop_toBottomOf="@id/bottom_sheet_title_view"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layoutManager="LinearLayoutManager" />
-
-</androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

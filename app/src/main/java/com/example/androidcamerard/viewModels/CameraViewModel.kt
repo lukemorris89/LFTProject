@@ -15,7 +15,7 @@ class CameraViewModel : ViewModel() {
     val capturedImageProxy = MutableLiveData<ImageProxy>()
     val capturedImageBitmap = MutableLiveData<Bitmap>()
 
-    // For storing Uri of photo form gallery
+    // For storing Uri of photo from gallery
     val photoFilename = MutableLiveData<Uri>()
 
     //For storing photo capture as file
@@ -35,7 +35,8 @@ class CameraViewModel : ViewModel() {
     // at once in ML and not individual elements. Updating this once for the entire list makes
     // sense.
     private val _recognitionList = MutableLiveData<List<Recognition>>()
-    val recognitionList: LiveData<List<Recognition>> = _recognitionList
+    val recognitionList: LiveData<List<Recognition>>
+        get() = _recognitionList
 
     init {
         _torchOn.value = false
