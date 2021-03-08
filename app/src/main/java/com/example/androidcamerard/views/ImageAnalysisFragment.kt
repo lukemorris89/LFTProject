@@ -2,6 +2,7 @@ package com.example.androidcamerard.views
 
 import android.app.Activity
 import android.graphics.Bitmap
+import android.graphics.ImageDecoder
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -185,10 +186,18 @@ class ImageAnalysisFragment : Fragment(), View.OnClickListener {
         val bitmapImage: Bitmap = if (fromCapture!!) {
             viewModel.capturedImageBitmap.value!!
         } else {
-            MediaStore.Images.Media.getBitmap(
-                requireContext().contentResolver,
-                Uri.parse(requireArguments().getString(PHOTO_FILENAME_KEY))
-            )
+            if (Build.VERSION.SDK_INT < 28) {
+                MediaStore.Images.Media.getBitmap(
+                    requireContext().contentResolver,
+                    Uri.parse(requireArguments().getString(PHOTO_FILENAME_KEY))
+                )
+            } else {
+                val source = ImageDecoder.createSource(
+                    requireContext().contentResolver,
+                    Uri.parse(requireArguments().getString(PHOTO_FILENAME_KEY))
+                )
+                ImageDecoder.decodeBitmap(source)
+            }
         }
         val tfImage = TensorImage.fromBitmap(bitmapImage)
 

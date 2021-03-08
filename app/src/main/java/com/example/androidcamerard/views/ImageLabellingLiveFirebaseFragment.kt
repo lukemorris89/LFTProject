@@ -362,7 +362,6 @@ class ImageLabellingLiveFirebaseFragment : Fragment(), View.OnClickListener {
         // Constants
         private const val TAG = "ImageLabellingLiveFB"
         private const val REQUEST_CODE_PERMISSIONS = 10
-        private const val MAX_RESULT_DISPLAY = 1 // Maximum number of results displayed
         private val REQUIRED_PERMISSIONS = arrayOf(Manifest.permission.CAMERA)
     }
 }

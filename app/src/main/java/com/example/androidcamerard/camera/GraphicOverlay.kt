@@ -24,6 +24,7 @@ import android.os.Build
 import android.util.AttributeSet
 import android.util.Size
 import android.view.View
+import androidx.core.content.ContextCompat
 import com.example.androidcamerard.R.*
 import com.example.androidcamerard.utils.getEnum
 import com.example.androidcamerard.utils.px
@@ -40,13 +41,13 @@ import kotlin.math.min
  * to the full view size, and also mirrored in the case of the front-facing camera.
  *
  *
- * Associated [Graphic] items should use the following methods to convert to view
+ * Associated Graphic items should use the following methods to convert to view
  * coordinates for the graphics that are drawn:
  *
  *
- *  1. [Graphic.scale] adjusts the size of the supplied value from the image scale
+ *  1. Graphic.scale adjusts the size of the supplied value from the image scale
  * to the view scale.
- *  1. [Graphic.translateX] and [Graphic.translateY] adjust the
+ *  1. Graphic.translateX and Graphic.translateY adjust the
  * coordinate from the image's coordinate system to the view coordinate system.
  *
  */
@@ -83,7 +84,7 @@ class GraphicOverlay @JvmOverloads constructor(
     private var type: Type
 
     // Set colour of rectangle outline
-    private val blueColor = resources.getColor(color.bond)
+    private val blueColor = ContextCompat.getColor(context, color.bond)
 
     init {
         setWillNotDraw(false)
