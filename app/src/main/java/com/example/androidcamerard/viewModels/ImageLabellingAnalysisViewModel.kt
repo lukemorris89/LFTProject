@@ -1,7 +1,6 @@
 package com.example.androidcamerard.viewModels
 
 import android.graphics.Bitmap
-import android.net.Uri
 import androidx.camera.core.ImageProxy
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -13,9 +12,6 @@ class ImageLabellingAnalysisViewModel : ViewModel() {
     // For storing captured raw imageproxy and cropped bitmap
     val capturedImageProxy = MutableLiveData<ImageProxy>()
     val capturedImageBitmap = MutableLiveData<Bitmap>()
-
-    // For storing Uri of photo from gallery
-    val photoFilename = MutableLiveData<Uri>()
 
     // For enabling device torch
     private val _torchOn = MutableLiveData<Boolean>()

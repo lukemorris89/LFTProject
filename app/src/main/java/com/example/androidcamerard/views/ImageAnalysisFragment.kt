@@ -2,6 +2,8 @@ package com.example.androidcamerard.views
 
 import android.app.Activity
 import android.graphics.Bitmap
+import android.graphics.ImageDecoder
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
@@ -9,11 +11,9 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
 import androidx.annotation.RequiresApi
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.bumptech.glide.Glide
@@ -23,11 +23,13 @@ import com.example.androidcamerard.viewModels.ImageLabellingAnalysisViewModel
 import com.example.androidcamerard.ml.Model
 import com.example.androidcamerard.recognition.Recognition
 import com.example.androidcamerard.recognition.RecognitionAdapter
+import com.example.androidcamerard.utils.PHOTO_FILENAME_KEY
 import com.example.androidcamerard.utils.SOURCE_IMAGE_CAPTURE
 import com.example.androidcamerard.utils.Utils
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import kotlinx.android.synthetic.main.fragment_image_analysis.*
 import kotlinx.android.synthetic.main.image_analysis_bottom_sheet.*
+import org.koin.androidx.viewmodel.ext.android.sharedViewModel
 import org.tensorflow.lite.gpu.CompatibilityList
 import org.tensorflow.lite.support.image.TensorImage
 
@@ -37,7 +39,6 @@ class ImageAnalysisFragment : Fragment(), View.OnClickListener {
     // Data binding
     private lateinit var binding: FragmentImageAnalysisBinding
 
-    private lateinit var expandButton: ImageView
     private lateinit var bottomSheetBehavior: BottomSheetBehavior<View>
 
     private var slidingSheetUpFromHiddenState: Boolean = false
@@ -45,7 +46,7 @@ class ImageAnalysisFragment : Fragment(), View.OnClickListener {
 
     private val args: ImageAnalysisFragmentArgs by navArgs()
 
-    private val viewModel: ImageLabellingAnalysisViewModel by activityViewModels()
+    private val viewModel: ImageLabellingAnalysisViewModel by sharedViewModel()
 
     @RequiresApi(Build.VERSION_CODES.P)
     override fun onCreateView(
@@ -55,23 +56,19 @@ class ImageAnalysisFragment : Fragment(), View.OnClickListener {
         binding =
             DataBindingUtil.inflate(
                 inflater,
-                R.layout.fragment_image_labelling_live,
+                R.layout.fragment_image_analysis,
                 container,
                 false
             )
         if (arguments != null) {
             fromCapture = args.source == SOURCE_IMAGE_CAPTURE
-            if (args.photoFileName != null) {
-
-            }
         }
-
-        setUpUI()
-
-        analyzeStaticImage()
 
         binding.lifecycleOwner = viewLifecycleOwner
         binding.viewModel = viewModel
+
+        setUpUI()
+        analyzeStaticImage()
 
         return binding.root
     }
@@ -83,6 +80,7 @@ class ImageAnalysisFragment : Fragment(), View.OnClickListener {
 
     private fun setUpUI() {
         binding.imageAnalysisBottomSheetInclude.returnHomeButton.setOnClickListener(this@ImageAnalysisFragment)
+        binding.imageAnalysisBottomSheetInclude.actionButton.setOnClickListener(this@ImageAnalysisFragment)
         binding.topActionBarImageAnalysisInclude.backButton.setOnClickListener(this@ImageAnalysisFragment)
 
         if (fromCapture!!) {
@@ -97,7 +95,7 @@ class ImageAnalysisFragment : Fragment(), View.OnClickListener {
                 text = getString(R.string.gallery)
             }
             binding.cameraOutputImageview.apply {
-                Glide.with(this).load(viewModel.photoFilename.value).into(this)
+                Glide.with(this).load(requireArguments().getString(PHOTO_FILENAME_KEY)).into(this)
             }
         }
     }
@@ -113,19 +111,19 @@ class ImageAnalysisFragment : Fragment(), View.OnClickListener {
                 else -> bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
             }
         }
-        bottomSheetBehavior.setBottomSheetCallback(
+        bottomSheetBehavior.addBottomSheetCallback(
             object : BottomSheetBehavior.BottomSheetCallback() {
                 override fun onStateChanged(bottomSheet: View, newState: Int) {
                     when (newState) {
                         BottomSheetBehavior.STATE_HIDDEN,
                         BottomSheetBehavior.STATE_COLLAPSED -> {
                             slidingSheetUpFromHiddenState = false
-                            expandButton.setImageResource(R.drawable.expand_up_24)
+                            binding.imageAnalysisBottomSheetInclude.expandArrow.setImageResource(R.drawable.expand_up_24)
                         }
                         BottomSheetBehavior.STATE_EXPANDED,
                         BottomSheetBehavior.STATE_HALF_EXPANDED -> {
                             slidingSheetUpFromHiddenState = false
-                            expandButton.setImageResource(R.drawable.expand_down_24)
+                            binding.imageAnalysisBottomSheetInclude.expandArrow.setImageResource(R.drawable.expand_down_24)
                         }
                         BottomSheetBehavior.STATE_DRAGGING, BottomSheetBehavior.STATE_SETTLING -> {
                         }
@@ -188,10 +186,18 @@ class ImageAnalysisFragment : Fragment(), View.OnClickListener {
         val bitmapImage: Bitmap = if (fromCapture!!) {
             viewModel.capturedImageBitmap.value!!
         } else {
-            MediaStore.Images.Media.getBitmap(
-                requireContext().contentResolver,
-                viewModel.photoFilename.value
-            )
+            if (Build.VERSION.SDK_INT < 28) {
+                MediaStore.Images.Media.getBitmap(
+                    requireContext().contentResolver,
+                    Uri.parse(requireArguments().getString(PHOTO_FILENAME_KEY))
+                )
+            } else {
+                val source = ImageDecoder.createSource(
+                    requireContext().contentResolver,
+                    Uri.parse(requireArguments().getString(PHOTO_FILENAME_KEY))
+                )
+                ImageDecoder.decodeBitmap(source)
+            }
         }
         val tfImage = TensorImage.fromBitmap(bitmapImage)
 
