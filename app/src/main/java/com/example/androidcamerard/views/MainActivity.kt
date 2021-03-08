@@ -8,6 +8,7 @@ import androidx.core.os.bundleOf
 import androidx.navigation.NavController
 import androidx.navigation.findNavController
 import com.example.androidcamerard.R
+import com.example.androidcamerard.utils.PHOTO_FILENAME_KEY
 import com.example.androidcamerard.utils.Utils
 
 class MainActivity : AppCompatActivity() {
@@ -30,14 +31,13 @@ class MainActivity : AppCompatActivity() {
         ) {
             val args = bundleOf(
                 "SOURCE" to SOURCE,
-                "PHOTO_FILENAME" to data.data.toString()
+                PHOTO_FILENAME_KEY to data.data.toString()
             )
             navController.navigate(R.id.imageAnalysisFragment, args)
         }
     }
 
     companion object {
-        private const val TAG = "MainActivity"
         private const val SOURCE = "ImagePicker"
     }
 }

@@ -28,6 +28,7 @@
             app:popUpTo="@id/startFragment"
             app:popUpToInclusive="false"/>
     </fragment>
+
     <fragment
         android:id="@+id/imageLabellingLiveFragment"
         android:name="com.example.androidcamerard.views.ImageLabellingLiveFragment"
@@ -37,8 +38,41 @@
             app:destination="@id/imageAnalysisFragment"
             app:launchSingleTop="true"
             app:popUpTo="@id/imageLabellingLiveFragment"
-            app:popUpToInclusive="false"/>
+            app:popUpToInclusive="false">
+            <argument
+                android:name="source"
+                app:argType="string"
+                android:defaultValue="image_picker_fragment"/>
+            <argument
+                android:name="photoFileName"
+                app:argType="string"
+                app:nullable="true"
+                android:defaultValue="default_photo_filename"/>
+        </action>
     </fragment>
+
+    <fragment
+        android:id="@+id/imageLabellingLiveFirebaseFragment"
+        android:name="com.example.androidcamerard.views.ImageLabellingLiveFirebaseFragment"
+        android:label="fragment_image_labelling_live_firebase" >
+        <action
+            android:id="@+id/action_imageLabellingLiveFirebaseFragment_to_imageAnalysisFragment"
+            app:destination="@id/imageAnalysisFragment"
+            app:launchSingleTop="true"
+            app:popUpTo="@id/imageLabellingLiveFirebaseFragment"
+            app:popUpToInclusive="false">
+            <argument
+                android:name="source"
+                app:argType="string"
+                android:defaultValue="image_picker_fragment"/>
+            <argument
+                android:name="photoFileName"
+                app:argType="string"
+                app:nullable="true"
+                android:defaultValue="default_photo_filename"/>
+        </action>
+    </fragment>
+
     <fragment
         android:id="@+id/imageAnalysisFragment"
         android:name="com.example.androidcamerard.views.ImageAnalysisFragment"
@@ -57,21 +91,13 @@
         <argument
             android:name="photoFileName"
             app:argType="string"
-            app:nullable="true"/>
+            app:nullable="true"
+            android:defaultValue="default_photo_filename"/>
     </fragment>
+
     <fragment
         android:id="@+id/dataCollectionFragment"
         android:name="com.example.androidcamerard.views.DataCollectionFragment"
         android:label="DataCollectionFragment" />
-    <fragment
-        android:id="@+id/imageLabellingLiveFirebaseFragment"
-        android:name="com.example.androidcamerard.views.ImageLabellingLiveFirebaseFragment"
-        android:label="fragment_image_labelling_live_firebase" >
-        <action
-            android:id="@+id/action_imageLabellingLiveFirebaseFragment_to_imageAnalysisFragment"
-            app:destination="@id/imageAnalysisFragment"
-            app:launchSingleTop="true"
-            app:popUpTo="@id/imageLabellingLiveFirebaseFragment"
-            app:popUpToInclusive="false"/>
-    </fragment>
+
 </navigation>

@@ -47,5 +47,4 @@ class DataCollectionViewModel : ViewModel() {
     fun toggleTorch() {
         _torchOn.value = !torchOn.value!!
     }
-
 }

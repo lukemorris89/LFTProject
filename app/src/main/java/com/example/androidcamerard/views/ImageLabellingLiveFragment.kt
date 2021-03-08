@@ -24,6 +24,7 @@ import com.example.androidcamerard.recognition.Recognition
 import com.example.androidcamerard.utils.BitmapUtils.cropBitmapToTest
 import com.example.androidcamerard.utils.BitmapUtils.capturedImageProxyToBitmap
 import com.example.androidcamerard.utils.SOURCE_IMAGE_CAPTURE
+import org.koin.androidx.viewmodel.ext.android.sharedViewModel
 import org.tensorflow.lite.gpu.CompatibilityList
 import org.tensorflow.lite.support.image.TensorImage
 import java.util.concurrent.Executors
@@ -49,7 +50,7 @@ class ImageLabellingLiveFragment : Fragment(), View.OnClickListener {
     private val cameraExecutor = Executors.newSingleThreadExecutor()
 
     // ViewModel variables
-    private val viewModel: ImageLabellingAnalysisViewModel by activityViewModels()
+    private val viewModel: ImageLabellingAnalysisViewModel by sharedViewModel()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -229,7 +230,7 @@ class ImageLabellingLiveFragment : Fragment(), View.OnClickListener {
                     val source = SOURCE_IMAGE_CAPTURE
                     val action =
                         ImageLabellingLiveFragmentDirections.actionImageLabellingLiveFragmentToImageAnalysisFragment(
-                            source, null
+                            source
                         )
                     findNavController().navigate(action)
 

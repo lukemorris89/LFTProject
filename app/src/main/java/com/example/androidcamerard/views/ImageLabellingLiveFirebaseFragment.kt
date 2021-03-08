@@ -13,7 +13,6 @@ import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import com.example.androidcamerard.R
 import com.example.androidcamerard.databinding.FragmentImageLabellingLiveBinding
@@ -27,6 +26,7 @@ import com.google.mlkit.vision.label.ImageLabeler
 import com.google.mlkit.vision.label.ImageLabeling
 import com.google.mlkit.vision.label.automl.AutoMLImageLabelerLocalModel
 import com.google.mlkit.vision.label.automl.AutoMLImageLabelerOptions
+import org.koin.androidx.viewmodel.ext.android.sharedViewModel
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
@@ -47,7 +47,7 @@ class ImageLabellingLiveFirebaseFragment : Fragment(), View.OnClickListener {
     private val cameraExecutor = Executors.newSingleThreadExecutor()
 
     // ViewModel variables
-    private val viewModel: ImageLabellingAnalysisViewModel by activityViewModels()
+    private val viewModel: ImageLabellingAnalysisViewModel by sharedViewModel()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -240,8 +240,7 @@ class ImageLabellingLiveFirebaseFragment : Fragment(), View.OnClickListener {
                     val source = SOURCE_IMAGE_CAPTURE
                     val action =
                         ImageLabellingLiveFirebaseFragmentDirections.actionImageLabellingLiveFirebaseFragmentToImageAnalysisFragment(
-                            source,
-                            null
+                            source
                         )
                     findNavController().navigate(action)
 

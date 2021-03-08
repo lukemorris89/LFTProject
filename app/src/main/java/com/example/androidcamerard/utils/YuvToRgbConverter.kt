@@ -30,8 +30,8 @@ import com.example.androidcamerard.BuildConfig
 import java.nio.ByteBuffer
 
 /**
- * Helper class used to efficiently convert a [Media.Image] object from
- * [ImageFormat.YUV_420_888] format to an RGB [Bitmap] object.
+ * Helper class used to efficiently convert a Media.Image object from
+ * ImageFormat.YUV_420_888 format to an RGB Bitmap object.
  *
  * The [yuvToRgb] method is able to achieve the same FPS as the CameraX image
  * analysis use case on a Pixel 3 XL device at the default analyzer resolution,

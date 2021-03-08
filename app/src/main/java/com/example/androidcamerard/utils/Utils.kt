@@ -18,7 +18,7 @@ object Utils {
     }
 
     internal fun getOutputDirectory(context: Context): File? {
-        val mediaDir = context.externalMediaDirs?.firstOrNull()?.let {
+        val mediaDir = context.getExternalFilesDirs(null)?.firstOrNull()?.let {
             File(it, "Android Camera R&D").apply { mkdirs() }
         }
 

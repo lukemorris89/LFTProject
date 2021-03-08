@@ -15,13 +15,13 @@ import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.example.androidcamerard.R
 import com.example.androidcamerard.databinding.FragmentDataCollectionBinding
 import com.example.androidcamerard.utils.Utils
 import com.example.androidcamerard.viewModels.DataCollectionViewModel
 import kotlinx.android.synthetic.main.fragment_data_collection.*
+import org.koin.android.ext.android.inject
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
@@ -48,7 +48,7 @@ class DataCollectionFragment : Fragment(), View.OnClickListener {
     private lateinit var previewUseCase: Preview
     private lateinit var imageCaptureUseCase: ImageCapture
 
-    private val viewModel: DataCollectionViewModel by viewModels()
+    private val viewModel: DataCollectionViewModel by inject()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,

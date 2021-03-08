@@ -8,6 +8,7 @@ buildscript {
         gms_version = "4.3.5"
         navigation_safeargs_version = "2.3.2"
         lifecycle_version = "2.3.0"
+        koin_version = "2.1.6"
     }
 
     repositories {
